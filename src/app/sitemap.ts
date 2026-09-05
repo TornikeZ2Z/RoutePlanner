@@ -12,12 +12,36 @@ export const revalidate = 3600;
  * surfaces are excluded here and additionally noindexed at the header level.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  /*
+   * Every dynamic section degrades on its own.
+   *
+   * This file is prerendered during `next build`, so an unreachable database
+   * at that moment took the entire deploy down with it — the build fails, the
+   * previous version keeps serving, and every unrelated fix waiting behind it
+   * stops shipping. A sitemap missing its tour URLs for one revalidation cycle
+   * costs a little crawl freshness; a failed deploy costs everything in the
+   * queue. lib/settings.ts already takes this position for pricing ("a
+   * settings table is not allowed to be a way to break the business") and the
+   * same reasoning applies here.
+   *
+   * The static URLs below need no database at all, and they are the ones that
+   * matter most for indexing.
+   */
+  const degrade = async <T>(what: string, run: () => Promise<T[]>): Promise<T[]> => {
+    try {
+      return await run();
+    } catch (error) {
+      console.error(`sitemap: ${what} unavailable, omitted from this build`, error);
+      return [];
+    }
+  };
+
   const [routes, tours, drivers] = await Promise.all([
-    listRoutes("en"),
-    listTours("en"),
-    sql<{ handle: string; updated_at: Date }[]>`
+    degrade("routes", () => listRoutes("en")),
+    degrade("tours", () => listTours("en")),
+    degrade("drivers", () => sql<{ handle: string; updated_at: Date }[]>`
       SELECT handle, updated_at FROM driver_profiles
-      WHERE published AND status = 'APPROVED'`,
+      WHERE published AND status = 'APPROVED'`),
   ]);
 
   const alternates = (path: string) => ({
