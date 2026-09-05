@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui";
 import { getTranslator, isLocale, type Locale, type MessageKey } from "@/lib/i18n";
+import { VEHICLE_CATEGORIES } from "@/lib/vehicle-categories";
 
 const CLASS_LABEL: Record<string, string> = {
   ECONOMY: "Economy", COMFORT: "Comfort", MINIVAN: "Minivan",
@@ -64,16 +65,24 @@ const TOGGLES: [keyof FilterState, MessageKey, MessageKey?][] = [
  * are shareable and bookmarkable by URL and work without JavaScript.
  */
 export function OfferFiltersPanel({
-  locale, hidden, state, facets, resultCount,
+  locale, hidden, state, facets, vehicle, resultCount,
 }: {
   locale: string;
   /** Repeatable name/value pairs, so `stop` can appear more than once. */
   hidden: [string, string][];
   state: FilterState;
   facets: { classes: { value: string; count: number }[]; languages: { value: string; count: number }[] };
+  /**
+   * The body type chosen back in the booking bar, or "" for any. It is not a
+   * control here — it rides along so applying a filter does not silently drop
+   * it — but it is named, because a traveller looking at four sedans deserves
+   * to know why. Clear drops it, which is what "clear" ought to mean.
+   */
+  vehicle: string;
   resultCount: number;
 }) {
   const t = getTranslator(isLocale(locale) ? (locale as Locale) : "en");
+  const category = VEHICLE_CATEGORIES.find((c) => c.id === vehicle);
 
   // Sort is not a filter — it never hides a car — so it stays out of the count.
   const activeCount =
@@ -81,7 +90,8 @@ export function OfferFiltersPanel({
     (state.language ? 1 : 0) +
     // Only what the panel can still set. The other flags remain in the state
     // so existing links keep working, but nothing can switch them on here.
-    [state.childSeat, state.petsAllowed].filter(Boolean).length;
+    [state.childSeat, state.petsAllowed].filter(Boolean).length +
+    (category ? 1 : 0);
 
   return (
     <>
@@ -117,6 +127,7 @@ export function OfferFiltersPanel({
         {hidden.map(([k, v], i) => (
           <input key={`${k}-${i}`} type="hidden" name={k} value={v} />
         ))}
+        {category && <input type="hidden" name="vehicle" value={category.id} />}
 
         <fieldset>
           <legend className="mb-1.5 text-sm font-medium text-ink-800">{t("filters.vehicleClass")}</legend>
@@ -140,6 +151,11 @@ export function OfferFiltersPanel({
               );
             })}
           </div>
+          {category && (
+            <p className="mt-1.5 text-xs text-ink-500">
+              {t("filters.vehicleChosen", { category: t(category.label) })}
+            </p>
+          )}
         </fieldset>
 
         <div>

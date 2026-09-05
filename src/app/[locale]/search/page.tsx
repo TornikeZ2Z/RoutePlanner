@@ -9,6 +9,7 @@ import { Badge, Card, EmptyState } from "@/components/ui";
 import { VehiclePhoto } from "@/components/vehicle-photo";
 import { BookingSteps } from "@/components/booking-steps";
 import { OfferFiltersPanel, CLASS_LABEL, CLASS_TIERS, type FilterState } from "@/components/offer-filters";
+import { VEHICLE_CATEGORIES, classesForCategory } from "@/lib/vehicle-categories";
 
 export const dynamic = "force-dynamic";
 export const metadata = { robots: { index: false } };
@@ -94,8 +95,16 @@ export default async function SearchPage({ params, searchParams }: Props) {
     .filter((tier) => tiers.includes(tier.id))
     .flatMap((tier) => tier.classes);
 
+  /*
+   * The body type picked in the booking bar (CR-2026-0008 item 5) expands the
+   * same way, and rides in its own parameter so the panel's tiers and the
+   * bar's categories can be told apart in a shared link.
+   */
+  const vehicle = VEHICLE_CATEGORIES.some((c) => c.id === str(sp.vehicle)) ? str(sp.vehicle)! : "";
+  const vehicleClasses = classesForCategory(vehicle);
+
   const filterState: FilterState = {
-    classes: [...new Set([...list(sp.class), ...tierClasses])],
+    classes: [...new Set([...list(sp.class), ...tierClasses, ...vehicleClasses])],
     tiers,
     language: str(sp.language) ?? "",
     fourWheelDrive: on(sp.fourWheelDrive),
@@ -203,6 +212,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
           <OfferFiltersPanel
             locale={locale}
             hidden={hidden} state={filterState} facets={facets}
+            vehicle={vehicle}
             resultCount={result.offers.length}
           />
         </aside>

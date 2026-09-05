@@ -31,9 +31,12 @@ import userEvent from "@testing-library/user-event";
 import { getTranslator, LOCALES } from "@/lib/i18n";
 
 // The widget is a client component that would otherwise want a real Next
-// router and app context. Neither is what is under test here.
+// router and app context. Neither is what is under test here. The push is
+// hoisted rather than made per-call, because "did not navigate" is itself an
+// assertion: a refused search must not reach the results page.
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
+  useRouter: () => ({ push, replace: vi.fn(), prefetch: vi.fn() }),
 }));
 vi.mock("next/link", () => ({
   default: ({ href, children }: { href: string; children: ReactNode }) => (
@@ -42,6 +45,7 @@ vi.mock("next/link", () => ({
 }));
 
 const { SearchTabs } = await import("@/components/search-tabs");
+const { VEHICLE_CATEGORIES } = await import("@/lib/vehicle-categories");
 
 const LOCATIONS = [
   { slug: "tbilisi-airport", name_en: "Tbilisi Airport", type: "airport" },
@@ -49,7 +53,10 @@ const LOCATIONS = [
   { slug: "kazbegi", name_en: "Kazbegi", type: "town" },
 ];
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  push.mockClear();
+});
 
 describe.each(LOCALES)("booking widget (%s)", (locale) => {
   const t = getTranslator(locale);
@@ -140,5 +147,56 @@ describe("booking widget, round trip", () => {
 
     await user.click(screen.getByRole("radio", { name: t("home.tabOneWay") }));
     expect(whenFields()).toHaveLength(1);
+  });
+});
+
+/*
+ * CR-2026-0008 item 5. The category is the one field on the bar that decides
+ * what a traveller is actually buying, and the one they cannot infer from the
+ * others: two passengers fit in a saloon and in a fifteen-seater, at very
+ * different prices. Three things have to hold, and each fails on its own.
+ */
+describe("booking widget, vehicle category", () => {
+  const t = getTranslator("en");
+
+  it("offers every category with its seat range, and any vehicle by default", () => {
+    render(<SearchTabs locale="en" locations={LOCATIONS} />);
+
+    const any = screen.getByRole("radio", { name: t("search.vehAny") });
+    expect(any).toHaveProperty("checked", true);
+
+    // The range is the label's whole point — a name on its own asks the
+    // reader to know a minivan from a minibus before they have picked a car.
+    for (const category of VEHICLE_CATEGORIES) {
+      const label = t(category.label);
+      expect(label, `${category.id} label carries its seat range`).toMatch(/\d/);
+      expect(screen.getByRole("radio", { name: label })).toHaveProperty("checked", false);
+    }
+  });
+
+  it("refuses a category that cannot seat the passengers, without searching", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<SearchTabs locale="en" locations={LOCATIONS} />);
+
+    const passengers = container.querySelector<HTMLInputElement>("#pax")!;
+    await user.clear(passengers);
+    await user.type(passengers, "5");
+    await user.click(screen.getByRole("radio", { name: t("search.vehSedan") }));
+    await user.click(screen.getByRole("button", { name: new RegExp(t("search.submit")) }));
+
+    expect(screen.getByRole("alert").textContent)
+      .toBe(t("search.errVehiclePax", { count: 5 }));
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("carries the chosen category into the search it runs", async () => {
+    const user = userEvent.setup();
+    render(<SearchTabs locale="en" locations={LOCATIONS} />);
+
+    await user.click(screen.getByRole("radio", { name: t("search.vehMinivan") }));
+    await user.click(screen.getByRole("button", { name: new RegExp(t("search.submit")) }));
+
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(String(push.mock.calls[0]![0])).toContain("vehicle=minivan");
   });
 });

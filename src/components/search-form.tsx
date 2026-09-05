@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Field, Input } from "@/components/ui";
 import { getTranslator, isLocale, type Locale } from "@/lib/i18n";
+import { VEHICLE_CATEGORIES } from "@/lib/vehicle-categories";
 
 interface LocationOption { slug: string; name_en: string; type: string }
 
@@ -74,6 +75,9 @@ export function SearchForm({
   const [returnWhen, setReturnWhen] = useState(defaultReturnWhen());
   const [passengers, setPassengers] = useState(2);
   const [luggage, setLuggage] = useState(2);
+  // "" is any vehicle, and stays the default: a traveller who does not care
+  // which body they get should not have to say so before seeing a price.
+  const [vehicle, setVehicle] = useState("");
   // Free text, carried untouched to checkout: "Rooms Hotel, 14 Kostava St".
   // The chosen locations still decide the route and the price; these decide
   // where the driver actually stops the car.
@@ -95,6 +99,12 @@ export function SearchForm({
       if (!isTourEndpoints) return setError(t("search.errAdjacent"));
     }
     if (new Date(when).getTime() < Date.now()) return setError(t("search.errPast"));
+    // Caught here rather than on the results page, where it would read as
+    // "no drivers on this route" — which would be a lie about the route.
+    const category = VEHICLE_CATEGORIES.find((c) => c.id === vehicle);
+    if (category && passengers > category.maxPassengers) {
+      return setError(t("search.errVehiclePax", { count: passengers }));
+    }
     if (roundTrip && new Date(returnWhen).getTime() <= new Date(when).getTime()) {
       return setError(t("search.errReturn"));
     }
@@ -102,6 +112,7 @@ export function SearchForm({
     const q = new URLSearchParams({
       from, to, when, passengers: String(passengers), luggage: String(luggage),
     });
+    if (vehicle) q.set("vehicle", vehicle);
     if (pickupDetail.trim()) q.set("pd", pickupDetail.trim().slice(0, 300));
     if (dropDetail.trim()) q.set("dd", dropDetail.trim().slice(0, 300));
     if (roundTrip) q.set("return", returnWhen);
@@ -148,6 +159,47 @@ export function SearchForm({
     </ul>
   );
 
+  /*
+     The body type, chosen before the search rather than after it.
+
+     Real radio inputs behind their labels, not buttons with a click handler:
+     the bar is a native GET form, and a visitor with scripting off has to be
+     able to submit a category along with the rest of the trip. "Any" is the
+     default and is a real option, so the choice can be taken back.
+
+     The seat range is inside each label. Without it the four names ask a
+     visitor to know a minivan from a minibus before they have picked a car —
+     the objection CLASS_TIERS in offer-filters.tsx exists to answer.
+  */
+  const vehiclePicker = (
+    <fieldset className="rounded-2xl border border-ink-200 bg-white px-4 py-3">
+      <legend className="px-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-400">
+        {t("search.vehicle")}
+      </legend>
+      <div className="mt-1 flex flex-wrap gap-2">
+        {[{ id: "", label: "search.vehAny" as const }, ...VEHICLE_CATEGORIES].map((c) => {
+          const chosen = vehicle === c.id;
+          return (
+            <label
+              key={c.id || "any"}
+              className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors focus-within:ring-2 focus-within:ring-brand-600 focus-within:ring-offset-1 ${
+                chosen
+                  ? "border-brand-600 bg-brand-600 text-white"
+                  : "border-ink-200 text-ink-600 hover:border-ink-300 hover:text-ink-900"
+              }`}
+            >
+              <input
+                type="radio" name="vehicle" value={c.id} checked={chosen}
+                onChange={() => setVehicle(c.id)} className="sr-only"
+              />
+              {t(c.label)}
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+
   if (compact) {
     return (
       <form onSubmit={submit} action={`/${locale}/search`} method="get" className="space-y-4">
@@ -191,6 +243,7 @@ export function SearchForm({
                    onChange={(e) => setLuggage(Number(e.target.value))} />
           </Field>
         </div>
+        {vehiclePicker}
         {!lockRoute && (
           <Button type="button" variant="secondary" className="w-full"
                   onClick={() => setStops([...stops, ""])} disabled={stops.length >= 6}>
@@ -284,6 +337,8 @@ export function SearchForm({
       </div>
 
       {stopsEditor}
+
+      {vehiclePicker}
 
       <details open className="rounded-2xl border border-ink-200 bg-white px-4 py-3">
         <summary className="cursor-pointer text-sm font-medium text-ink-700">

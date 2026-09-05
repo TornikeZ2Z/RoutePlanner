@@ -69,6 +69,15 @@ export const en = {
   "search.dateHint": "Local time in Georgia (Asia/Tbilisi)",
   "search.passengers": "Passengers",
   "search.luggage": "Luggage",
+  /* CR-2026-0008 item 5. The seat range is part of the label, not a hint
+     beside it: it is the whole reason the four names mean anything. */
+  "search.vehicle": "Vehicle",
+  "search.vehAny": "Any vehicle",
+  "search.vehSedan": "Sedan — 1–3 passengers",
+  "search.vehSuv": "SUV — 1–4 passengers",
+  "search.vehMinivan": "Minivan — 1–7 passengers",
+  "search.vehMinibus": "Minibus — 8+ passengers",
+  "search.errVehiclePax": "That vehicle does not seat {count} passengers. Choose a larger one.",
   "search.addStop": "+ Add stop",
   "search.stop": "Stop {n}",
   "search.removeStop": "Remove",
@@ -118,6 +127,7 @@ export const en = {
   "filters.tierEconomy": "Economy",
   "filters.tierStandard": "Standard",
   "filters.tierPremium": "Premium",
+  "filters.vehicleChosen": "Chosen when you searched: {category}",
   "filters.driverSpeaks": "Driver speaks",
   "filters.anyLanguage": "Any language",
   "filters.verifiedOnly": "Interview-verified only",
