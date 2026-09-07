@@ -153,21 +153,30 @@ export default async function Home({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-32 bg-gradient-to-t from-pine-900/80 to-transparent" />
         </div>
 
-        <div className="relative z-[2] mx-auto max-w-[1400px] 2xl:max-w-[1680px] px-4 pb-10 pt-9 sm:px-6 sm:pb-14 sm:pt-16 lg:px-10">
+        <div className="relative z-[2] mx-auto max-w-[1400px] 2xl:max-w-[1680px] px-4 pb-8 pt-8 sm:px-6 sm:pb-10 sm:pt-14 lg:px-10">
           {/*
-            The headline is sized for a sentence, not a slogan. It ran at
-            text-7xl when it read "Let's go." — two words, five characters.
-            The same size under a full Georgian sentence wrapped to five lines
-            and swallowed the hero, which is what CR-2026-0016 reported. It is
-            wider and a step smaller again now that the booking card shares the
-            hero with it: four lines of headline would push the card down the
-            screen, which is the whole thing CR-2026-0030 asked us to stop.
+            The headline is sized for a sentence, not a slogan.
+
+            It ran at text-7xl when it read "Let's go." — two words, five
+            characters. The same size under a full Georgian sentence wrapped to
+            five lines and swallowed the hero (CR-2026-0016). It came down a
+            step when the booking card moved in beside it (CR-2026-0030), and a
+            step again for CR-2026-0032, which asked for the slogan smaller and
+            the whole thing on one screen.
+
+            The width is doing as much work as the size: max-w-4xl is what keeps
+            the Georgian to two lines. Narrow it and the type size stops
+            mattering, because a third line costs more than a point of scale.
+
+            Below this it is not worth going. The headline is the one thing on
+            the page that says what the company sells; shrink it further and the
+            hero fits a laptop by having nothing to say.
           */}
-          <h1 className="font-display max-w-3xl text-[1.6rem] leading-[1.15] sm:text-4xl lg:text-[2.75rem]">
+          <h1 className="font-display max-w-4xl text-[1.5rem] leading-[1.12] sm:text-[1.9rem] lg:text-[2.15rem]">
             {t("home.heroTitle")}
             <span className="block text-gold-400">{t("home.heroTitle2")}</span>
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-pine-100 sm:text-lg">
+          <p className="mt-2.5 max-w-3xl text-sm leading-relaxed text-pine-100 sm:text-base">
             {t("home.heroSubtitle")}
           </p>
 
@@ -185,8 +194,8 @@ export default async function Home({
             sized for the headline alone, so the card starts about a third of
             the way down whatever screen it opens on.
           */}
-          <div id="book" className="mt-6 scroll-mt-24 sm:mt-8">
-            <Card className="p-4 shadow-[var(--shadow-float)] sm:p-6">
+          <div id="book" className="mt-5 scroll-mt-24">
+            <Card className="p-3.5 shadow-[var(--shadow-float)] sm:p-5">
               <SearchTabs locale={locale} locations={locations} />
             </Card>
           </div>
@@ -197,18 +206,18 @@ export default async function Home({
             to sit inside the card said the same four things in different
             words; dropping the duplicate is part of what let the card move up.
           */}
-          <ul className="mt-6 grid grid-cols-2 gap-x-8 gap-y-5 sm:mt-8 sm:grid-cols-4">
+          <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
             {HERO_CHIPS.map(([key, icon], i) => (
-              <li key={key} className="flex items-start gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-full border border-gold-400/70 text-gold-400">
-                  <svg viewBox="0 0 24 24" className="size-4.5" fill="none" stroke="currentColor"
+              <li key={key} className="flex items-start gap-2.5">
+                <span className="grid size-8 shrink-0 place-items-center rounded-full border border-gold-400/70 text-gold-400">
+                  <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor"
                        strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                     <path d={icon} />
                   </svg>
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-bold leading-tight tracking-[-0.01em]">{t(key)}</span>
-                  <span className="mt-1 block text-xs leading-snug text-pine-200">{t(`home.chip${i + 1}s` as never)}</span>
+                  <span className="block text-[13px] font-bold leading-tight tracking-[-0.01em]">{t(key)}</span>
+                  <span className="mt-0.5 block text-[11px] leading-snug text-pine-200">{t(`home.chip${i + 1}s` as never)}</span>
                 </span>
               </li>
             ))}

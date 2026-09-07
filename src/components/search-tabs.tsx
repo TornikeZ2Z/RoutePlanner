@@ -40,23 +40,23 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
 
   return (
     <div>
-      <div role="tablist" aria-label={t("home.planTitle")} className="grid grid-cols-3 gap-1.5 border-b border-ink-100 pb-3 sm:gap-2 sm:pb-4">
+      <div role="tablist" aria-label={t("home.planTitle")} className="grid grid-cols-3 gap-1.5 border-b border-ink-100 pb-2.5 sm:gap-2 sm:pb-3">
         {tabs.map(({ id, label, sub, icon }) => (
           <button
             key={id} role="tab" type="button"
             aria-selected={tab === id}
             onClick={() => setTab(id)}
-            className={`flex items-start gap-1.5 rounded-xl px-2.5 py-2.5 text-left transition-colors sm:gap-2.5 sm:px-4 sm:py-3 ${
+            className={`flex items-start gap-1.5 rounded-xl px-2.5 py-2 text-left transition-colors sm:gap-2.5 sm:px-3.5 sm:py-2.5 ${
               tab === id ? "bg-brand-600 text-white" : "text-ink-500 hover:bg-ink-50 hover:text-ink-900"
             }`}
           >
-            <svg viewBox="0 0 24 24" className="mt-0.5 size-4 shrink-0 sm:size-4.5" fill="none" stroke="currentColor"
+            <svg viewBox="0 0 24 24" className="mt-0.5 size-4 shrink-0" fill="none" stroke="currentColor"
                  strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d={icon} />
             </svg>
             <span className="min-w-0">
-              <span className="block text-xs font-semibold leading-tight sm:text-sm">{label}</span>
-              <span className={`mt-0.5 hidden text-xs leading-snug sm:block ${tab === id ? "text-white/80" : "text-ink-400"}`}>
+              <span className="block text-xs font-semibold leading-tight sm:text-[13px]">{label}</span>
+              <span className={`mt-0.5 hidden text-[11px] leading-snug sm:block ${tab === id ? "text-white/80" : "text-ink-400"}`}>
                 {sub}
               </span>
             </span>
@@ -82,7 +82,7 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
         Presence is therefore no longer the same as being open: data-active
         says which one is, for anything that needs to ask.
       */}
-      <div className="grid pt-5">
+      <div className="grid pt-4">
         {PANELS.map((id) => {
           const open = tab === id;
           return (

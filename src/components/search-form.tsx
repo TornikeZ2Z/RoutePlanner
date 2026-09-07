@@ -36,7 +36,7 @@ function Cell({
   icon, label, htmlFor, children, className = "",
 }: { icon: string; label: string; htmlFor: string; children: React.ReactNode; className?: string }) {
   return (
-    <label htmlFor={htmlFor} className={`flex min-w-0 flex-1 cursor-pointer items-center gap-3 px-4 py-3 ${className}`}>
+    <label htmlFor={htmlFor} className={`flex min-w-0 flex-1 cursor-pointer items-center gap-3 px-4 py-2.5 ${className}`}>
       <svg viewBox="0 0 24 24" className="size-5 shrink-0 text-gold-600" fill="none" stroke="currentColor"
            strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d={icon} />
@@ -216,7 +216,7 @@ export function SearchForm({
   }
 
   return (
-    <form onSubmit={submit} action={`/${locale}/search`} method="get" className="space-y-4">
+    <form onSubmit={submit} action={`/${locale}/search`} method="get" className="space-y-3">
       {placeList}
       {tourSlug && <input type="hidden" name="tour" value={tourSlug} />}
       {lockRoute && (
