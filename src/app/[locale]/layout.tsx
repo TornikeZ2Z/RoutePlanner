@@ -118,9 +118,6 @@ export default async function LocaleLayout({
               {item.label}
             </Link>
           ))}
-          <Link href={`/${locale}/drive`} className="whitespace-nowrap rounded-lg px-3 py-1.5 font-medium text-ink-900">
-            {t("nav.becomeDriver")}
-          </Link>
         </nav>
       </header>
 
@@ -147,9 +144,19 @@ export default async function LocaleLayout({
             <ul className="mt-3 space-y-2 text-sm text-pine-200">
               <li><Link className="hover:text-white" href={`/${locale}/transfers`}>{t("footer.allRoutes")}</Link></li>
               <li><Link className="hover:text-white" href={`/${locale}/tours`}>{t("footer.dayTrips")}</Link></li>
+              <li><Link className="hover:text-white" href={`/${locale}/plan`}>{t("nav.plan")}</Link></li>
               <li><Link className="hover:text-white" href={`/${locale}/hourly`}>{t("nav.hourly")}</Link></li>
+              <li><Link className="hover:text-white" href={`/${locale}/booking`}>{t("lookup.title")}</Link></li>
               <li><Link className="hover:text-white" href={`/${locale}/faq`}>{t("footer.faqLink")}</Link></li>
-              <li><Link className="hover:text-white" href={`/${locale}/contact`}>{t("footer.support")}</Link></li>
+            </ul>
+          </nav>
+
+          <nav aria-label="For organisations">
+            <p className="text-sm font-semibold text-white">{t("nav.business")}</p>
+            <ul className="mt-3 space-y-2 text-sm text-pine-200">
+              <li><Link className="hover:text-white" href={`/${locale}/business`}>{t("footer.b2bTransport")}</Link></li>
+              <li><Link className="hover:text-white" href={`/${locale}/schools`}>{t("nav.schools")}</Link></li>
+              <li><Link className="hover:text-white" href={`/${locale}/hourly`}>{t("nav.hourly")}</Link></li>
             </ul>
           </nav>
 
@@ -157,10 +164,8 @@ export default async function LocaleLayout({
             <p className="text-sm font-semibold text-white">{t("footer.company")}</p>
             <ul className="mt-3 space-y-2 text-sm text-pine-200">
               <li><Link className="hover:text-white" href={`/${locale}/about`}>{t("nav.about")}</Link></li>
-              <li><Link className="hover:text-white" href={`/${locale}/business`}>{t("nav.business")}</Link></li>
-              <li><Link className="hover:text-white" href={`/${locale}/schools`}>{t("nav.schools")}</Link></li>
+              <li><Link className="hover:text-white" href={`/${locale}/contact`}>{t("footer.support")}</Link></li>
               <li><Link className="hover:text-white" href={`/${locale}/drive`}>{t("nav.becomeDriver")}</Link></li>
-              <li><Link className="hover:text-white" href="/login">{t("nav.signIn")}</Link></li>
             </ul>
             <p className="mt-5 text-sm font-semibold text-white">{t("footer.legal")}</p>
             <ul className="mt-3 space-y-2 text-sm text-pine-200">

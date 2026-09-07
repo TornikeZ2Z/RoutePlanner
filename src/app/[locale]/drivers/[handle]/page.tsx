@@ -144,9 +144,17 @@ export default async function DriverProfile({ params, searchParams }: Props) {
               </p>
             </div>
             <div className="ml-auto flex items-center gap-4">
-              <p className="font-display text-2xl text-ink-900">
-                {formatMoney(trip.grossMinor, CANONICAL, locale)}
-              </p>
+              {/* The largest number on the funnel, and the one place it was
+                  shown without saying what it buys. Results, checkout, the
+                  route pages and the FAQ all carry the per-vehicle line; a
+                  reader who arrives straight here from a shared link saw a
+                  bare figure and had to guess whether it was each. */}
+              <div className="text-right">
+                <p className="font-display text-2xl text-ink-900">
+                  {formatMoney(trip.grossMinor, CANONICAL, locale)}
+                </p>
+                <p className="text-xs text-ink-500">{t("search.priceForVehicle")}</p>
+              </div>
               <a
                 href={`/${locale}/checkout?quote=${trip.id}${addressThread}`}
                 className="inline-flex min-h-11 items-center rounded-lg bg-gold-400 px-6 py-2.5 font-bold tracking-[-0.01em] text-pine-900 shadow-sm transition-colors hover:bg-gold-300"

@@ -23,9 +23,16 @@ export async function generateMetadata({
   };
 }
 
+/* Six named services rather than three (CR-2026-0011 item 24). The three
+   added are things the platform already does — employee runs, guest transport
+   and hourly hire — they were simply not listed where a company goes looking,
+   so the page read narrower than the offer. */
 const POINTS = [
   ["business.p1t", "business.p1b"],
   ["business.p2t", "business.p2b"],
+  ["business.p4t", "business.p4b"],
+  ["business.p5t", "business.p5b"],
+  ["business.p6t", "business.p6b"],
   ["business.p3t", "business.p3b"],
 ] as const;
 
