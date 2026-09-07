@@ -778,6 +778,7 @@ export const ka: Partial<Dictionary> = {
   "plan.party4": "მეგობრები",
   "plan.submit": "ამიწყვე მარშრუტი",
   "plan.resultsTitle": "შენი მარშრუტი",
+  "plan.mapLabel": "შენი მარშრუტი რუკაზე",
   "plan.resultsLead": "ეს საწყისი წერტილია და არა გალია — ყველაფერი შეიძლება შეიცვალოს დაჯავშნამდე.",
   "plan.day": "დღე {n}",
   "plan.bookTour": "დაჯავშნე როგორც ტური",

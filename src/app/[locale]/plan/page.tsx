@@ -35,14 +35,34 @@ export default async function PlanPage({
   const sp = await searchParams;
   const t = getTranslator(locale);
 
-  const [tours, places] = await Promise.all([
+  const [tours, places, stopRows] = await Promise.all([
     listTours(locale),
-    sql<{ slug: string; name: string }[]>`
+    sql<{ slug: string; name: string; lat: number; lon: number }[]>`
       SELECT slug,
              coalesce(CASE WHEN ${locale} = 'ka' THEN name_ka
-                           WHEN ${locale} = 'ru' THEN name_ru END, name_en) AS name
+                           WHEN ${locale} = 'ru' THEN name_ru END, name_en) AS name,
+             lat, lon
       FROM locations WHERE in_service_area`,
+    /*
+     * Which places each tour actually passes through, in order.
+     *
+     * Most days in a plan are a tour rather than a list of places — a
+     * five-day plan names two places and three tours — so a map drawn from
+     * the plan's own places alone would be nearly empty. listTours() returns
+     * stops: [] and TourStop carries a name but no slug, so this asks the
+     * question directly rather than widening a type used in four other places.
+     */
+    sql<{ tour: string; slug: string }[]>`
+      SELECT t.slug AS tour, l.slug
+      FROM tour_stops ts
+      JOIN tours t ON t.id = ts.tour_id
+      JOIN locations l ON l.id = ts.location_id
+      WHERE t.active
+      ORDER BY t.slug, ts.day_index, ts.position`,
   ]);
+
+  const tourStops: Record<string, string[]> = {};
+  for (const row of stopRows) (tourStops[row.tour] ??= []).push(row.slug);
 
   const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
@@ -56,7 +76,10 @@ export default async function PlanPage({
       <PlanWizard
         locale={locale}
         tours={tours.map((x) => ({ slug: x.slug, title: x.title, durationDays: x.durationDays }))}
-        placeNames={Object.fromEntries(places.map((p) => [p.slug, p.name]))}
+        places={Object.fromEntries(places.map((p) => [p.slug, {
+          name: p.name, lat: Number(p.lat), lon: Number(p.lon),
+        }]))}
+        tourStops={tourStops}
         initial={{ d: str(sp.d), i: str(sp.i), p: str(sp.p) }}
       />
     </div>

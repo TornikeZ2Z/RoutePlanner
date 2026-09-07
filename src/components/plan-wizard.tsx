@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { getTranslator, isLocale, type Locale } from "@/lib/i18n";
 import { buildPlan, type DaysBucket, type Interest } from "@/lib/plan";
+import { RouteMap, type RoutePoint } from "@/components/route-map";
 
 interface TourInfo { slug: string; title: string; durationDays: number }
 
@@ -17,12 +18,16 @@ const DAY_LABEL_KEY = { "1": "home.day1t", "3": "home.day2t", "5": "home.day3t",
  * The three-question wizard. State lives in the URL (?d=&i=&p=), so a plan
  * is shareable and survives reloads without any account or database row.
  */
+export interface PlanPlace { name: string; lat: number; lon: number }
+
 export function PlanWizard({
-  locale, tours, placeNames, initial,
+  locale, tours, places, tourStops, initial,
 }: {
   locale: string;
   tours: TourInfo[];
-  placeNames: Record<string, string>;
+  places: Record<string, PlanPlace>;
+  /** Ordered location slugs for each tour, so a tour day can be drawn. */
+  tourStops: Record<string, string[]>;
   initial?: { d?: string; i?: string; p?: string };
 }) {
   const t = getTranslator(isLocale(locale) ? (locale as Locale) : "en");
@@ -50,6 +55,23 @@ export function PlanWizard({
     d.setMinutes(0, 0, 0);
     return d.toISOString().slice(0, 16);
   };
+
+  /*
+   * The plan flattened into an ordered list of points to draw. A tour day
+   * contributes the tour's own stops, a places day contributes its places,
+   * and anything without coordinates is dropped rather than guessed at.
+   */
+  const routePoints = useMemo<RoutePoint[]>(() => {
+    const out: RoutePoint[] = [];
+    plan.days.forEach((day, i) => {
+      const slugs = day.tourSlug ? (tourStops[day.tourSlug] ?? []) : day.places;
+      for (const slug of slugs) {
+        const place = places[slug];
+        if (place) out.push({ slug, name: place.name, lat: place.lat, lon: place.lon, day: i + 1 });
+      }
+    });
+    return out;
+  }, [plan, places, tourStops]);
 
   return (
     <div className="space-y-10">
@@ -121,7 +143,7 @@ export function PlanWizard({
                       </Link>
                     ) : (
                       <span className="text-ink-900">
-                        {day.places.map((s) => placeNames[s] ?? s).join(" → ")}
+                        {day.places.map((s) => places[s]?.name ?? s).join(" → ")}
                       </span>
                     )}
                   </div>
@@ -129,6 +151,12 @@ export function PlanWizard({
               );
             })}
           </ol>
+
+          {routePoints.length >= 2 && (
+            <div className="mt-6">
+              <RouteMap points={routePoints} label={t("plan.mapLabel")} />
+            </div>
+          )}
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             {plan.primary.kind === "tour" ? (

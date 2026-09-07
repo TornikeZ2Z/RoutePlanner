@@ -799,6 +799,7 @@ export const en = {
   "plan.party4": "Friends",
   "plan.submit": "Build my route",
   "plan.resultsTitle": "Your route",
+  "plan.mapLabel": "Your route on the map",
   "plan.resultsLead": "A starting point, not a cage — every part can change before you book.",
   "plan.day": "Day {n}",
   "plan.bookTour": "Book this as a tour",

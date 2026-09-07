@@ -778,6 +778,7 @@ export const ru: Partial<Dictionary> = {
   "plan.party4": "Друзья",
   "plan.submit": "Собрать маршрут",
   "plan.resultsTitle": "Ваш маршрут",
+  "plan.mapLabel": "Твой маршрут на карте",
   "plan.resultsLead": "Это отправная точка, а не клетка — всё можно изменить до бронирования.",
   "plan.day": "День {n}",
   "plan.bookTour": "Забронировать как тур",
