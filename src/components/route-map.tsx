@@ -7,6 +7,8 @@ export interface RoutePoint {
   lon: number;
   /** 1-based day this point belongs to, for the label under the pin. */
   day: number;
+  /** Where the name sits relative to the dot, from the curated table. */
+  labelPos?: "top" | "bottom" | "left" | "right";
 }
 
 /**
@@ -72,10 +74,23 @@ export function RouteMap({ points, label }: { points: RoutePoint[]; label: strin
         />
 
         {xy.map((p, i) => {
-          // Labels alternate above and below the pin. With four to eight stops
-          // on a country this wide that is enough to keep them apart, and it
-          // beats a collision solver nobody can follow later.
-          const above = i % 2 === 0;
+          /*
+           * Where the name goes. Sixteen of the twenty-three destinations
+           * carry a labelPos in lib/destinations.ts, written for the old map
+           * because everything worth visiting near Tbilisi crowds into the
+           * same corner of the country — Tbilisi right, Mtskheta left,
+           * Gudauri below. Alternating above and below was not enough: on a
+           * seven-day plan the eastern names overlapped each other.
+           *
+           * Anything without a hint falls back to alternating, which is fine
+           * for the western half where the stops are far apart.
+           */
+          const pos = p.labelPos ?? (i % 2 === 0 ? "top" : "bottom");
+          const label =
+            pos === "left" ? { x: p.x - 16, y: p.y + 5, anchor: "end" as const }
+            : pos === "right" ? { x: p.x + 16, y: p.y + 5, anchor: "start" as const }
+            : pos === "bottom" ? { x: p.x, y: p.y + 30, anchor: "middle" as const }
+            : { x: p.x, y: p.y - 18, anchor: "middle" as const };
           return (
             <g key={`${p.slug}-${i}`}>
               <circle cx={p.x} cy={p.y} r={11} className="fill-brand-600" />
@@ -87,8 +102,8 @@ export function RouteMap({ points, label }: { points: RoutePoint[]; label: strin
                 {i + 1}
               </text>
               <text
-                x={p.x} y={above ? p.y - 18 : p.y + 30}
-                textAnchor="middle"
+                x={label.x} y={label.y}
+                textAnchor={label.anchor}
                 className="fill-ink-900 text-[15px] font-semibold"
                 // A white halo rather than a backdrop rectangle: the label
                 // stays legible over the outline without boxing every name.

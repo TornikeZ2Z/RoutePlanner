@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getTranslator, isLocale, type Locale } from "@/lib/i18n";
 import { buildPlan, type DaysBucket, type Interest } from "@/lib/plan";
 import { RouteMap, type RoutePoint } from "@/components/route-map";
+import { DESTINATIONS } from "@/lib/destinations";
 
 interface TourInfo { slug: string; title: string; durationDays: number }
 
@@ -67,7 +68,12 @@ export function PlanWizard({
       const slugs = day.tourSlug ? (tourStops[day.tourSlug] ?? []) : day.places;
       for (const slug of slugs) {
         const place = places[slug];
-        if (place) out.push({ slug, name: place.name, lat: place.lat, lon: place.lon, day: i + 1 });
+        if (place) {
+          out.push({
+            slug, name: place.name, lat: place.lat, lon: place.lon, day: i + 1,
+            labelPos: DESTINATIONS.find((d) => d.slug === slug)?.labelPos,
+          });
+        }
       }
     });
     return out;
