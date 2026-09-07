@@ -788,7 +788,7 @@ export const en = {
   "schools.pkgTitle": "What should the trip include?",
   "schools.pkg1": "STANDARD — vehicle, driver and the agreed route",
   "schools.pkg2": "PLUS — adds a Safety Coordinator",
-  "schools.pkg3": "PREMIUM — adds organisational support on the day",
+  "schools.pkg3": "PREMIUM — we organise the whole day, with a supervisor",
   "schools.pkg4": "Parent updates — departure, arrival and return",
 
   "checkout.childSeatFee": "Child seat: {amount} each, installed and fitted by the driver.",

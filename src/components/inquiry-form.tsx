@@ -98,8 +98,12 @@ export function InquiryForm({
         <fieldset>
           <legend className="mb-2 block text-sm font-medium text-ink-800">{t("schools.pkgTitle")}</legend>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
+            {/* Three packages, matching the three the page describes. A
+                fourth box offering parent updates outlived the section that
+                explained them (CR-2026-0022); a form that can request a
+                service the page does not sell is how the two drift apart. */}
             {([["standard", "schools.pkg1"], ["plus", "schools.pkg2"],
-               ["premium", "schools.pkg3"], ["parent-updates", "schools.pkg4"]] as const).map(([value, key]) => (
+               ["premium", "schools.pkg3"]] as const).map(([value, key]) => (
               <label key={value} className="flex items-center gap-2 text-sm text-ink-900">
                 <input type="checkbox" name="package" value={value} className="size-4 rounded border-ink-300" />
                 {t(key)}
