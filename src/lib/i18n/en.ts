@@ -652,7 +652,7 @@ export const en = {
   "schools.pkgPlusT": "PLUS",
   "schools.pkgPlusB": "Everything in STANDARD, plus a Safety Coordinator who travels with the group and handles the moving-people part of the day.",
   "schools.pkgPremiumT": "PREMIUM",
-  "schools.pkgPremiumB": "Everything in PLUS, plus additional organisational support — useful for larger groups, several vehicles, or a full-day itinerary with multiple stops.",
+  "schools.pkgPremiumB": "Everything in PLUS, and we organise the whole day: we plan the route, a supervisor travels with the group, and we run the day from start to finish. The school gives us the date and the number of children.",
   "schools.pkgNote": "The type and number of vehicles follows the size of the group. Tell us how many are travelling and we will say what it takes.",
   "schools.scT": "What a Safety Coordinator does",
   "schools.scB": "They help get children on and off the vehicle in an orderly way, keep the group together at stops, watch for anyone falling behind, and stay in contact with the school's own responsible person throughout.",

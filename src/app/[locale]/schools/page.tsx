@@ -23,10 +23,13 @@ export async function generateMetadata({
   };
 }
 
+/* Regular scheduled routes were withdrawn (CR-2026-0022) — the offer is
+   excursions and day trips, and advertising a service we do not run is worse
+   than a shorter list. schools.p3t/p3b stay in the dictionaries; a key costs
+   nothing and the parity test wants all three locales to agree. */
 const POINTS = [
   ["schools.p1t", "schools.p1b"],
   ["schools.p2t", "schools.p2b"],
-  ["schools.p3t", "schools.p3b"],
 ] as const;
 
 /**
@@ -39,8 +42,6 @@ const PACKAGES = [
   ["schools.pkgPlusT", "schools.pkgPlusB"],
   ["schools.pkgPremiumT", "schools.pkgPremiumB"],
 ] as const;
-
-const MILESTONES = ["schools.pu1", "schools.pu2", "schools.pu3", "schools.pu4"] as const;
 
 const COMMITMENTS = [
   "schools.safety1", "schools.safety2", "schools.safety3", "schools.safety4",
@@ -72,15 +73,6 @@ export default async function SchoolsPage({
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-ink-600">{t("schools.lead")}</p>
       </header>
 
-      <ul className="grid gap-4 sm:grid-cols-3">
-        {POINTS.map(([title, body]) => (
-          <li key={title} className="rounded-lg border border-ink-300 bg-white p-6">
-            <p className="font-semibold text-ink-900">{t(title)}</p>
-            <p className="mt-2 text-sm leading-relaxed text-ink-600">{t(body)}</p>
-          </li>
-        ))}
-      </ul>
-
       <section>
         <h2 className="font-display text-2xl text-ink-900">{t("schools.pkgSectionT")}</h2>
         <p className="mt-2 max-w-2xl leading-relaxed text-ink-600">{t("schools.pkgSectionB")}</p>
@@ -105,36 +97,35 @@ export default async function SchoolsPage({
         <p className="mt-4 text-sm leading-relaxed text-ink-500">{t("schools.pkgNote")}</p>
       </section>
 
-      <section className="grid gap-6 sm:grid-cols-2">
-        <div>
-          <h2 className="font-display text-2xl text-ink-900">{t("schools.scT")}</h2>
-          <p className="mt-3 leading-relaxed text-ink-600">{t("schools.scB")}</p>
-          {/*
-            The limit is stated as plainly as the offer. A school reading this
-            has to know exactly where our responsibility stops, and finding
-            that out from Article 6.3 after something has gone wrong would be
-            far too late.
-          */}
-          <p className="mt-4 rounded-lg border-l-2 border-ink-300 bg-ink-50 p-4 text-sm leading-relaxed text-ink-700">
-            {t("schools.scNot")}
-          </p>
-        </div>
+      <Card className="p-6 sm:p-8">
+        <h2 className="font-display mb-6 text-2xl text-ink-900">{t("business.formTitle")}</h2>
+        <InquiryForm
+          locale={locale} kind="school" withCompany withPackages
+          sent={sp.sent === "1"} error={sp.error === "1"}
+        />
+      </Card>
 
-        <div>
-          <h2 className="font-display text-2xl text-ink-900">{t("schools.puT")}</h2>
-          <p className="mt-3 leading-relaxed text-ink-600">{t("schools.puB")}</p>
-          <ol className="mt-4 space-y-2">
-            {MILESTONES.map((key, i) => (
-              <li key={key} className="flex gap-3 text-sm text-ink-700">
-                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-pine-800 text-[11px] font-semibold text-white">
-                  {i + 1}
-                </span>
-                <span className="leading-relaxed">{t(key)}</span>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-4 text-sm leading-relaxed text-ink-500">{t("schools.puNote")}</p>
-        </div>
+      <ul className="grid gap-4 sm:grid-cols-2">
+        {POINTS.map(([title, body]) => (
+          <li key={title} className="rounded-lg border border-ink-300 bg-white p-6">
+            <p className="font-semibold text-ink-900">{t(title)}</p>
+            <p className="mt-2 text-sm leading-relaxed text-ink-600">{t(body)}</p>
+          </li>
+        ))}
+      </ul>
+
+      <section>
+        <h2 className="font-display text-2xl text-ink-900">{t("schools.scT")}</h2>
+        <p className="mt-3 max-w-2xl leading-relaxed text-ink-600">{t("schools.scB")}</p>
+        {/*
+          The limit is stated as plainly as the offer. A school reading this
+          has to know exactly where our responsibility stops, and finding
+          that out from Article 6.3 after something has gone wrong would be
+          far too late.
+        */}
+        <p className="mt-4 max-w-2xl rounded-lg border-l-2 border-ink-300 bg-ink-50 p-4 text-sm leading-relaxed text-ink-700">
+          {t("schools.scNot")}
+        </p>
       </section>
 
       <section>
@@ -166,13 +157,6 @@ export default async function SchoolsPage({
         </ol>
       </section>
 
-      <Card className="p-6 sm:p-8">
-        <h2 className="font-display mb-6 text-2xl text-ink-900">{t("business.formTitle")}</h2>
-        <InquiryForm
-          locale={locale} kind="school" withCompany withPackages
-          sent={sp.sent === "1"} error={sp.error === "1"}
-        />
-      </Card>
     </div>
   );
 }
