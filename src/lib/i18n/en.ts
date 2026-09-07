@@ -665,8 +665,6 @@ export const en = {
   "business.p1b": "Your guests are met by name, in a car you approved in advance.",
   "business.p2t": "Teams and events",
   "business.p2b": "Minivans and minibuses for offsites, conferences and shuttles.",
-  "business.p3t": "One agreement, simple invoicing",
-  "business.p3b": "Tell us your volume and we will put a simple agreement and invoicing in place.",
   "business.p4t": "Employee transport",
   "business.p4b": "Regular or one-off runs to a shift, a site, or between offices — the same verified drivers each time.",
   "business.p5t": "Business guests",
