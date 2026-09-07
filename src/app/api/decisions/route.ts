@@ -35,12 +35,31 @@ export async function POST(req: NextRequest) {
   const round = await getRound(slug);
   if (!round) return new NextResponse("Not found", { status: 404 });
 
+  // Checked here rather than by the browser, so the answer is a page with a
+  // message on it instead of a button that appears to do nothing.
+  if (str("name").trim().length < 2) return back("error=name");
+
   const given = round.questions.map((q) => ({
     questionId: q.id,
     choice: str(`c_${q.id}`) || undefined,
     notes: str(`n_${q.id}`) || undefined,
   }));
 
-  const n = await recordAnswers(slug, str("name"), given);
-  return n === 0 ? back("error=empty") : back(`sent=${n}`);
+  const who = str("name").trim();
+  const n = await recordAnswers(slug, who, given);
+  if (n === 0) return back("error=empty");
+
+  /*
+   * Remember who this is, so returning to the form shows them what they
+   * already sent rather than a blank page. Identity here is a self-reported
+   * name and nothing is gated on it — this cookie only decides whose draft to
+   * show back on this device.
+   */
+  const res = back(`sent=${n}`);
+  res.cookies.set("decisions_who", who, {
+    httpOnly: true, sameSite: "lax", path: "/",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 * 90,
+  });
+  return res;
 }

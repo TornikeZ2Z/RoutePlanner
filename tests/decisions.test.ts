@@ -11,7 +11,7 @@
  */
 import { describe, it, expect, afterAll } from "vitest";
 import postgres from "postgres";
-import { recordAnswers, getRound, listAnswers } from "@/lib/decisions";
+import { recordAnswers, getRound, listAnswers, latestAnswersBy } from "@/lib/decisions";
 
 const sql = postgres(process.env.DATABASE_URL!, { max: 2, onnotice: () => {}, connect_timeout: 3 });
 
@@ -123,6 +123,32 @@ describe.skipIf(!reachable)("recording answers", () => {
     const forB = (await listAnswers(SLUG)).filter((x) => x.questionId === qB);
     expect(forB.filter((x) => x.choice === "yes").length).toBeGreaterThan(0);
     expect(forB.filter((x) => x.choice === "no").length).toBeGreaterThan(0);
+  });
+});
+
+describe.skipIf(!reachable)("showing somebody their own answers back", () => {
+  it("returns the latest answer per question for that person", async () => {
+    await recordAnswers(SLUG, "Ana", [{ questionId: qA, choice: "yes" }]);
+    await recordAnswers(SLUG, "Ana", [{ questionId: qA, choice: "no", notes: "changed my mind" }]);
+
+    const mine = await latestAnswersBy(SLUG, "Ana");
+    expect(mine.get(qA)?.choice).toBe("no");
+    expect(mine.get(qA)?.notes).toBe("changed my mind");
+  });
+
+  it("does not show one person another person's answers", async () => {
+    await recordAnswers(SLUG, "Beso", [{ questionId: qB, choice: "yes" }]);
+    expect((await latestAnswersBy(SLUG, "Ana")).has(qB)).toBe(false);
+  });
+
+  it("matches the name regardless of case or padding", async () => {
+    // The name is typed by hand every time; "Ana" and " ana " are one person.
+    expect((await latestAnswersBy(SLUG, "  ANA  ")).get(qA)?.choice).toBe("no");
+  });
+
+  it("is empty for a name nobody used, and for no name at all", async () => {
+    expect((await latestAnswersBy(SLUG, "Nobody")).size).toBe(0);
+    expect((await latestAnswersBy(SLUG, "   ")).size).toBe(0);
   });
 });
 

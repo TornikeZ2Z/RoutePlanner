@@ -139,6 +139,40 @@ export async function recordAnswers(
   return rows.length;
 }
 
+/**
+ * What one person last said, per question.
+ *
+ * There is no login, so identity is the name they typed. That is weak, and it
+ * is deliberately only used to show somebody their own draft back — never to
+ * gate anything.
+ *
+ * This exists because of how the form first failed. It saved correctly, said
+ * so once, and then handed back an empty form; the first person to use it
+ * could not tell a successful submission from a lost one, so he sent the same
+ * eleven answers six times. Coming back to your own answers is the difference
+ * between a form that works and a form that looks broken.
+ */
+export async function latestAnswersBy(
+  roundSlug: string, answeredBy: string,
+): Promise<Map<string, { choice: string | null; notes: string | null; at: string }>> {
+  const who = answeredBy.trim();
+  if (!who) return new Map();
+
+  const rows = await sql<{
+    question_id: string; choice: string | null; notes: string | null; created_at: Date | string;
+  }[]>`
+    SELECT DISTINCT ON (a.question_id) a.question_id, a.choice, a.notes, a.created_at
+    FROM decision_answers a
+    JOIN decision_questions q ON q.id = a.question_id
+    JOIN decision_rounds r ON r.id = q.round_id
+    WHERE r.slug = ${roundSlug} AND lower(btrim(a.answered_by)) = lower(${who})
+    ORDER BY a.question_id, a.created_at DESC`;
+
+  return new Map(rows.map((r) => [r.question_id, {
+    choice: r.choice, notes: r.notes, at: new Date(r.created_at).toISOString(),
+  }]));
+}
+
 /** Every answer in a round, newest first within each question. */
 export async function listAnswers(roundSlug: string): Promise<DecisionAnswer[]> {
   const rows = await sql<{

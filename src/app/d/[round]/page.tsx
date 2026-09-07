@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { adminT, adminLocale } from "@/lib/i18n/admin";
-import { getRound } from "@/lib/decisions";
+import { getRound, latestAnswersBy } from "@/lib/decisions";
 
 export const dynamic = "force-dynamic";
 /** Never indexed, never followed. Not a secret either: during the build the
@@ -36,6 +37,14 @@ export default async function DecisionsPage({
 
   const round = await getRound(slug);
   if (!round) notFound();
+
+  /*
+   * Whatever this person last sent, shown back to them. Without it the form
+   * after a successful send is indistinguishable from one that never saved,
+   * which is how its first reader came to submit the same answers six times.
+   */
+  const who = (await cookies()).get("decisions_who")?.value ?? "";
+  const mine = await latestAnswersBy(round.slug, who);
 
   const sent = one(sp.sent);
   const throttled = one(sp.error) === "throttled";
@@ -74,6 +83,12 @@ export default async function DecisionsPage({
           <>
             {round.lede && <p className="mb-6 max-w-2xl leading-relaxed text-ink-600">{round.lede}</p>}
 
+            {mine.size > 0 && (
+              <div className="mb-5 rounded-xl border border-pine-200 bg-pine-50 px-4 py-3 text-sm leading-relaxed text-pine-900">
+                {t("dq.restored", { who, n: mine.size })}
+              </div>
+            )}
+
             {!round.accepting && (
               <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                 {t("dq.closed")}
@@ -89,22 +104,24 @@ export default async function DecisionsPage({
                 {t("dq.empty")}
               </div>
             )}
+            {one(sp.error) === "name" && (
+              <div className="mb-5 rounded-xl border border-rust-200 bg-rust-50 px-4 py-3 text-sm text-rust-800">
+                {t("dq.needName")}
+              </div>
+            )}
 
             {/* A native POST to a route handler, so the form submits even
                 if the page's JavaScript never loads. */}
-            <form action="/api/decisions" method="post" className="space-y-5">
+            {/*
+              * noValidate is deliberate. Browser validation refuses the
+              * submission without navigating, and if the offending field is
+              * off-screen the reader sees nothing at all — which is exactly
+              * how this form failed for its first users. The server checks
+              * the same things and answers with a message they can read.
+              */}
+            <form action="/api/decisions" method="post" noValidate className="space-y-5">
               <input type="hidden" name="round" value={round.slug} />
               <input type="hidden" name="lang" value={locale} />
-              <div className="rounded-2xl border border-ink-200 bg-white p-5 shadow-sm sm:p-6">
-                <label htmlFor="name" className="block text-sm font-medium text-ink-900">
-                  {t("dq.nameL")}
-                </label>
-                <p className="mt-0.5 text-xs leading-relaxed text-ink-500">{t("dq.nameH")}</p>
-                <input
-                  id="name" name="name" required minLength={2} maxLength={120} autoComplete="name"
-                  className="mt-2 w-full rounded-lg border border-ink-300 bg-white px-3 py-2.5 text-sm text-ink-900 focus:border-pine-800 focus:outline-none focus:ring-1 focus:ring-pine-800"
-                />
-              </div>
 
               {round.questions.map((q, i) => (
                 <fieldset key={q.id} className="rounded-2xl border border-ink-200 bg-white p-5 shadow-sm sm:p-6">
@@ -119,6 +136,11 @@ export default async function DecisionsPage({
                     <span className="rounded border border-gold-600 bg-gold-50 px-2 py-0.5 text-[11px] font-semibold text-gold-700">
                       {t("dq.nOf", { n: i + 1, total: round.questions.length })}
                     </span>
+                    {mine.has(q.id) && (
+                      <span className="rounded border border-pine-800 bg-pine-50 px-2 py-0.5 text-[11px] font-semibold text-pine-800">
+                        {t("dq.yours")}
+                      </span>
+                    )}
                   </div>
                   <h2 className="font-display mt-2 text-lg leading-snug text-ink-900">{q.title}</h2>
 
@@ -163,6 +185,7 @@ export default async function DecisionsPage({
                         >
                           <input
                             type="radio" name={`c_${q.id}`} value={o.v}
+                            defaultChecked={mine.get(q.id)?.choice === o.v}
                             className="mt-1 size-4 shrink-0 accent-gold-600"
                           />
                           <span>
@@ -187,6 +210,7 @@ export default async function DecisionsPage({
                     </label>
                     <textarea
                       id={`n_${q.id}`} name={`n_${q.id}`} rows={3} maxLength={4000}
+                      defaultValue={mine.get(q.id)?.notes ?? ""}
                       placeholder={t("dq.notesH")}
                       className="mt-1.5 w-full rounded-lg border border-ink-300 bg-white px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-400 focus:border-pine-800 focus:outline-none focus:ring-1 focus:ring-pine-800"
                     />
@@ -194,8 +218,30 @@ export default async function DecisionsPage({
                 </fieldset>
               ))}
 
+              {/*
+                * Who is answering sits HERE, beside the button, and not at the
+                * top of the page.
+                *
+                * It was at the top, and it is `required`. A reader who worked
+                * down eleven questions and pressed send had the browser refuse
+                * the submission and try to focus a field a full page above
+                * them — so from where they were sitting, the button did
+                * nothing at all. Validation has to be visible from wherever it
+                * can stop you.
+                */}
               <div className="rounded-2xl border border-ink-200 bg-white p-5 shadow-sm sm:p-6">
-                <p className="text-sm leading-relaxed text-ink-600">{t("dq.partial")}</p>
+                <label htmlFor="name" className="block text-sm font-medium text-ink-900">
+                  {t("dq.nameL")}
+                </label>
+                <p className="mt-0.5 text-xs leading-relaxed text-ink-500">{t("dq.nameH")}</p>
+                <input
+                  id="name" name="name" required minLength={2} maxLength={120} autoComplete="name"
+                  defaultValue={who}
+                  className="mt-2 w-full rounded-lg border border-ink-300 bg-white px-3 py-2.5 text-sm text-ink-900 focus:border-pine-800 focus:outline-none focus:ring-1 focus:ring-pine-800"
+                />
+                <p className="mt-4 border-t border-ink-100 pt-4 text-sm leading-relaxed text-ink-600">
+                  {t("dq.partial")}
+                </p>
                 <button
                   type="submit"
                   disabled={!round.accepting}
