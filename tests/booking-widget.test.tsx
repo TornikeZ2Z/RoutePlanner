@@ -114,16 +114,26 @@ describe.each(LOCALES)("booking widget (%s)", (locale) => {
     const tabAt = (i: number) => screen.getAllByRole("tab")[i]!;
     const submit = () => screen.queryByRole("button", { name: new RegExp(t("search.submit")) });
 
+    /*
+     * All three panels stay in the DOM so the widget keeps one height whichever
+     * is open — it sits inside the hero now, and a shrinking panel moved the
+     * whole page. So "is it there" no longer means "is it open": the closed
+     * ones carry aria-hidden, which is exactly what byRole honours and getByText
+     * does not. Read the open one through the role.
+     */
+    const open = () => screen.getByRole("tabpanel");
+
     await user.click(tabAt(1));
-    expect(screen.getByText(t("home.toursTabBody"))).toBeDefined();
+    expect(open().textContent).toContain(t("home.toursTabBody"));
     expect(submit()).toBeNull();
 
     await user.click(tabAt(2));
-    expect(screen.getByText(t("home.planTabBody"))).toBeDefined();
-    expect(screen.queryByText(t("home.toursTabBody"))).toBeNull();
+    expect(open().textContent).toContain(t("home.planTabBody"));
+    expect(open().textContent).not.toContain(t("home.toursTabBody"));
 
     // Exactly one open at a time, whichever is chosen.
     expect(screen.getAllByRole("tab").filter((x) => x.ariaSelected === "true")).toHaveLength(1);
+    expect(screen.getAllByRole("tabpanel")).toHaveLength(1);
 
     await user.click(tabAt(0));
     expect(submit()).not.toBeNull();

@@ -25,9 +25,11 @@ interface LocationOption { slug: string; name_en: string; type: string }
  * the hero, so anything above the fields is charged against the fields. Three
  * columns at every width, the explaining line from sm up.
  */
+const PANELS = ["transfer", "tours", "plan"] as const;
+
 export function SearchTabs({ locale, locations }: { locale: string; locations: LocationOption[] }) {
   const t = getTranslator(isLocale(locale) ? (locale as Locale) : "en");
-  const [tab, setTab] = useState<"transfer" | "tours" | "plan">("transfer");
+  const [tab, setTab] = useState<(typeof PANELS)[number]>("transfer");
   const [roundTrip, setRoundTrip] = useState(false);
 
   const tabs = [
@@ -62,40 +64,74 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
         ))}
       </div>
 
-      <div className="pt-5">
-        {tab === "transfer" && (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div role="radiogroup" aria-label={t("home.tabTransfer")}
-                   className="inline-flex rounded-full border border-ink-200 p-0.5 text-xs font-semibold">
-                {([false, true] as const).map((rt) => (
-                  <button
-                    key={String(rt)} type="button" role="radio" aria-checked={roundTrip === rt}
-                    onClick={() => setRoundTrip(rt)}
-                    className={`rounded-full px-3.5 py-1.5 transition-colors ${
-                      roundTrip === rt ? "bg-brand-600 text-white" : "text-ink-500 hover:text-ink-900"
-                    }`}
-                  >
-                    {rt ? t("home.tabRoundTrip") : t("home.tabOneWay")}
-                  </button>
-                ))}
-              </div>
-              <Link href={`/${locale}/hourly`}
-                    className="text-xs font-medium text-ink-500 underline-offset-2 hover:text-ink-900 hover:underline">
-                {t("home.tabHourly")} →
-              </Link>
+      {/*
+        All three panels occupy one grid cell from sm up, so the widget is as
+        tall as its tallest panel whichever one is open.
+
+        This exists because the card moved inside the hero (CR-2026-0030). The
+        hero's height is now its content's height, so a short panel made the
+        photograph and everything under it jump up by the difference every time
+        someone tried Tours — about 85px on a laptop. Reserving the space costs
+        some white inside the two teaser panels, which is why their content
+        centres in it; a page that moves under the reader costs more.
+
+        Below sm the inactive panels are display:none instead. There the
+        transfer form stacks into a column four times the height of a teaser,
+        and reserving THAT would leave half a screen of nothing.
+
+        Presence is therefore no longer the same as being open: data-active
+        says which one is, for anything that needs to ask.
+      */}
+      <div className="grid pt-5">
+        {PANELS.map((id) => {
+          const open = tab === id;
+          return (
+            <div
+              key={id}
+              role="tabpanel"
+              data-active={open}
+              aria-hidden={!open}
+              inert={!open}
+              className={`col-start-1 row-start-1 flex-col justify-center ${
+                open ? "flex" : "hidden sm:flex sm:invisible"
+              }`}
+            >
+              {id === "transfer" && (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div role="radiogroup" aria-label={t("home.tabTransfer")}
+                         className="inline-flex rounded-full border border-ink-200 p-0.5 text-xs font-semibold">
+                      {([false, true] as const).map((rt) => (
+                        <button
+                          key={String(rt)} type="button" role="radio" aria-checked={roundTrip === rt}
+                          onClick={() => setRoundTrip(rt)}
+                          className={`rounded-full px-3.5 py-1.5 transition-colors ${
+                            roundTrip === rt ? "bg-brand-600 text-white" : "text-ink-500 hover:text-ink-900"
+                          }`}
+                        >
+                          {rt ? t("home.tabRoundTrip") : t("home.tabOneWay")}
+                        </button>
+                      ))}
+                    </div>
+                    <Link href={`/${locale}/hourly`}
+                          className="text-xs font-medium text-ink-500 underline-offset-2 hover:text-ink-900 hover:underline">
+                      {t("home.tabHourly")} →
+                    </Link>
+                  </div>
+                  {roundTrip
+                    ? <SearchForm key="rt" locale={locale} locations={locations} roundTrip />
+                    : <SearchForm key="ow" locale={locale} locations={locations} />}
+                </div>
+              )}
+              {id === "tours" && (
+                <TeaserPanel body={t("home.toursTabBody")} cta={t("home.toursTabCta")} href={`/${locale}/tours`} />
+              )}
+              {id === "plan" && (
+                <TeaserPanel body={t("home.planTabBody")} cta={t("nav.plan")} href={`/${locale}/plan`} />
+              )}
             </div>
-            {roundTrip
-              ? <SearchForm key="rt" locale={locale} locations={locations} roundTrip />
-              : <SearchForm key="ow" locale={locale} locations={locations} />}
-          </div>
-        )}
-        {tab === "tours" && (
-          <TeaserPanel body={t("home.toursTabBody")} cta={t("home.toursTabCta")} href={`/${locale}/tours`} />
-        )}
-        {tab === "plan" && (
-          <TeaserPanel body={t("home.planTabBody")} cta={t("nav.plan")} href={`/${locale}/plan`} />
-        )}
+          );
+        })}
       </div>
     </div>
   );
