@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { formTokenMatches } from "@/lib/change-requests";
 import { getRound, recordAnswers } from "@/lib/decisions";
 import { rateLimit, clientKey } from "@/lib/security";
 
@@ -19,19 +18,17 @@ export async function POST(req: NextRequest) {
   const form = await req.formData();
   const str = (k: string) => String(form.get(k) ?? "");
 
-  const token = str("token");
   const slug = str("round");
   const lang = str("lang") === "en" ? "en" : "ka";
   const back = (q: string) => NextResponse.redirect(
-    new URL(`/d/${token}?round=${slug}&lang=${lang}&${q}`, req.url), 303,
+    new URL(`/d/${slug}?lang=${lang}&${q}`, req.url), 303,
   );
 
-  // A wrong token is a 404, not a 403: confirming the path exists is most of
-  // the work of finding it.
-  if (!formTokenMatches(token)) {
-    return new NextResponse("Not found", { status: 404 });
-  }
-
+  /*
+   * No token while the round is being built: the slug is the whole address.
+   * The rate limit is therefore doing real work rather than belt-and-braces —
+   * it is the only thing between this and somebody filling the table.
+   */
   const limit = rateLimit(await clientKey("decisions"), 12, 60);
   if (!limit.allowed) return back("error=throttled");
 

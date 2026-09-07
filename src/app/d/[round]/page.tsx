@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import { adminT, adminLocale } from "@/lib/i18n/admin";
-import { formTokenMatches } from "@/lib/change-requests";
-import { getRound, currentRoundSlug } from "@/lib/decisions";
+import { getRound } from "@/lib/decisions";
 
 export const dynamic = "force-dynamic";
-/** Never indexed, never followed. The URL is the only thing protecting it. */
+/** Never indexed, never followed. Not a secret either: during the build the
+    round slug is the whole address, so anyone who guesses it can answer. That
+    is a deliberate, temporary choice — treat an answer as unverified until you
+    recognise the name on it. */
 export const metadata = { robots: { index: false, follow: false } };
 
 /**
@@ -22,21 +24,16 @@ export const metadata = { robots: { index: false, follow: false } };
 export default async function DecisionsPage({
   params, searchParams,
 }: {
-  params: Promise<{ token: string }>;
+  params: Promise<{ round: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { token } = await params;
-  if (!formTokenMatches(token)) notFound();
+  const { round: slug } = await params;
 
   const sp = await searchParams;
   const locale = adminLocale(String(sp.lang ?? "ka"));
   const t = adminT(locale);
   const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
-  // A link with no round opens whichever is still taking answers, so the URL
-  // people are sent does not go stale between rounds.
-  const slug = one(sp.round) ?? (await currentRoundSlug());
-  if (!slug) notFound();
   const round = await getRound(slug);
   if (!round) notFound();
 
@@ -45,7 +42,7 @@ export default async function DecisionsPage({
   const empty = one(sp.error) === "empty";
   const other = locale === "ka" ? "en" : "ka";
   const otherLabel = locale === "ka" ? "English" : "ქართული";
-  const here = `/d/${token}?round=${round.slug}&lang=`;
+  const here = `/d/${round.slug}?lang=`;
 
   return (
     <div className="min-h-screen bg-ink-50/50">
@@ -96,7 +93,6 @@ export default async function DecisionsPage({
             {/* A native POST to a route handler, so the form submits even
                 if the page's JavaScript never loads. */}
             <form action="/api/decisions" method="post" className="space-y-5">
-              <input type="hidden" name="token" value={token} />
               <input type="hidden" name="round" value={round.slug} />
               <input type="hidden" name="lang" value={locale} />
               <div className="rounded-2xl border border-ink-200 bg-white p-5 shadow-sm sm:p-6">

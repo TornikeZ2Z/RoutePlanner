@@ -2,7 +2,6 @@ import { requirePermission } from "@/lib/auth/session";
 import { adminT, adminLocale } from "@/lib/i18n/admin";
 import { Badge, Card, PageHeader, Alert } from "@/components/ui";
 import { listRounds, getRound, listAnswers } from "@/lib/decisions";
-import { formEnabled } from "@/lib/change-requests";
 import { config } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
@@ -78,16 +77,14 @@ export default async function DecisionsConsole({
               </div>
               {!round.accepting && <Badge tone="neutral">{t("dq.roundClosed")}</Badge>}
             </div>
-            {/* The link to send. Shown only when a token is configured, since
-                without one the form is a 404 and the link would be a lie. */}
-            {formEnabled() && (
-              <p className="mt-4 border-t border-ink-100 pt-4 text-sm text-ink-500">
-                {t("dq.openLink")}:{" "}
-                <code className="rounded border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-mono text-xs break-all text-ink-700">
-                  {config.appUrl}/d/{config.changeRequestToken}?round={round.slug}
-                </code>
-              </p>
-            )}
+            {/* The link to send. The round's slug is the whole address while
+                the form is unguarded. */}
+            <p className="mt-4 border-t border-ink-100 pt-4 text-sm text-ink-500">
+              {t("dq.openLink")}:{" "}
+              <code className="rounded border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-mono text-xs break-all text-ink-700">
+                {config.appUrl}/d/{round.slug}
+              </code>
+            </p>
           </Card>
 
           <div className="space-y-4">
