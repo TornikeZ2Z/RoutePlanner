@@ -153,7 +153,7 @@ export default async function Home({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-32 bg-gradient-to-t from-pine-900/80 to-transparent" />
         </div>
 
-        <div className="relative z-[2] mx-auto max-w-[1400px] 2xl:max-w-[1680px] px-4 pb-10 pt-14 sm:px-6 sm:pb-14 sm:pt-16 lg:px-10">
+        <div className="relative z-[2] mx-auto max-w-[1400px] 2xl:max-w-[1680px] px-4 pb-10 pt-9 sm:px-6 sm:pb-14 sm:pt-16 lg:px-10">
           {/*
             The headline is sized for a sentence, not a slogan. It ran at
             text-7xl when it read "Let's go." — two words, five characters.
@@ -163,11 +163,11 @@ export default async function Home({
             hero with it: four lines of headline would push the card down the
             screen, which is the whole thing CR-2026-0030 asked us to stop.
           */}
-          <h1 className="font-display max-w-3xl text-3xl leading-[1.15] sm:text-4xl lg:text-[2.75rem]">
+          <h1 className="font-display max-w-3xl text-[1.6rem] leading-[1.15] sm:text-4xl lg:text-[2.75rem]">
             {t("home.heroTitle")}
             <span className="block text-gold-400">{t("home.heroTitle2")}</span>
           </h1>
-          <p className="mt-3 max-w-2xl text-base leading-relaxed text-pine-100 sm:text-lg">
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-pine-100 sm:text-lg">
             {t("home.heroSubtitle")}
           </p>
 
