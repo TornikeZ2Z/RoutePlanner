@@ -311,6 +311,18 @@ export const en = {
 
   // ---- manage booking ----------------------------------------------------
   "booking.reference": "Booking reference",
+  "lookup.title": "Find your booking",
+  "lookup.lead": "Enter your booking code and the email you booked with, and we will open it.",
+  "lookup.code": "Booking code",
+  "lookup.codeHint": "Eight characters, in your confirmation — for example ABCD-EFGH.",
+  "lookup.email": "Email",
+  "lookup.emailHint": "The address you gave when booking.",
+  "lookup.submit": "Open my booking",
+  "lookup.failedT": "We could not find that booking",
+  "lookup.failedB": "Check both the code and the email — each has to match the booking exactly.",
+  "lookup.throttledT": "Try again shortly",
+  "lookup.throttledB": "That is several attempts in a row. Wait a minute and try again.",
+  "lookup.help": "Lost the code? Write to us from the address you booked with and we will find it.",
   "booking.stPending": "Awaiting payment",
   "booking.stPendingN": "We are waiting for your card payment to complete.",
   "booking.stConfirmed": "Confirmed",

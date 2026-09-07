@@ -523,6 +523,42 @@ export async function cancelBooking(
   return outcome;
 }
 
+/**
+ * Find a booking from what the customer can actually remember.
+ *
+ * The manage link is the normal way in, and its token is stored hashed — so
+ * once the email carrying it is gone, nothing can reproduce it. That link is
+ * also sent by email, and email cannot send from here yet, which leaves a
+ * customer who has booked with no route back to their own booking at all.
+ *
+ * So: the code plus the email it was booked with, and a fresh token issued on
+ * success. Both are required. The code is eight characters drawn randomly from
+ * a 31-symbol alphabet — about forty bits, and unlike an airline reference it
+ * is not sequential — so guessing one is not the attack; knowing someone's
+ * email and grinding codes is, and that is what the caller's rate limit is
+ * for. Returns null for a wrong code, a wrong email and an unknown booking
+ * alike, so the response cannot be used to discover which bookings exist.
+ */
+export async function issueManageTokenFor(
+  code: string,
+  email: string,
+): Promise<string | null> {
+  const [booking] = await sql<{ id: string; service_start_at: Date }[]>`
+    SELECT id, service_start_at FROM bookings
+    WHERE upper(code) = upper(${code.trim()})
+      AND lower(customer_email) = lower(${email.trim()})`;
+  if (!booking) return null;
+
+  const token = randomBytes(32).toString("base64url");
+  // Same lifetime the booking's original link was given: a month past travel,
+  // long enough to settle a dispute and short enough not to live forever.
+  await sql`
+    INSERT INTO booking_access_tokens (booking_id, token_hash, expires_at)
+    VALUES (${booking.id}::uuid, ${hash(token)},
+            ${new Date(booking.service_start_at.getTime() + 30 * 86_400_000).toISOString()}::timestamptz)`;
+  return token;
+}
+
 /** Verify a manage-booking magic link without putting anything in the URL that identifies a person. */
 export async function verifyManageToken(code: string, token: string): Promise<string | null> {
   const rows = await sql<{ id: string }[]>`
