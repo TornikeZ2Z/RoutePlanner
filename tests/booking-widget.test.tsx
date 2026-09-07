@@ -46,6 +46,14 @@ vi.mock("next/link", () => ({
 
 const { SearchTabs } = await import("@/components/search-tabs");
 const { VEHICLE_CATEGORIES } = await import("@/lib/vehicle-categories");
+const { OfferFiltersPanel } = await import("@/components/offer-filters");
+
+/** No filter applied — the state the panel is in when results first load. */
+const EMPTY_FILTERS = {
+  classes: [], tiers: [], language: "", fourWheelDrive: false, winterTyres: false,
+  petsAllowed: false, childSeat: false, wifi: false, airConditioning: false,
+  wheelchairAccess: false, sort: "",
+};
 
 const LOCATIONS = [
   { slug: "tbilisi-airport", name_en: "Tbilisi Airport", type: "airport" },
@@ -151,52 +159,75 @@ describe("booking widget, round trip", () => {
 });
 
 /*
- * CR-2026-0008 item 5. The category is the one field on the bar that decides
- * what a traveller is actually buying, and the one they cannot infer from the
- * others: two passengers fit in a saloon and in a fifteen-seater, at very
- * different prices. Three things have to hold, and each fails on its own.
+ * CR-2026-0027 moved the body type off the booking bar and onto the results
+ * page: "this should not be here — when they get to the cars, a filter should
+ * come up in the corner there". The question survives the move, so both halves
+ * are asserted — gone from the bar, present and complete on the panel — because
+ * a change like this fails silently in the middle, with the choice removed from
+ * one place and never arriving in the other.
  */
-describe("booking widget, vehicle category", () => {
+describe("vehicle category, after CR-2026-0027", () => {
   const t = getTranslator("en");
 
-  it("offers every category with its seat range, and any vehicle by default", () => {
+  it("is not asked on the booking bar", () => {
     render(<SearchTabs locale="en" locations={LOCATIONS} />);
 
-    const any = screen.getByRole("radio", { name: t("search.vehAny") });
-    expect(any).toHaveProperty("checked", true);
+    for (const category of [{ label: "search.vehAny" as const }, ...VEHICLE_CATEGORIES]) {
+      expect(screen.queryByRole("radio", { name: t(category.label) }), t(category.label)).toBeNull();
+    }
+  });
+
+  it("is offered by the results filter, with its seat range, any by default", () => {
+    render(
+      <OfferFiltersPanel
+        locale="en" hidden={[["from", "Tbilisi"], ["to", "Kazbegi"]]}
+        state={EMPTY_FILTERS} facets={{ classes: [], languages: [] }}
+        vehicle="" resultCount={0}
+      />,
+    );
+
+    const select = screen.getByLabelText(t("search.vehicle")) as HTMLSelectElement;
+    expect(select.name).toBe("vehicle");
+    expect(select.value).toBe("");
 
     // The range is the label's whole point — a name on its own asks the
     // reader to know a minivan from a minibus before they have picked a car.
     for (const category of VEHICLE_CATEGORIES) {
       const label = t(category.label);
       expect(label, `${category.id} label carries its seat range`).toMatch(/\d/);
-      expect(screen.getByRole("radio", { name: label })).toHaveProperty("checked", false);
+      const option = screen.getByRole("option", { name: label }) as HTMLOptionElement;
+      expect(option.value).toBe(category.id);
     }
   });
 
-  it("refuses a category that cannot seat the passengers, without searching", async () => {
-    const user = userEvent.setup();
+  it("shows the filter already set when the search carried a category", () => {
+    render(
+      <OfferFiltersPanel
+        locale="en" hidden={[]} state={EMPTY_FILTERS}
+        facets={{ classes: [], languages: [] }} vehicle="minivan" resultCount={3}
+      />,
+    );
+
+    expect((screen.getByLabelText(t("search.vehicle")) as HTMLSelectElement).value).toBe("minivan");
+  });
+});
+
+/*
+ * CR-2026-0027 again: "the stop should move up above the price view, without
+ * the extra text". Both clauses, because dropping the note is the easy half.
+ */
+describe("adding a stop", () => {
+  const t = getTranslator("en");
+
+  it("sits above the submit button, with no note beside it", () => {
     const { container } = render(<SearchTabs locale="en" locations={LOCATIONS} />);
 
-    const passengers = container.querySelector<HTMLInputElement>("#pax")!;
-    await user.clear(passengers);
-    await user.type(passengers, "5");
-    await user.click(screen.getByRole("radio", { name: t("search.vehSedan") }));
-    await user.click(screen.getByRole("button", { name: new RegExp(t("search.submit")) }));
+    const controls = Array.from(container.querySelectorAll("button"));
+    const addStop = controls.findIndex((b) => b.textContent === t("search.addStop"));
+    const submit = controls.findIndex((b) => b.getAttribute("type") === "submit");
 
-    expect(screen.getByRole("alert").textContent)
-      .toBe(t("search.errVehiclePax", { count: 5 }));
-    expect(push).not.toHaveBeenCalled();
-  });
-
-  it("carries the chosen category into the search it runs", async () => {
-    const user = userEvent.setup();
-    render(<SearchTabs locale="en" locations={LOCATIONS} />);
-
-    await user.click(screen.getByRole("radio", { name: t("search.vehMinivan") }));
-    await user.click(screen.getByRole("button", { name: new RegExp(t("search.submit")) }));
-
-    expect(push).toHaveBeenCalledTimes(1);
-    expect(String(push.mock.calls[0]![0])).toContain("vehicle=minivan");
+    expect(addStop, "add a stop is on the bar").toBeGreaterThan(-1);
+    expect(addStop, "add a stop comes before the price button").toBeLessThan(submit);
+    expect(screen.queryByText(t("search.stopsNote"))).toBeNull();
   });
 });

@@ -28,13 +28,19 @@ export async function generateMetadata({
    listed where a company goes looking.
    "One agreement, simple invoicing" was removed for CR-2026-0025: neither the
    agreement nor the invoicing exists, so it was the one panel on this page
-   promising something nobody could deliver. */
+   promising something nobody could deliver.
+   Hourly hire (business.p6t/p6b) went the same way for CR-2026-0028, which
+   marked it in yellow to delete. It is the third time the same answer has
+   come back: "a car with a driver for four, six, eight or ten hours" is a
+   price list we do not have, and the requestor's answers on CR-2026-0011
+   item 23 twice said to take it down until we do. The /hourly enquiry page
+   is untouched — the two requestors still disagree about what should replace
+   the packages, and that question is open. */
 const POINTS = [
   ["business.p1t", "business.p1b"],
   ["business.p2t", "business.p2b"],
   ["business.p4t", "business.p4b"],
   ["business.p5t", "business.p5b"],
-  ["business.p6t", "business.p6b"],
 ] as const;
 
 export default async function BusinessPage({

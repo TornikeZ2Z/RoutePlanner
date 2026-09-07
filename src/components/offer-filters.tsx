@@ -73,10 +73,13 @@ export function OfferFiltersPanel({
   state: FilterState;
   facets: { classes: { value: string; count: number }[]; languages: { value: string; count: number }[] };
   /**
-   * The body type chosen back in the booking bar, or "" for any. It is not a
-   * control here — it rides along so applying a filter does not silently drop
-   * it — but it is named, because a traveller looking at four sedans deserves
-   * to know why. Clear drops it, which is what "clear" ought to mean.
+   * The body type: sedan, SUV, minivan, minibus, or "" for any.
+   *
+   * It used to be chosen on the booking bar and merely ride along here as a
+   * hidden field. CR-2026-0027 moved the choice to this panel — "when they get
+   * to the cars, a filter should come up in the corner" — so it is now a real
+   * control, asked beside the cars it filters rather than before any of them
+   * have been seen. Clear drops it, which is what "clear" ought to mean.
    */
   vehicle: string;
   resultCount: number;
@@ -127,7 +130,27 @@ export function OfferFiltersPanel({
         {hidden.map(([k, v], i) => (
           <input key={`${k}-${i}`} type="hidden" name={k} value={v} />
         ))}
-        {category && <input type="hidden" name="vehicle" value={category.id} />}
+        {/*
+          Body type first, because it is the one thing that decides which cars
+          could carry the party at all — a tier sorts by price, this sorts by
+          size. A select rather than a row of chips: the panel is a column on
+          a desktop and a drawer on a phone, and five radios in either would
+          push the tiers below the fold of the drawer they live in.
+        */}
+        <div>
+          <label htmlFor="vehicle" className="mb-1.5 block text-sm font-medium text-ink-800">
+            {t("search.vehicle")}
+          </label>
+          <select
+            id="vehicle" name="vehicle" defaultValue={category?.id ?? ""}
+            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm"
+          >
+            <option value="">{t("search.vehAny")}</option>
+            {VEHICLE_CATEGORIES.map((c) => (
+              <option key={c.id} value={c.id}>{t(c.label)}</option>
+            ))}
+          </select>
+        </div>
 
         <fieldset>
           <legend className="mb-1.5 text-sm font-medium text-ink-800">{t("filters.vehicleClass")}</legend>
@@ -151,11 +174,6 @@ export function OfferFiltersPanel({
               );
             })}
           </div>
-          {category && (
-            <p className="mt-1.5 text-xs text-ink-500">
-              {t("filters.vehicleChosen", { category: t(category.label) })}
-            </p>
-          )}
         </fieldset>
 
         <div>

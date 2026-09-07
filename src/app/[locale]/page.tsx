@@ -153,94 +153,68 @@ export default async function Home({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-32 bg-gradient-to-t from-pine-900/80 to-transparent" />
         </div>
 
-        <div className="relative z-[2] mx-auto max-w-[1400px] 2xl:max-w-[1680px] px-4 pb-32 pt-14 sm:px-6 sm:pb-44 sm:pt-20 lg:px-10">
+        <div className="relative z-[2] mx-auto max-w-[1400px] 2xl:max-w-[1680px] px-4 pb-10 pt-14 sm:px-6 sm:pb-14 sm:pt-16 lg:px-10">
           {/*
             The headline is sized for a sentence, not a slogan. It ran at
             text-7xl when it read "Let's go." — two words, five characters.
             The same size under a full Georgian sentence wrapped to five lines
-            and swallowed the hero, which is what CR-2026-0016 reported. If it
-            ever goes back to two words, it can go back up.
+            and swallowed the hero, which is what CR-2026-0016 reported. It is
+            wider and a step smaller again now that the booking card shares the
+            hero with it: four lines of headline would push the card down the
+            screen, which is the whole thing CR-2026-0030 asked us to stop.
           */}
-          <div className="flex flex-wrap items-start justify-between gap-8">
-            <div className="max-w-2xl">
-              <h1 className="font-display max-w-2xl text-3xl leading-[1.12] sm:text-4xl lg:text-5xl">
-                {t("home.heroTitle")}
-                <span className="block text-gold-400">{t("home.heroTitle2")}</span>
-              </h1>
-              <p className="mt-4 max-w-xl text-base leading-relaxed text-pine-100 sm:text-lg">
-                {t("home.heroSubtitle")}
-              </p>
+          <h1 className="font-display max-w-3xl text-3xl leading-[1.15] sm:text-4xl lg:text-[2.75rem]">
+            {t("home.heroTitle")}
+            <span className="block text-gold-400">{t("home.heroTitle2")}</span>
+          </h1>
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-pine-100 sm:text-lg">
+            {t("home.heroSubtitle")}
+          </p>
 
-              <ul className="mt-10 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-7 sm:grid-cols-4">
-                {HERO_CHIPS.map(([key, icon], i) => (
-                  <li key={key}>
-                    <span className="grid size-12 place-items-center rounded-full border border-gold-400/70 text-gold-400">
-                      <svg viewBox="0 0 24 24" className="size-5.5" fill="none" stroke="currentColor"
-                           strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <path d={icon} />
-                      </svg>
-                    </span>
-                    <p className="mt-2.5 text-sm font-bold tracking-[-0.01em] leading-tight">{t(key)}</p>
-                    <p className="mt-1 text-xs leading-snug text-pine-200">{t(`home.chip${i + 1}s` as never)}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {/*
+            The booking bar sits ON the hero, not under it.
 
-            {/*
-              The card beside the hero used to advertise multi-day tours. It
-              now opens the route builder, because that is the thing a visitor
-              who does not yet know where they are going can actually start —
-              and it shows the three questions rather than describing them, so
-              the promise is visible before the click.
-
-              No longer gated on tours existing: the builder always does.
-            */}
-            <Link
-              href={`/${locale}/plan`}
-              className="group hidden w-80 shrink-0 rounded-2xl bg-pine-900/75 p-5 backdrop-blur-md transition-colors hover:bg-pine-900/90 lg:block"
-            >
-              <p className="eyebrow text-pine-300">{t("home.planTeaserEyebrow")}</p>
-              <p className="font-display mt-2 text-xl">{t("home.planTeaserTitle")}</p>
-              <ol className="mt-3.5 space-y-2">
-                {(["home.planStep1", "home.planStep2", "home.planStep3"] as const).map((key, i) => (
-                  <li key={key} className="flex items-start gap-2.5 text-sm text-pine-100">
-                    <span
-                      aria-hidden
-                      className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-pine-700/70 text-[11px] font-semibold tabular-nums text-white"
-                    >
-                      {i + 1}
-                    </span>
-                    <span className="leading-snug">{t(key)}</span>
-                  </li>
-                ))}
-              </ol>
-              <span className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-pine-800 transition-colors group-hover:bg-ink-100 dark:bg-ink-900 dark:group-hover:bg-ink-800">
-                {t("home.planTeaserCta")}
-                <span aria-hidden>→</span>
-              </span>
-            </Link>
+            It used to be the next block down, pulled up by a negative margin so
+            it overlapped the hero's lower edge. On a laptop that left the date
+            field at the bottom of the screen and the rest of the form below the
+            fold: the first thing a visitor saw was a photograph and a slogan,
+            not the thing they came to do. CR-2026-0030 asked for the fields
+            "where the slides are", and CR-2026-0015 item 48 asked the same
+            question of both requestors — one answered "on the image, title
+            above it", the other filed the ticket. The hero's padding is now
+            sized for the headline alone, so the card starts about a third of
+            the way down whatever screen it opens on.
+          */}
+          <div id="book" className="mt-6 scroll-mt-24 sm:mt-8">
+            <Card className="p-4 shadow-[var(--shadow-float)] sm:p-6">
+              <SearchTabs locale={locale} locations={locations} />
+            </Card>
           </div>
-        </div>
-      </section>
 
-      {/* -------------------------------------------- booking widget ------ */}
-      <div id="book" className="relative z-10 -mt-24 scroll-mt-24 sm:-mt-36">
-        <Card className="p-6 shadow-[var(--shadow-float)] sm:p-8">
-          <SearchTabs locale={locale} locations={locations} />
-          <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-ink-100 pt-4">
-            {(["home.check1", "home.check2", "home.check3", "home.check4"] as const).map((key) => (
-              <li key={key} className="flex items-center gap-1.5 text-xs font-medium text-ink-600">
-                <svg viewBox="0 0 24 24" className="size-4 text-ink-900" fill="none" stroke="currentColor"
-                     strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M5 12.5 10 17.5 19 7" />
-                </svg>
-                {t(key)}
+          {/*
+            The four promises, as one row under the card instead of a block of
+            tiles beside the headline. Same four keys. The checklist that used
+            to sit inside the card said the same four things in different
+            words; dropping the duplicate is part of what let the card move up.
+          */}
+          <ul className="mt-6 grid grid-cols-2 gap-x-8 gap-y-5 sm:mt-8 sm:grid-cols-4">
+            {HERO_CHIPS.map(([key, icon], i) => (
+              <li key={key} className="flex items-start gap-3">
+                <span className="grid size-9 shrink-0 place-items-center rounded-full border border-gold-400/70 text-gold-400">
+                  <svg viewBox="0 0 24 24" className="size-4.5" fill="none" stroke="currentColor"
+                       strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d={icon} />
+                  </svg>
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-bold leading-tight tracking-[-0.01em]">{t(key)}</span>
+                  <span className="mt-1 block text-xs leading-snug text-pine-200">{t(`home.chip${i + 1}s` as never)}</span>
+                </span>
               </li>
             ))}
           </ul>
-        </Card>
-      </div>
+        </div>
+      </section>
 
       {/* ------------------------------------------------ categories ------ */}
       {/*

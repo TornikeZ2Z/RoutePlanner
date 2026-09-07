@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Field, Input } from "@/components/ui";
 import { getTranslator, isLocale, type Locale } from "@/lib/i18n";
-import { VEHICLE_CATEGORIES } from "@/lib/vehicle-categories";
 import { toLocalInput } from "@/lib/format";
 
 interface LocationOption { slug: string; name_en: string; type: string }
@@ -76,9 +75,6 @@ export function SearchForm({
   const [returnWhen, setReturnWhen] = useState(defaultReturnWhen());
   const [passengers, setPassengers] = useState(2);
   const [luggage, setLuggage] = useState(2);
-  // "" is any vehicle, and stays the default: a traveller who does not care
-  // which body they get should not have to say so before seeing a price.
-  const [vehicle, setVehicle] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   function submit(e: React.FormEvent) {
@@ -95,12 +91,6 @@ export function SearchForm({
       if (!isTourEndpoints) return setError(t("search.errAdjacent"));
     }
     if (new Date(when).getTime() < Date.now()) return setError(t("search.errPast"));
-    // Caught here rather than on the results page, where it would read as
-    // "no drivers on this route" — which would be a lie about the route.
-    const category = VEHICLE_CATEGORIES.find((c) => c.id === vehicle);
-    if (category && passengers > category.maxPassengers) {
-      return setError(t("search.errVehiclePax", { count: passengers }));
-    }
     if (roundTrip && new Date(returnWhen).getTime() <= new Date(when).getTime()) {
       return setError(t("search.errReturn"));
     }
@@ -108,7 +98,6 @@ export function SearchForm({
     const q = new URLSearchParams({
       from, to, when, passengers: String(passengers), luggage: String(luggage),
     });
-    if (vehicle) q.set("vehicle", vehicle);
     if (roundTrip) q.set("return", returnWhen);
     if (tourSlug) q.set("tour", tourSlug);
     for (const s of stops) q.append("stop", s);
@@ -154,45 +143,21 @@ export function SearchForm({
   );
 
   /*
-     The body type, chosen before the search rather than after it.
+     The body type is no longer asked here.
 
-     Real radio inputs behind their labels, not buttons with a click handler:
-     the bar is a native GET form, and a visitor with scripting off has to be
-     able to submit a category along with the rest of the trip. "Any" is the
-     default and is a real option, so the choice can be taken back.
+     It used to be a row of radio chips on the bar, from CR-2026-0008 item 5.
+     CR-2026-0027 moved it: "this should not be here — when they get to the
+     cars, a filter should come up in the corner there". It is the same
+     question either way, but on the results page it is asked next to the cars
+     it filters, and a traveller who does not yet know what a minivan seats can
+     see four of them before deciding. The control now lives in
+     OfferFiltersPanel; `vehicle` in the query string still works, so links and
+     bookmarks made before this change keep filtering.
 
-     The seat range is inside each label. Without it the four names ask a
-     visitor to know a minivan from a minibus before they have picked a car —
-     the objection CLASS_TIERS in offer-filters.tsx exists to answer.
+     The passenger check that lived here went with it. It refused a search a
+     category could not seat before it cost a page load, which is only worth
+     doing while the category is chosen before the search.
   */
-  const vehiclePicker = (
-    <fieldset className="rounded-2xl border border-ink-200 bg-white px-4 py-3">
-      <legend className="px-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-400">
-        {t("search.vehicle")}
-      </legend>
-      <div className="mt-1 flex flex-wrap gap-2">
-        {[{ id: "", label: "search.vehAny" as const }, ...VEHICLE_CATEGORIES].map((c) => {
-          const chosen = vehicle === c.id;
-          return (
-            <label
-              key={c.id || "any"}
-              className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors focus-within:ring-2 focus-within:ring-brand-600 focus-within:ring-offset-1 ${
-                chosen
-                  ? "border-brand-600 bg-brand-600 text-white"
-                  : "border-ink-200 text-ink-600 hover:border-ink-300 hover:text-ink-900"
-              }`}
-            >
-              <input
-                type="radio" name="vehicle" value={c.id} checked={chosen}
-                onChange={() => setVehicle(c.id)} className="sr-only"
-              />
-              {t(c.label)}
-            </label>
-          );
-        })}
-      </div>
-    </fieldset>
-  );
 
   if (compact) {
     return (
@@ -227,6 +192,12 @@ export function SearchForm({
           </Field>
         )}
         {stopsEditor}
+        {!lockRoute && (
+          <Button type="button" variant="secondary" className="w-full"
+                  onClick={() => setStops([...stops, ""])} disabled={stops.length >= 6}>
+            {t("search.addStop")}
+          </Button>
+        )}
         <div className="grid grid-cols-2 gap-3">
           <Field label={t("search.passengers")} htmlFor="pax">
             <Input id="pax" name="passengers" type="number" min={1} max={20} value={passengers}
@@ -237,16 +208,8 @@ export function SearchForm({
                    onChange={(e) => setLuggage(Number(e.target.value))} />
           </Field>
         </div>
-        {vehiclePicker}
-        {!lockRoute && (
-          <Button type="button" variant="secondary" className="w-full"
-                  onClick={() => setStops([...stops, ""])} disabled={stops.length >= 6}>
-            {t("search.addStop")}
-          </Button>
-        )}
 
         <Button type="submit" className="w-full">{t("search.submit")}</Button>
-        <p className="text-xs text-ink-500">{t("search.stopsNote")}</p>
         {error && <p className="text-sm text-[--color-danger]" role="alert">{error}</p>}
       </form>
     );
@@ -262,6 +225,32 @@ export function SearchForm({
           <input type="hidden" name="to" value={to} readOnly />
         </>
       )}
+
+      {/*
+        "Add a stop" above the price button, not below it.
+
+        CR-2026-0027: "the stop should move up above the price view, without
+        the extra text". It used to sit under the vehicle chips at the foot of
+        the panel, two rows below the button that ends the form — so a
+        traveller planning a route with a detour found the control only after
+        deciding they were done. The note that used to run alongside it is the
+        "extra text": it explained that stops change the price, which the price
+        does by itself the moment one is added.
+      */}
+      {!lockRoute && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setStops([...stops, ""])}
+            disabled={stops.length >= 6}
+            className="text-sm font-semibold text-gold-600 hover:text-gold-700 disabled:opacity-40"
+          >
+            {t("search.addStop")}
+          </button>
+        </div>
+      )}
+
+      {stopsEditor}
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch">
         <div className="flex flex-1 flex-col rounded-2xl border border-ink-200 bg-white sm:flex-row sm:flex-wrap lg:flex-nowrap lg:divide-x lg:divide-ink-200 [&>*+*]:border-t [&>*+*]:border-ink-100 sm:[&>*+*]:border-t-0 lg:[&>*+*]:border-t-0">
@@ -304,24 +293,6 @@ export function SearchForm({
           {t("search.submit")}
           <span aria-hidden>→</span>
         </button>
-      </div>
-
-      {stopsEditor}
-
-      {vehiclePicker}
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        {!lockRoute ? (
-          <button
-            type="button"
-            onClick={() => setStops([...stops, ""])}
-            disabled={stops.length >= 6}
-            className="text-sm font-semibold text-gold-600 hover:text-gold-700 disabled:opacity-40"
-          >
-            {t("search.addStop")}
-          </button>
-        ) : <span />}
-        <p className="text-xs text-ink-500">{t("search.stopsNote")}</p>
       </div>
 
       {roundTrip && <p className="text-xs text-ink-500">{t("search.roundTripNote")}</p>}
