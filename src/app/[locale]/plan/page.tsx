@@ -80,7 +80,10 @@ export default async function PlanPage({
           name: p.name, lat: Number(p.lat), lon: Number(p.lon),
         }]))}
         tourStops={tourStops}
-        initial={{ d: str(sp.d), i: str(sp.i), p: str(sp.p) }}
+        initial={{
+          o: str(sp.o), d: str(sp.d), i: str(sp.i),
+          pace: str(sp.pace), b: str(sp.b), p: str(sp.p),
+        }}
       />
     </div>
   );

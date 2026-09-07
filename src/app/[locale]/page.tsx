@@ -401,7 +401,7 @@ export default async function Home({
               </div>
               <ul className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-ink-50 p-2.5 dark:bg-pine-900 lg:grid-cols-4">
                 {([["1", "home.day1t"], ["3", "home.day2t"], ["5", "home.day3t"], ["7", "home.day4t"]] as const).map(([d, label]) => (
-                  <PlanChip key={d} href={`/${locale}/plan?d=${d}&i=nature&p=0`} label={t(label)} />
+                  <PlanChip key={d} href={`/${locale}/plan?d=${d}&i=nature`} label={t(label)} />
                 ))}
               </ul>
             </li>
@@ -414,21 +414,24 @@ export default async function Home({
               </div>
               <ul className="mt-3 grid gap-2 rounded-xl bg-ink-50 p-2.5 dark:bg-pine-900 sm:grid-cols-2 lg:grid-cols-3">
                 {([["nature", "nature", "plan.int1"], ["culture", "culture", "plan.int2"], ["wine", "wine", "plan.int3"],
-                   ["adventure", "mountains", "plan.int4"], ["rest", "sea", "plan.int5"]] as const).map(([interest, icon, label]) => (
-                  <PlanChip key={interest} href={`/${locale}/plan?d=3&i=${interest}&p=0`} label={t(label)} icon={CATEGORY_ICONS[icon]} />
+                   ["adventure", "mountains", "plan.int4"], ["sea", "sea", "plan.int6"],
+                   ["rest", "winter", "plan.int5"]] as const).map(([interest, icon, label]) => (
+                  <PlanChip key={interest} href={`/${locale}/plan?d=3&i=${interest}`} label={t(label)} icon={CATEGORY_ICONS[icon]} />
                 ))}
               </ul>
             </li>
 
-            {/* step 3 — party */}
+            {/* step 3 — pace. Was "who is travelling", which the wizard now
+                asks beside the booking button because it picks the car rather
+                than the route. */}
             <li className="p-5 sm:p-6">
               <div className="flex items-center gap-3">
                 <StepBadge n={3} />
                 <p className="font-bold tracking-[-0.02em] text-ink-900">{t("home.planStep3")}</p>
               </div>
-              <ul className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-ink-50 p-2.5 dark:bg-pine-900 lg:grid-cols-4">
-                {(["plan.party1", "plan.party2", "plan.party3", "plan.party4"] as const).map((key, i) => (
-                  <PlanChip key={key} href={`/${locale}/plan?d=3&i=nature&p=${i}`} label={t(key)} />
+              <ul className="mt-3 grid grid-cols-1 gap-2 rounded-xl bg-ink-50 p-2.5 dark:bg-pine-900 sm:grid-cols-3">
+                {([["calm", "plan.pace1"], ["balanced", "plan.pace2"], ["active", "plan.pace3"]] as const).map(([p, key]) => (
+                  <PlanChip key={p} href={`/${locale}/plan?d=3&i=nature&pace=${p}`} label={t(key)} />
                 ))}
               </ul>
             </li>
