@@ -359,6 +359,8 @@ export const en = {
   "booking.cashDue": "Cash to the driver at the end of the trip.",
   "booking.paidOnline": "Paid online by card.",
   "booking.cancelT": "Need to cancel?",
+  "booking.offPlatformT": "Trips arranged outside the booking",
+  "booking.offPlatformB": "This booking — the route, the price and the terms — is confirmed through RoutePlanner. If a driver offers you a journey outside it, or asks you to agree a different route directly, please decline and tell us. A trip arranged that way is not one we have confirmed, and we cannot stand behind it — not the price, not the safety, and not the insurance. The same applies the other way round: please do not make that offer to a driver.",
   "booking.cancelFree": "Free of charge. Cancelling early helps your driver find other work.",
   "booking.cancelFee": "A fee of {fee} applies at this notice period.",
   "booking.cancelBtn": "Cancel this booking",

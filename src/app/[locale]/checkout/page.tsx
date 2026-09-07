@@ -166,6 +166,14 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
         </Card>
       </aside>
       </div>
+
+      {/* Also here, not only on the confirmation. This is the last screen
+          before a driver has the passenger's number, which is the moment the
+          offer to go around us actually gets made. */}
+      <Card className="mt-6 p-4 sm:p-6">
+        <h2 className="font-semibold text-ink-900">{t("booking.offPlatformT")}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink-600">{t("booking.offPlatformB")}</p>
+      </Card>
     </div>
   );
 }

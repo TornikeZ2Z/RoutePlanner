@@ -204,6 +204,22 @@ export default async function BookingPage({ params, searchParams }: Props) {
           )}
         </aside>
       </div>
+
+      {/*
+        Under the booking, on every booking — CR-2026-0024, and item 28 of the
+        product review. It is the passenger-facing half of driver agreement
+        4.8, which forbids the driver settling anything beyond the order price
+        in the car. A rule that binds only one side of a conversation is not
+        much of a rule, and the passenger is the side being offered the deal.
+
+        Stated plainly rather than sternly. Somebody being asked to go around
+        us has done nothing wrong yet, and a notice that reads like an
+        accusation is one people stop reading.
+      */}
+      <Card className="mt-6 p-4 sm:p-6">
+        <h2 className="font-semibold text-ink-900">{t("booking.offPlatformT")}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink-600">{t("booking.offPlatformB")}</p>
+      </Card>
     </div>
   );
 }
