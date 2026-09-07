@@ -299,9 +299,7 @@ export default async function Home({
                     {picks.map((d) => (
                       <li key={d.slug}>
                         <Link
-                          href={d.slug === "tbilisi"
-                            ? `/${locale}/transfers/tbilisi-airport-tbilisi`
-                            : `/${locale}/search?from=tbilisi&to=${d.slug}&when=${defaultWhen()}&passengers=2&luggage=2`}
+                          href={`/${locale}/destinations/${d.slug}`}
                           className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 hover:text-ink-900"
                         >
                           <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-gold-600" fill="none" stroke="currentColor"
@@ -506,9 +504,7 @@ export default async function Home({
                     {picks.map((d) => (
                       <li key={d.slug}>
                         <Link
-                          href={d.slug === "tbilisi"
-                            ? `/${locale}/transfers/tbilisi-airport-tbilisi`
-                            : `/${locale}/search?from=tbilisi&to=${d.slug}&when=${defaultWhen()}&passengers=2&luggage=2`}
+                          href={`/${locale}/destinations/${d.slug}`}
                           className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 hover:text-ink-900"
                         >
                           <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-gold-600" fill="none" stroke="currentColor"
@@ -615,13 +611,6 @@ export default async function Home({
   );
 }
 
-/** Two days out, on the hour — a sane default for a link that lands on search
-    with the date already filled in. Was the map's; the season lists use it now. */
-function defaultWhen(): string {
-  const d = new Date(Date.now() + 48 * 3600_000);
-  d.setMinutes(0, 0, 0);
-  return d.toISOString().slice(0, 16);
-}
 
 /** One answer to one of the three questions. The optional leading icon is what
     lets the interests row share a shape with days and party instead of being an

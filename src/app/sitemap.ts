@@ -3,6 +3,7 @@ import { config } from "@/lib/config";
 import { LOCALES } from "@/lib/i18n";
 import { listRoutes } from "@/lib/routes-content";
 import { listTours } from "@/lib/tours";
+import { DESTINATIONS } from "@/lib/destinations";
 import { sql } from "@db/client";
 
 export const revalidate = 3600;
@@ -59,6 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       { url: `${config.appUrl}/${locale}/about`, changeFrequency: "monthly", priority: 0.5, alternates: alternates("/about") },
       { url: `${config.appUrl}/${locale}/business`, changeFrequency: "monthly", priority: 0.5, alternates: alternates("/business") },
       { url: `${config.appUrl}/${locale}/schools`, changeFrequency: "monthly", priority: 0.5, alternates: alternates("/schools") },
+      { url: `${config.appUrl}/${locale}/destinations`, changeFrequency: "weekly", priority: 0.8, alternates: alternates("/destinations") },
       { url: `${config.appUrl}/${locale}/hourly`, changeFrequency: "monthly", priority: 0.4, alternates: alternates("/hourly") },
       { url: `${config.appUrl}/${locale}/contact`, changeFrequency: "monthly", priority: 0.5, alternates: alternates("/contact") },
       { url: `${config.appUrl}/${locale}/drive`, changeFrequency: "monthly", priority: 0.6, alternates: alternates("/drive") },
@@ -66,6 +68,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       { url: `${config.appUrl}/${locale}/legal/privacy`, changeFrequency: "yearly", priority: 0.3, alternates: alternates("/legal/privacy") },
       { url: `${config.appUrl}/${locale}/legal/cancellation`, changeFrequency: "yearly", priority: 0.3, alternates: alternates("/legal/cancellation") },
     );
+
+    // One page per curated destination. These come from a constant, not the
+    // database, so unlike the sections above they cannot be lost to a blip.
+    for (const dest of DESTINATIONS) {
+      entries.push({
+        url: `${config.appUrl}/${locale}/destinations/${dest.slug}`,
+        changeFrequency: "monthly",
+        priority: 0.7,
+        alternates: alternates(`/destinations/${dest.slug}`),
+      });
+    }
 
     for (const tour of tours) {
       entries.push({
