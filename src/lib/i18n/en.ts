@@ -1197,9 +1197,6 @@ export const en = {
   "console.errB": "Either your driver profile is not set up for this yet, or the page failed to load. Nothing was changed.",
   "console.errRetry": "Try again",
   "console.errHome": "Overview",
-  "search.exactFromL": "Exact pickup address (optional)",
-  "search.exactToL": "Exact drop-off address (optional)",
-  "search.exactHint": "Hotel, street or landmark — e.g. “Rooms Hotel, 14 Merab Kostava St”. You can also add it at checkout.",
   "checkout.pickupPh": "e.g. Tbilisi Airport, arrivals hall",
   "checkout.dropoffPh": "e.g. Rooms Hotel, 14 Merab Kostava St, Tbilisi",
 

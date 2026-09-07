@@ -1176,9 +1176,6 @@ export const ka: Partial<Dictionary> = {
   "console.errB": "ან თქვენი პროფილი ამისთვის ჯერ არ არის მზად, ან გვერდი ვერ ჩაიტვირთა. არაფერი შეცვლილა.",
   "console.errRetry": "თავიდან ცდა",
   "console.errHome": "მთავარი",
-  "search.exactFromL": "ზუსტი აყვანის მისამართი (არასავალდებულო)",
-  "search.exactToL": "ზუსტი დანიშნულების მისამართი (არასავალდებულო)",
-  "search.exactHint": "სასტუმრო, ქუჩა ან ორიენტირი — მაგ. „Rooms Hotel, კოსტავას 14“. ჯავშნისასაც შეგიძლია მიუთითო.",
   "checkout.pickupPh": "მაგ. თბილისის აეროპორტი, ჩამოსვლის დარბაზი",
   "checkout.dropoffPh": "მაგ. Rooms Hotel, კოსტავას 14, თბილისი",
 

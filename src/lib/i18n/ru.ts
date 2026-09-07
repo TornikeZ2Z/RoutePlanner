@@ -1176,9 +1176,6 @@ export const ru: Partial<Dictionary> = {
   "console.errB": "Либо ваш профиль ещё не готов для этого, либо страница не загрузилась. Ничего не изменилось.",
   "console.errRetry": "Попробовать снова",
   "console.errHome": "Главная",
-  "search.exactFromL": "Точный адрес подачи (необязательно)",
-  "search.exactToL": "Точный адрес назначения (необязательно)",
-  "search.exactHint": "Отель, улица или ориентир — напр. «Rooms Hotel, Коставы 14». Можно указать и при оформлении.",
   "checkout.pickupPh": "напр. аэропорт Тбилиси, зал прилёта",
   "checkout.dropoffPh": "напр. Rooms Hotel, Коставы 14, Тбилиси",
 

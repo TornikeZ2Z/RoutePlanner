@@ -87,10 +87,10 @@ async function main() {
     SELECT id FROM decision_rounds WHERE slug = ${SLUG}`;
   if (!round) throw new Error(`round ${SLUG} not found — seed it first`);
 
-  const [{ n }] = await sql<{ n: number }[]>`
+  const [count] = await sql<{ n: number }[]>`
     SELECT count(*)::int AS n FROM decision_questions WHERE round_id = ${round.id}::uuid`;
-  if (n > 4) {
-    console.log(`Round already has ${n} questions — clarifications look added. Nothing to do.`);
+  if ((count?.n ?? 0) > 4) {
+    console.log(`Round already has ${count?.n} questions — clarifications look added. Nothing to do.`);
     return;
   }
 
