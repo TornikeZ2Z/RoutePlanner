@@ -25,3 +25,15 @@ export const formatApproxDuration = (minutes: number): string =>
 export function formatDistance(km: number): string {
   return `${Math.round(km)} km`;
 }
+
+/**
+ * Format a moment for a `datetime-local` input, which reads LOCAL time.
+ *
+ * `toISOString()` returns UTC, so using it directly shifted every default by
+ * the reader's offset — four hours in Georgia, which is how a 10:00 pickup
+ * came out as 06:00. The booking bar was fixed for CR-2026-0019; the plan
+ * wizard had its own copy of the same line and kept the bug.
+ */
+export function toLocalInput(d: Date): string {
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+}

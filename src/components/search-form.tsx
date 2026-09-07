@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, Field, Input } from "@/components/ui";
 import { getTranslator, isLocale, type Locale } from "@/lib/i18n";
 import { VEHICLE_CATEGORIES } from "@/lib/vehicle-categories";
+import { toLocalInput } from "@/lib/format";
 
 interface LocationOption { slug: string; name_en: string; type: string }
 
@@ -381,15 +382,6 @@ export function SearchForm({
       {error && <p className="text-sm text-[--color-danger]" role="alert">{error}</p>}
     </form>
   );
-}
-
-/**
- * Format for a datetime-local input, which reads LOCAL time. toISOString()
- * returns UTC, so using it here shifted every default by the reader's offset —
- * four hours in Georgia, which is how a 10:00 pickup showed as 06:00.
- */
-function toLocalInput(d: Date): string {
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 }
 
 /** The earliest a journey can be booked: now. CR-2026-0019 — the field had no

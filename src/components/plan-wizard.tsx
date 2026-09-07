@@ -6,6 +6,7 @@ import { getTranslator, isLocale, type Locale } from "@/lib/i18n";
 import { buildPlan, type DaysBucket, type Interest } from "@/lib/plan";
 import { RouteMap, type RoutePoint } from "@/components/route-map";
 import { DESTINATIONS } from "@/lib/destinations";
+import { toLocalInput } from "@/lib/format";
 
 interface TourInfo { slug: string; title: string; durationDays: number }
 
@@ -51,10 +52,12 @@ export function PlanWizard({
       active ? "border-ink-900 bg-ink-900 text-white dark:text-pine-900" : "border-ink-300 text-ink-900 hover:border-ink-500"
     }`;
 
+  /* Local time, not UTC — the booking bar's own copy of this was four hours
+     out until CR-2026-0019 and this one still was. */
   const when = () => {
     const d = new Date(Date.now() + 48 * 3600_000);
     d.setMinutes(0, 0, 0);
-    return d.toISOString().slice(0, 16);
+    return toLocalInput(d);
   };
 
   /*
