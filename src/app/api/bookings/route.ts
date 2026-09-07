@@ -104,9 +104,19 @@ export async function POST(request: NextRequest) {
                 ${booking.currency}, ${`checkout:${booking.id}`})
         ON CONFLICT (idempotency_key) DO NOTHING`;
 
-      // Payment-provider URLs stay absolute; our own URLs re-base onto the
-      // incoming request so redirects work on any host (localhost, previews, prod).
-      const target = new URL(session.redirectUrl, request.url);
+      /*
+       * Payment-provider URLs stay absolute; our own become relative.
+       *
+       * The base here must be the site's configured address, NOT request.url.
+       * The provider returns a RELATIVE path (src/lib/payments/index.ts:71
+       * gives `/checkout/sandbox?…`), and resolving that against request.url
+       * behind Render's proxy produced https://localhost:10000/checkout/…,
+       * which then failed the own-host test below and was sent to the payer
+       * absolutely. Every card booking ended on an address that does not
+       * exist. Basing on config.appUrl makes a relative path match ownHost,
+       * so it goes back as a relative redirect and works on any host.
+       */
+      const target = new URL(session.redirectUrl, config.appUrl);
       const ownHost = new URL(config.appUrl).host;
       return target.host === ownHost
         ? seeOther(target.pathname + target.search)

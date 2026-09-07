@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { sql } from "@db/client";
-import { assertSameOrigin, rateLimit, clientKey, CrossOriginError } from "@/lib/security";
+import { assertSameOrigin, rateLimit, clientKey, seeOther, CrossOriginError } from "@/lib/security";
 
 /**
  * Business, school and hourly-hire inquiries.
@@ -49,12 +49,19 @@ export async function POST(request: NextRequest) {
   const parsed = Schema.safeParse(Object.fromEntries(form));
   const vehicleTypes = form.getAll("vehicleType").map(String).filter(Boolean);
   const packages = form.getAll("package").map(String).filter(Boolean);
-  const origin = new URL(request.url).origin;
+  /*
+   * No absolute origin. `new URL(request.url).origin` is the address the
+   * SERVER was reached on, which behind Render's proxy is its internal one —
+   * so this endpoint answered every submission with a 303 to
+   * https://localhost:10000/... The enquiry was stored and the sender landed
+   * on a page that does not exist. seeOther sends a relative Location and the
+   * browser resolves it against the site it actually asked.
+   */
 
   if (!parsed.success) {
     const returnTo = String(form.get("returnTo") ?? "/en");
     const safe = /^\/[a-z]{2}\/[a-z-]+$/.test(returnTo) ? returnTo : "/en";
-    return NextResponse.redirect(`${origin}${safe}?error=1#inquiry`, 303);
+    return seeOther(`${safe}?error=1#inquiry`);
   }
   const d = parsed.data;
 
@@ -85,5 +92,5 @@ export async function POST(request: NextRequest) {
       VALUES (${ticket!.id}::uuid, ${detailLines.join("\n")})`;
   });
 
-  return NextResponse.redirect(`${origin}${d.returnTo}?sent=1#inquiry`, 303);
+  return seeOther(`${d.returnTo}?sent=1#inquiry`);
 }

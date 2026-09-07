@@ -84,12 +84,29 @@ export function rateLimit(key: string, limit: number, windowSeconds: number): Ra
   };
 }
 
-/** Best-effort client identity for rate limiting. */
+/**
+ * Client identity for rate limiting.
+ *
+ * The order here is the whole point. This used to read the LEFTMOST entry of
+ * x-forwarded-for, which is the one value in the request an attacker fully
+ * controls: a proxy APPENDS the address it saw rather than replacing the
+ * header, so `X-Forwarded-For: 1.2.3.4` arrives as `1.2.3.4, <real ip>` and
+ * the leftmost is whatever was sent. Rotating that header defeated every
+ * limit on the site at once — sign-in, booking, inquiries, change requests,
+ * the decision form.
+ *
+ * cf-connecting-ip is written by Cloudflare itself and cannot be forged
+ * through it; the site is served through Cloudflare today. Where that header
+ * is absent the RIGHTMOST forwarded entry is used, because the last hop is
+ * the one appended by the proxy nearest to us rather than by the caller.
+ */
 export async function clientKey(scope: string): Promise<string> {
   const h = await headers();
+  const forwarded = h.get("x-forwarded-for")?.split(",").map((s) => s.trim()).filter(Boolean) ?? [];
   const ip =
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    h.get("x-real-ip") ??
+    h.get("cf-connecting-ip")?.trim() ||
+    forwarded.at(-1) ||
+    h.get("x-real-ip")?.trim() ||
     "unknown";
   return `${scope}:${ip}`;
 }
