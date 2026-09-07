@@ -1,9 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getRound, recordAnswers } from "@/lib/decisions";
-import { rateLimit, clientKey } from "@/lib/security";
+import { rateLimit, clientKey, seeOther } from "@/lib/security";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+/** Ninety days. Long enough that a round running over a fortnight still knows
+    you on the last day, short enough that a shared machine forgets. */
+const REMEMBER_SECONDS = 60 * 60 * 24 * 90;
 
 /**
  * Where the decision form posts.
@@ -13,6 +17,15 @@ export const dynamic = "force-dynamic";
  * page's JavaScript ever loaded. A server action form is inert until React
  * has hydrated, and when hydration is slow or broken the button does nothing
  * at all — no error, no submission, nothing for the person to report.
+ *
+ * Every reply is a RELATIVE redirect through seeOther, which the browser
+ * resolves against the origin it actually asked. Building an absolute URL from
+ * `req.url` looked equivalent and was not: behind Render's proxy that is the
+ * internal address, so the first version of this endpoint stored every answer
+ * correctly and then sent the reader to https://localhost:10000. The answers
+ * were saved; the page they landed on did not exist. That is most of why the
+ * form's first user believed nothing was happening and sent the same eleven
+ * answers seven times.
  */
 export async function POST(req: NextRequest) {
   const form = await req.formData();
@@ -20,9 +33,8 @@ export async function POST(req: NextRequest) {
 
   const slug = str("round");
   const lang = str("lang") === "en" ? "en" : "ka";
-  const back = (q: string) => NextResponse.redirect(
-    new URL(`/d/${slug}?lang=${lang}&${q}`, req.url), 303,
-  );
+  const back = (q: string, headers?: Record<string, string>) =>
+    seeOther(`/d/${encodeURIComponent(slug)}?lang=${lang}&${q}`, headers);
 
   /*
    * No token while the round is being built: the slug is the whole address.
@@ -37,7 +49,8 @@ export async function POST(req: NextRequest) {
 
   // Checked here rather than by the browser, so the answer is a page with a
   // message on it instead of a button that appears to do nothing.
-  if (str("name").trim().length < 2) return back("error=name");
+  const who = str("name").trim();
+  if (who.length < 2) return back("error=name");
 
   const given = round.questions.map((q) => ({
     questionId: q.id,
@@ -45,7 +58,6 @@ export async function POST(req: NextRequest) {
     notes: str(`n_${q.id}`) || undefined,
   }));
 
-  const who = str("name").trim();
   const n = await recordAnswers(slug, who, given);
   if (n === 0) return back("error=empty");
 
@@ -55,11 +67,11 @@ export async function POST(req: NextRequest) {
    * name and nothing is gated on it — this cookie only decides whose draft to
    * show back on this device.
    */
-  const res = back(`sent=${n}`);
-  res.cookies.set("decisions_who", who, {
-    httpOnly: true, sameSite: "lax", path: "/",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * 90,
-  });
-  return res;
+  const cookie = [
+    `decisions_who=${encodeURIComponent(who)}`,
+    "Path=/", "HttpOnly", "SameSite=Lax", `Max-Age=${REMEMBER_SECONDS}`,
+    ...(process.env.NODE_ENV === "production" ? ["Secure"] : []),
+  ].join("; ");
+
+  return back(`sent=${n}`, { "Set-Cookie": cookie });
 }
