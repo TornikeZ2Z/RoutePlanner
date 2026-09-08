@@ -236,13 +236,40 @@ export default async function Home({
             Ours is a two-part sentence in Georgian, so it keeps its line break
             but loses the gold on the second half and the bold weight on both.
           */}
+          {/*
+            One sentence, and it is now a claim rather than an instruction.
+
+            CR-2026-0018 part 4 asks for the generic "Let's go" headline to go.
+            "Book a private driver" was never the generic half — it names the
+            product in four words. "and discover Georgia your way" was, and it
+            was ALSO the same sentence as home.catsSub five hundred pixels
+            below, so one deletion answered two of his five items.
+
+            What replaces it is not invented. The specific thing this page owns
+            — a price fixed before you travel — was sitting in the subtitle one
+            type size down in white/70, reading as a caption to the generic line
+            above it. It is in the headline now, and the subtitle, which existed
+            to carry it, is off the page.
+
+            Checked against CR-2026-0034 before writing: 57/50/56 characters
+            against the old 51/56/49, so it still wraps to two lines at every
+            breakpoint inside max-w-4xl. That is what keeps the measured 5.17
+            worst-case contrast and CR-2026-0032's one-screen rule — neither
+            survives a headline that grows a line.
+          */}
           <h1 className="font-display mx-auto max-w-4xl text-center text-[1.7rem] leading-[1.15] sm:text-[2.4rem] lg:text-[3rem]">
-            {t("home.heroTitle")}{" "}
-            <span className="text-white/80">{t("home.heroTitle2")}</span>
+            {t("home.heroTitle")}
           </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-white/70 sm:text-base">
-            {t("home.heroSubtitle")}
-          </p>
+          {/*
+            The subtitle stood here and is gone. It said the three tab labels
+            forty pixels below it say, and its one distinct claim is now the
+            headline.
+
+            home.heroSubtitle STAYS in all three dictionaries and must:
+            generateMetadata above uses it as the page description, which is
+            what a search result and a shared link show. It is no longer on the
+            page; it is still the sentence that describes the page.
+          */}
 
           <div id="book" className="mt-7 scroll-mt-24">
             <SearchTabs locale={locale} locations={locations} />
@@ -328,7 +355,10 @@ export default async function Home({
       <section>
         <div>
           <h2 className="font-display text-[1.9rem] leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.catsTitle")}</h2>
-          <p className="mt-2 text-ink-500">{t("home.catsSub")}</p>
+          {/* home.catsSub said "Explore Georgia your way" — the hero's own
+              second line, in small type, five hundred pixels below it. In
+              Russian the two were near-identical. The heading above already
+              asks the question; the answer is the tiles. */}
         </div>
         {/*
           Six across on a wide screen, from the CR-2026-0033 reference. They

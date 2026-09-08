@@ -24,7 +24,7 @@ export const en = {
 
   // ---- homepage ----------------------------------------------------------
   "home.heroEyebrow": "Georgia · private drivers",
-  "home.heroTitle": "Book a private driver",
+  "home.heroTitle": "Book a private driver at a price fixed before you travel.",
   "home.heroSubtitle": "Transfers, tours and custom routes across Georgia — with a named driver, a specific car and a price agreed in advance.",
   "home.searchCta": "Find a driver",
   "home.statDrivers": "verified drivers",
@@ -982,7 +982,6 @@ export const en = {
 
 
   // --- Navy & gold identity ------------------------------------------------
-  "home.heroTitle2": "and discover Georgia your way.",
   "home.chip1s": "You see the final price up front — no hidden charges.",
   "home.chip2s": "You see the driver, the car, the languages and the reviews before you book.",
   "home.chip3s": "Add stops and plan the journey the way you want it.",
@@ -990,7 +989,6 @@ export const en = {
   "nav.plan": "Build my route",
   "home.catsTitle": "Where do you want to go?",
   "home.catsAll": "All destinations",
-  "home.catsSub": "Explore Georgia your way",
   "home.seasonsSub": "Georgia changes completely with the season. Pick when you are coming.",
   "home.seasonPlaces": "places",
   "home.tabTransfer": "Transfer",
