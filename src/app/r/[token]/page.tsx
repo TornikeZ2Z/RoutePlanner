@@ -116,7 +116,7 @@ export default async function RequestFormPage({
               </Step>
 
               <Step n={4} label={t("cr.areaL")} htmlFor="area">
-                <select id="area" name="area" defaultValue="OTHER" className={INPUT}>
+                <select id="area" name="area" defaultValue="OTHER" className={`${INPUT} select-chevron cursor-pointer`}>
                   {AREAS.map((a) => (
                     <option key={a} value={a}>{t(`cr.a${a}` as Parameters<typeof t>[0])}</option>
                   ))}

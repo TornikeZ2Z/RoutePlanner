@@ -294,7 +294,7 @@ export function SearchForm({
           <select
             id="vehicle-compact" name="vehicle" value={vehicle}
             onChange={(e) => setVehicle(e.target.value)}
-            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm select-chevron cursor-pointer"
           >
             {vehicleOptions}
           </select>
@@ -377,7 +377,8 @@ export function SearchForm({
           </Cell>
           <Cell icon={ICONS.car} label={t("search.vehicle")} htmlFor="vehicle" className="sm:basis-1/2 lg:max-w-40 lg:basis-auto">
             <select id="vehicle" name="vehicle" value={vehicle}
-                    onChange={(e) => setVehicle(e.target.value)} className={CELL_CONTROL + " cursor-pointer"}>
+                    onChange={(e) => setVehicle(e.target.value)}
+                    className={CELL_CONTROL + " select-chevron-glass cursor-pointer"}>
               {vehicleOptions}
             </select>
           </Cell>

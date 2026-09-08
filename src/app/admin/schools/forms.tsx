@@ -89,7 +89,7 @@ export function RecordSignatureForm({ schoolId }: { schoolId: string }) {
           <Field label="Language of the copy signed" htmlFor="locale">
             <select
               id="locale" name="locale" defaultValue="ka"
-              className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm select-chevron cursor-pointer"
             >
               <option value="ka">Georgian (governing)</option>
               <option value="en">English</option>
@@ -100,7 +100,7 @@ export function RecordSignatureForm({ schoolId }: { schoolId: string }) {
         <Field label="How it was signed" htmlFor="method" required>
           <select
             id="method" name="method" defaultValue="IN_PERSON" required
-            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm select-chevron cursor-pointer"
           >
             <option value="IN_PERSON">In person, on paper</option>
             <option value="SCANNED">Scanned copy returned</option>
@@ -175,7 +175,7 @@ export function NewOrderForm({ schoolId }: { schoolId: string }) {
           <Field label="Package" htmlFor="package" required>
             <select
               id="package" name="package" value={pkg} onChange={(e) => setPkg(e.target.value)}
-              className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm select-chevron cursor-pointer"
             >
               <option value="STANDARD">STANDARD — vehicle, driver, route</option>
               <option value="PLUS">PLUS — plus Safety Coordinator</option>
@@ -242,7 +242,7 @@ export function OrderStatusForm({
       <div className="flex flex-wrap items-center gap-2">
         <select
           name="status" value={next} onChange={(e) => setNext(e.target.value)}
-          className="rounded-lg border border-ink-300 bg-white px-2 py-1 text-sm"
+          className="rounded-lg border border-ink-300 bg-white px-2 py-1 text-sm select-chevron cursor-pointer"
         >
           <option value="DRAFT">Draft</option>
           <option value="CONFIRMED">Confirmed</option>

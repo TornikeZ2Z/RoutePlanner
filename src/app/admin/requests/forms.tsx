@@ -8,7 +8,7 @@ import { setRequestStatusAction } from "./actions";
 const INITIAL = { ok: false } as const;
 
 const SELECT =
-  "rounded-lg border border-ink-300 bg-white px-2.5 py-1.5 text-sm " +
+  "rounded-lg border border-ink-300 bg-white px-2.5 py-1.5 text-sm select-chevron cursor-pointer " +
   "focus:border-pine-800 focus:outline-none focus:ring-1 focus:ring-pine-800";
 
 export function StatusForm({ id, status }: { id: string; status: string }) {

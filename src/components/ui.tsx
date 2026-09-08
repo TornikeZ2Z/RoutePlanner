@@ -67,8 +67,20 @@ export function Input({ className, ...props }: ComponentProps<"input">) {
   return <input className={cx(FIELD_BASE, className)} {...props} />;
 }
 
+/**
+ * Every dropdown in the console and the driver cabinet.
+ *
+ * `select-chevron` (globals.css) suppresses the browser's own arrow and draws
+ * the site's. It replaces a `pr-8` that reserved thirty-two pixels for a
+ * chevron nothing ever painted, and it supplies its own padding-right, so the
+ * reservation is gone with it.
+ */
 export function Select({ className, children, ...props }: ComponentProps<"select">) {
-  return <select className={cx(FIELD_BASE, "pr-8", className)} {...props}>{children}</select>;
+  return (
+    <select className={cx(FIELD_BASE, "select-chevron cursor-pointer", className)} {...props}>
+      {children}
+    </select>
+  );
 }
 
 export function Textarea({ className, ...props }: ComponentProps<"textarea">) {

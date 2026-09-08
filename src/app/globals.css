@@ -166,6 +166,57 @@ h1, h2, h3, h4, h5, nav, button, .font-display {
   color: var(--color-ink-500);
 }
 
+/*
+ * One dropdown, everywhere.
+ *
+ * There were sixteen native selects across eight files in five different
+ * treatments — heights of 26, 30, 34, 38 and 42px and radii of 4, 8 and 12 —
+ * and not one of them set `appearance`, so every dropdown on the site was drawn
+ * by the browser: a different arrow on Windows, macOS, Android and Firefox, in
+ * a colour the design never chose. ui.tsx's Select even reserved `pr-8` for a
+ * chevron it never painted.
+ *
+ * This class is the whole fix: suppress the UA control and draw the arrow the
+ * design system already uses elsewhere. Two variants exist because the site has
+ * two surfaces — a white field, and a translucent cell floating on a
+ * photograph — and one grey arrow cannot serve both.
+ *
+ * The colours are literal rather than var(): a data URI cannot read a custom
+ * property, which is also why dark mode gets its own rule instead of relying on
+ * the token swap the rest of the sheet uses. They are the ink-400 values from
+ * @theme and .dark above; if those move, move these.
+ */
+.select-chevron {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aab3bf' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 1rem 1rem;
+  padding-right: 2.1rem;
+}
+
+.dark .select-chevron {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23587493' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+}
+
+/* The booking bar's cells: white text on a photograph, so the arrow is white
+   too, and the cell supplies its own padding — overriding it here would push
+   the value off-centre in a pill that is already tight for six fields.
+
+   Self-sufficient rather than a modifier of .select-chevron above. Written as a
+   variant it inherited only the image, left `appearance` alone, and every cell
+   drew the browser's arrow AND this one — two chevrons, side by side, which is
+   what the first build of this actually shipped to the local server. */
+.select-chevron-glass,
+.dark .select-chevron-glass {
+  appearance: none;
+  background-repeat: no-repeat;
+  background-size: 1rem 1rem;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba%28255%2C255%2C255%2C0.7%29' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-position: right 0.1rem center;
+  padding-right: 1.35rem;
+}
+
 /* A hairline that fades out — used under section headings. */
 .rule-fade {
   height: 1px;

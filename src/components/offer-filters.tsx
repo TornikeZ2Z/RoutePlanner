@@ -143,7 +143,7 @@ export function OfferFiltersPanel({
           </label>
           <select
             id="vehicle" name="vehicle" defaultValue={category?.id ?? ""}
-            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm select-chevron cursor-pointer"
           >
             <option value="">{t("search.vehAny")}</option>
             {VEHICLE_CATEGORIES.map((c) => (
@@ -182,7 +182,7 @@ export function OfferFiltersPanel({
           </label>
           <select
             id="language" name="language" defaultValue={state.language}
-            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm select-chevron cursor-pointer"
           >
             <option value="">{t("filters.anyLanguage")}</option>
             {/* Always these three, whatever the current fleet happens to

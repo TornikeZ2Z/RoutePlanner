@@ -47,7 +47,7 @@ import { getTranslator, isLocale, type Locale } from "@/lib/i18n";
 export function PlanBar({ locale }: { locale: string }) {
   const t = getTranslator(isLocale(locale) ? (locale as Locale) : "en");
 
-  const control = `${CELL_BASE} ${TONE.glass.control} cursor-pointer`;
+  const control = `${CELL_BASE} ${TONE.glass.control} select-chevron-glass cursor-pointer`;
   /* The control is white text on a photograph; the native option list is not,
      and inherits it onto a white popup. The vehicle select on the transfer bar
      carries the same class for the same reason. */
