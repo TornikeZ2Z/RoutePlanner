@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { isLocale, getTranslator, LOCALES, type Locale, type MessageKey } from "@/lib/i18n";
 import { config } from "@/lib/config";
-import { DESTINATIONS, type MapCategory, type Season } from "@/lib/destinations";
+import { DESTINATIONS, sightsFor, type MapCategory, type Season } from "@/lib/destinations";
 import { CATEGORY_ICONS } from "@/lib/map-icons";
 import { listRoutes } from "@/lib/routes-content";
 import { listTours } from "@/lib/tours";
@@ -100,6 +100,7 @@ export default async function DestinationPage({ params }: Props) {
   const relatedRoutes = routes.filter((r) => r.destinationSlug === slug || r.originSlug === slug);
   const relatedTours = tours.filter((tour) => dest.categories.includes(tour.category as MapCategory));
   // Places that share a theme, so the page leads somewhere rather than ending.
+  const sights = sightsFor(slug);
   const nearby = DESTINATIONS
     .filter((d) => d.slug !== slug && d.categories.some((c) => dest.categories.includes(c)))
     .slice(0, 6);
@@ -137,6 +138,30 @@ export default async function DestinationPage({ params }: Props) {
             ))}
           </ul>
         </Card>
+
+        {/*
+          Main sights — CR-2026-0010 item 14, open since 4 September and blocked
+          until now because nothing in the system recorded what there is to see
+          at a place. CR-2026-0036 supplied the list; the sights attach to their
+          destination rather than becoming destinations of their own.
+
+          Absent on a destination with none listed rather than showing an empty
+          heading. Twenty-four are named so far, across six places.
+        */}
+        {sights.length > 0 && (
+          <Card className="p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">{t("dest.sightsT")}</p>
+            <ul className="mt-2 space-y-1.5">
+              {sights.map((sight) => (
+                <li key={sight.slug} className="flex items-start gap-2 text-sm text-ink-700">
+                  <span aria-hidden className="mt-1.5 size-1.5 shrink-0 rounded-full bg-brand-600" />
+                  {t(`sight.${sight.slug}` as never)}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs leading-relaxed text-ink-500">{t("dest.sightsB")}</p>
+          </Card>
+        )}
 
         <Card className="p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">{t("dest.themesT")}</p>

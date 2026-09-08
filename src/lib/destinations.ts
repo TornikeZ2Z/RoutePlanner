@@ -25,6 +25,75 @@ export interface Destination {
   dy?: number;
 }
 
+/**
+ * Sights: the things you go and look at once you have arrived somewhere.
+ *
+ * CR-2026-0036 arrived as one list of about eighty place names to add to
+ * "where do you want to go". A good third of them are not places you travel to
+ * and stay — Svetitskhoveli is a cathedral inside Mtskheta, Ushba is a mountain
+ * you look at from Mestia, Gergeti Trinity is the church above Stepantsminda.
+ * Giving each of those its own destination page, titled "how to get there and
+ * what it costs", would have been wrong twice over: it is not a destination,
+ * and we do not sell a journey to it.
+ *
+ * So they attach to the destination they belong to. That is the answer both to
+ * this ticket and to CR-2026-0010 item 14, which has asked for "main sights" on
+ * every destination page since 4 September and was blocked because no such data
+ * existed anywhere. It does now.
+ *
+ * A sight needs no location row, no coordinates and no page: it is a name and a
+ * parent. Anything that genuinely is somewhere you can be driven to and stay
+ * belongs in DESTINATIONS below instead.
+ */
+export interface Sight {
+  /** Stable key, used for the dictionary lookup. */
+  slug: string;
+  /** The destination slug this belongs to. Must exist in DESTINATIONS. */
+  destination: string;
+}
+
+export const SIGHTS: Sight[] = [
+  // Kazbegi / Mtiuleti
+  { slug: "gergeti",      destination: "kazbegi" },
+  { slug: "dariali",      destination: "kazbegi" },
+  { slug: "truso",        destination: "kazbegi" },
+  { slug: "gveleti",      destination: "kazbegi" },
+  { slug: "mkinvartsveri", destination: "kazbegi" },
+  { slug: "juta",         destination: "kazbegi" },
+  { slug: "sno",          destination: "kazbegi" },
+
+  // Svaneti
+  { slug: "ushguli",      destination: "mestia" },
+  { slug: "ushba",        destination: "mestia" },
+  { slug: "tetnuldi",     destination: "mestia" },
+  { slug: "hatsvali",     destination: "mestia" },
+
+  // Mtskheta
+  { slug: "svetitskhoveli", destination: "mtskheta" },
+  { slug: "jvari",        destination: "mtskheta" },
+  { slug: "samtavro",     destination: "mtskheta" },
+  { slug: "shiomghvime",  destination: "mtskheta" },
+
+  // Imereti, from Kutaisi
+  { slug: "gelati",       destination: "kutaisi" },
+  { slug: "motsameta",    destination: "kutaisi" },
+  { slug: "prometheus",   destination: "kutaisi" },
+  { slug: "sataplia",     destination: "kutaisi" },
+
+  // Racha
+  { slug: "nikortsminda", destination: "ambrolauri" },
+  { slug: "barakoni",     destination: "ambrolauri" },
+  { slug: "shovi",        destination: "oni" },
+
+  // Adjara, from Batumi
+  { slug: "gonio",        destination: "batumi" },
+  { slug: "mtsvanekontskhi", destination: "batumi" },
+];
+
+/** The sights that belong to a destination, in the order they are listed. */
+export const sightsFor = (destination: string): Sight[] =>
+  SIGHTS.filter((s) => s.destination === destination);
+
 export const DESTINATIONS: Destination[] = [
   { slug: "tbilisi",     categories: ["culture"],                       seasons: ["spring", "summer", "autumn", "winter"], descKey: "map.d.tbilisi",     icon: "culture", labelPos: "right" },
   { slug: "mtskheta",    categories: ["culture"],                       seasons: ["spring", "summer", "autumn"],           descKey: "map.d.mtskheta",    icon: "culture", labelPos: "left" },
