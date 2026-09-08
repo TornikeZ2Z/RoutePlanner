@@ -85,11 +85,35 @@ export default async function LegalPage({ params }: Props) {
         <p className="mt-5 text-lg leading-relaxed text-ink-700">{doc.intro}</p>
       </header>
 
-      {!edited && <div className="mt-6">
+      {/*
+        Two separate warnings, because they are two separate problems and a
+        reader deserves to know which one applies.
+
+        The lawyer notice has always been here. The language notice is new: the
+        code default is written in English and there are no ka or ru rows in
+        content_pages yet, so a Georgian visitor opening /ka/legal/terms has
+        been reading English with nothing on the page saying so. Silently
+        serving a legal document in a language the reader did not ask for is
+        worse than saying plainly that it is only available in English.
+
+        Translating the current text is deliberately NOT the fix. It is due for
+        review by Georgian counsel and will change; translating first means
+        translating twice, and a translated-but-unreviewed document reads more
+        authoritative than it is. Which comes first is the open question on
+        CR-2026-0018.
+      */}
+      {!edited && <div className="mt-6 space-y-3">
         <Alert tone="warning" title="Not yet reviewed by a Georgian lawyer">
           These terms describe accurately what this service does and what it stores, but they have
           not been checked by qualified local counsel. That review is required before trading.
         </Alert>
+        {locale !== "en" && (
+          <Alert tone="warning" title="Available in English only">
+            {locale === "ka"
+              ? "ეს დოკუმენტი ჯერ მხოლოდ ინგლისურადაა. ქართული ვერსია გამოქვეყნდება იურისტის შემოწმების შემდეგ."
+              : "Этот документ пока доступен только на английском. Русская версия появится после проверки юристом."}
+          </Alert>
+        )}
       </div>}
 
       <div className="mt-10 space-y-10">
