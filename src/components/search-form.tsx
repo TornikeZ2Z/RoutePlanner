@@ -312,7 +312,7 @@ export function SearchForm({
         does by itself the moment one is added.
       */}
       {!lockRoute && (
-        <div>
+        <div className={tone === "glass" ? "text-center" : ""}>
           <button
             type="button"
             onClick={() => setStops([...stops, ""])}

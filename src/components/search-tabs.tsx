@@ -97,7 +97,7 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
             >
               {id === "transfer" && (
                 <div className="space-y-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
                     <div role="radiogroup" aria-label={t("home.tabTransfer")}
                          className="inline-flex rounded-full border border-white/25 bg-white/10 p-0.5 text-xs font-semibold backdrop-blur-md">
                       {([false, true] as const).map((rt) => (
