@@ -185,6 +185,8 @@ export const en = {
   "tours.incl4": "Every planned stop on the stated route",
   "tours.incl5": "Road tolls, where there are any",
   "tours.incl6": "Drinking water for each passenger",
+  "tours.incl7": "Waiting time on the route, where the tour includes it",
+  "tours.incl8": "Free cancellation, where this tour's terms allow it",
   "tours.exclTitle": "What it does not cover",
   "tours.excl1": "Meals and drinks",
   "tours.excl2": "Accommodation",

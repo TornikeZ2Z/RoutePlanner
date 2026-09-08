@@ -175,13 +175,20 @@ export default async function TourPage({ params }: Props) {
             The day a tour genuinely differs — one that does include a boat, or
             a ticket — that tour needs its own field, and this becomes the
             default rather than the only answer.
+
+            Two of the eight carry their own condition — waiting time and free
+            cancellation — because that is how the list was written: "if the
+            specific tour includes it", "if this tour's terms allow it". A
+            shared list cannot promise either outright, and dropping them
+            because they are awkward would be answering a different question
+            than the one that was asked.
           */}
           <section>
             <div className="grid gap-6 sm:grid-cols-2">
               <div>
                 <h2 className="font-display text-2xl text-ink-900">{t("tours.inclTitle")}</h2>
                 <ul className="mt-4 space-y-2">
-                  {(["tours.incl1","tours.incl2","tours.incl3","tours.incl4","tours.incl5","tours.incl6"] as const).map((k) => (
+                  {(["tours.incl1","tours.incl2","tours.incl3","tours.incl4","tours.incl5","tours.incl6","tours.incl7","tours.incl8"] as const).map((k) => (
                     <li key={k} className="flex gap-2.5 text-sm leading-relaxed text-ink-700">
                       <svg viewBox="0 0 24 24" className="mt-0.5 size-4 shrink-0 text-brand-600" fill="none"
                            stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
