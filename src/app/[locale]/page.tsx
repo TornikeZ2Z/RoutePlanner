@@ -225,8 +225,8 @@ export default async function Home({
         carries nothing but a headline and a booking bar over its picture, and
         the promises are the one thing here that reads as decoration when it is
         competing with a photograph. Same four keys, same words — a quiet band
-        on the page's own ground, where the gold ring finally has enough
-        contrast to be worth drawing.
+        on the page's own ground, where a hairline ring and the accent colour
+        read properly instead of fighting a photograph.
       */}
       <section className="left-1/2 -mt-20 w-screen -translate-x-1/2 border-b border-ink-200 bg-ink-50 sm:-mt-28">
         <ul className="mx-auto grid max-w-[1400px] grid-cols-2 gap-x-8 gap-y-6 px-4 py-8 sm:px-6 sm:grid-cols-4 lg:px-10 2xl:max-w-[1680px]">
@@ -259,7 +259,7 @@ export default async function Home({
       */}
       <section>
         <div>
-          <h2 className="font-display text-3xl text-ink-900 sm:text-4xl">{t("home.catsTitle")}</h2>
+          <h2 className="font-display text-[1.9rem] font-normal leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.catsTitle")}</h2>
           <p className="mt-2 text-ink-500">{t("home.catsSub")}</p>
         </div>
         {/*
@@ -315,7 +315,7 @@ export default async function Home({
                           href={`/${locale}/destinations/${d.slug}`}
                           className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 hover:text-ink-900"
                         >
-                          <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-gold-600" fill="none" stroke="currentColor"
+                          <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-brand-600" fill="none" stroke="currentColor"
                                strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                             <path d={CATEGORY_ICONS[d.icon]} />
                           </svg>
@@ -336,7 +336,7 @@ export default async function Home({
         <section>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="font-display text-3xl text-ink-900 sm:text-4xl">{t("home.popularTitle")}</h2>
+              <h2 className="font-display text-[1.9rem] font-normal leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.popularTitle")}</h2>
               <p className="mt-2 text-ink-500">{t("home.popularSub")}</p>
             </div>
             <Link href={`/${locale}/transfers`} className="text-sm font-semibold text-ink-900 underline underline-offset-4">
@@ -395,11 +395,11 @@ export default async function Home({
         <div className="grid gap-8 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-center lg:gap-12">
           <div>
             <p className="eyebrow">{t("home.planTeaserEyebrow")}</p>
-            <h2 className="font-display mt-2 text-3xl text-ink-900 sm:text-4xl">{t("home.planTeaserTitle")}</h2>
+            <h2 className="font-display mt-2 text-[1.9rem] font-normal leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.planTeaserTitle")}</h2>
             <p className="mt-4 leading-relaxed text-ink-500">{t("home.planTeaserBody")}</p>
             <Link
               href={`/${locale}/plan`}
-              className="mt-6 inline-flex min-h-12 items-center rounded-xl bg-brand-600 px-6 py-3 font-bold tracking-[-0.02em] text-white shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-brand-700"
+              className="mt-6 inline-flex min-h-12 items-center rounded-full bg-brand-600 px-6 py-3 font-semibold text-white shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-brand-700"
             >
               {t("home.planTeaserCta")}
             </Link>
@@ -410,7 +410,7 @@ export default async function Home({
             <li className="p-5 sm:p-6">
               <div className="flex items-center gap-3">
                 <StepBadge n={1} />
-                <p className="font-bold tracking-[-0.02em] text-ink-900">{t("home.planStep1")}</p>
+                <p className="font-semibold text-ink-900">{t("home.planStep1")}</p>
               </div>
               <ul className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-ink-50 p-2.5 dark:bg-pine-900 lg:grid-cols-4">
                 {([["1", "home.day1t"], ["3", "home.day2t"], ["5", "home.day3t"], ["7", "home.day4t"]] as const).map(([d, label]) => (
@@ -423,7 +423,7 @@ export default async function Home({
             <li className="p-5 sm:p-6">
               <div className="flex items-center gap-3">
                 <StepBadge n={2} />
-                <p className="font-bold tracking-[-0.02em] text-ink-900">{t("home.planStep2")}</p>
+                <p className="font-semibold text-ink-900">{t("home.planStep2")}</p>
               </div>
               <ul className="mt-3 grid gap-2 rounded-xl bg-ink-50 p-2.5 dark:bg-pine-900 sm:grid-cols-2 lg:grid-cols-3">
                 {([["nature", "nature", "plan.int1"], ["culture", "culture", "plan.int2"], ["wine", "wine", "plan.int3"],
@@ -440,7 +440,7 @@ export default async function Home({
             <li className="p-5 sm:p-6">
               <div className="flex items-center gap-3">
                 <StepBadge n={3} />
-                <p className="font-bold tracking-[-0.02em] text-ink-900">{t("home.planStep3")}</p>
+                <p className="font-semibold text-ink-900">{t("home.planStep3")}</p>
               </div>
               <ul className="mt-3 grid grid-cols-1 gap-2 rounded-xl bg-ink-50 p-2.5 dark:bg-pine-900 sm:grid-cols-3">
                 {([["calm", "plan.pace1"], ["balanced", "plan.pace2"], ["active", "plan.pace3"]] as const).map(([p, key]) => (
@@ -468,7 +468,7 @@ export default async function Home({
       */}
       <section>
         <div>
-          <h2 className="font-display text-3xl text-ink-900 sm:text-4xl">{t("home.seasonsTitle")}</h2>
+          <h2 className="font-display text-[1.9rem] font-normal leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.seasonsTitle")}</h2>
           <p className="mt-2 text-ink-500">{t("home.seasonsSub")}</p>
         </div>
         <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -523,7 +523,7 @@ export default async function Home({
                           href={`/${locale}/destinations/${d.slug}`}
                           className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 hover:text-ink-900"
                         >
-                          <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-gold-600" fill="none" stroke="currentColor"
+                          <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-brand-600" fill="none" stroke="currentColor"
                                strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                             <path d={CATEGORY_ICONS[d.icon]} />
                           </svg>
@@ -542,12 +542,12 @@ export default async function Home({
       {/* -------------------------------------------- why + contact ------- */}
       <section className={config.contact.phone ? "grid gap-4 lg:grid-cols-[1fr_20rem]" : "grid gap-4"}>
         <div className="rounded-2xl bg-pine-50 p-6 sm:p-10">
-          <h2 className="font-display text-2xl text-ink-900 sm:text-3xl">{t("home.whyRG")}</h2>
+          <h2 className="font-display text-[1.6rem] font-normal leading-[1.15] text-ink-900 sm:text-[2rem]">{t("home.whyRG")}</h2>
           <ul className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
             {([["home.why1t", "home.why1b"], ["home.why2t", "home.why2b"],
                ["home.why3t", "home.why3b"], ["home.why4t", "home.why4b"]] as const).map(([tt, bb]) => (
               <li key={tt} className="flex gap-3">
-                <svg viewBox="0 0 24 24" className="mt-0.5 size-5 shrink-0 text-gold-600" fill="none" stroke="currentColor"
+                <svg viewBox="0 0 24 24" className="mt-0.5 size-5 shrink-0 text-brand-600" fill="none" stroke="currentColor"
                      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="m5 12 5 5L20 7" />
                 </svg>
@@ -581,11 +581,11 @@ export default async function Home({
             <p className="mt-2 text-sm leading-relaxed text-pine-200">{t("home.helpBody")}</p>
             <div className="mt-5 flex flex-col gap-2.5">
               <a href={`https://wa.me/${config.contact.phone.replace(/[^0-9]/g, "")}`}
-                 className="rounded-lg bg-white px-4 py-2.5 text-center text-sm font-bold tracking-[-0.01em] text-pine-800 hover:bg-pine-100 dark:bg-ink-900 dark:hover:bg-ink-800">
+                 className="rounded-full bg-white px-5 py-2.5 text-center text-sm font-semibold text-pine-800 hover:bg-pine-100 dark:bg-ink-900 dark:hover:bg-ink-800">
                 {t("home.helpWhatsApp")}
               </a>
               <a href={`tel:${config.contact.phone.replace(/\s+/g, "")}`}
-                 className="rounded-lg border border-gold-400 px-4 py-2.5 text-center text-sm font-bold tracking-[-0.01em] text-gold-400 hover:bg-white/5">
+                 className="rounded-full border border-white/35 px-5 py-2.5 text-center text-sm font-semibold text-white hover:bg-white/10">
                 {t("home.helpCall")} · {config.contact.phone}
               </a>
             </div>
@@ -597,7 +597,7 @@ export default async function Home({
       {travellers.length > 0 && (
         <section>
           <p className="eyebrow">{t("home.travellersEyebrow")}</p>
-          <h2 className="font-display mt-2 text-3xl text-ink-900 sm:text-4xl">{t("home.travellersTitle")}</h2>
+          <h2 className="font-display mt-2 text-[1.9rem] font-normal leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.travellersTitle")}</h2>
           <p className="mt-3 max-w-xl text-ink-500">{t("home.travellersBody")}</p>
           <ul className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
             {travellers.map((photo) => (
@@ -613,11 +613,11 @@ export default async function Home({
 
       {/* ------------------------------------------------ closing CTA ----- */}
       <section className="rounded-2xl bg-pine-800 px-6 py-14 text-center text-white sm:px-12">
-        <h2 className="font-display text-3xl sm:text-4xl">{t("home.closingTitle")}</h2>
+        <h2 className="font-display text-[1.9rem] font-normal leading-[1.15] sm:text-[2.5rem]">{t("home.closingTitle")}</h2>
         <p className="mx-auto mt-4 max-w-xl leading-relaxed text-pine-100">{t("home.closingBody")}</p>
         <a
           href="#book"
-          className="mt-8 inline-flex min-h-12 items-center rounded-xl bg-gold-400 px-8 py-3 font-bold tracking-[-0.01em] text-pine-900 shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-gold-300"
+          className="mt-8 inline-flex min-h-12 items-center rounded-full bg-white px-8 py-3 font-semibold text-ink-900 shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-ink-100"
         >
           {t("home.closingCta")}
         </a>
@@ -638,10 +638,10 @@ function PlanChip({ href, label, icon }: { href: string; label: string; icon?: s
     <li className="flex">
       <Link
         href={href}
-        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-ink-200 bg-white px-3.5 py-2 text-center text-sm font-medium text-ink-600 transition-colors hover:border-gold-500 hover:text-ink-900"
+        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-ink-200 bg-white px-3.5 py-2 text-center text-sm font-medium text-ink-600 transition-colors hover:border-brand-600 hover:text-ink-900"
       >
         {icon && (
-          <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-gold-600" fill="none" stroke="currentColor"
+          <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-brand-600" fill="none" stroke="currentColor"
                strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d={icon} />
           </svg>
