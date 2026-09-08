@@ -68,7 +68,7 @@ export default async function Contact({ params }: Props) {
           <h2 className="font-display text-xl text-ink-900">{t("contact.driversT")}</h2>
           <p className="mt-2 text-sm leading-relaxed text-ink-600">
             {t("contact.driversB1")}{" "}
-            <Link href="/driver" className="text-ink-900 underline">{t("nav.becomeDriver")}</Link>
+            <Link href={`/${locale}/drive`} className="text-ink-900 underline">{t("nav.becomeDriver")}</Link>
           </p>
           <p className="mt-3 text-sm text-ink-600">
             {t("contact.driversB2")}
