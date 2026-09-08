@@ -104,8 +104,9 @@ export function briefFor(request: ChangeRequest, imageCount = 0): string {
     "",
     "Before changing anything: read the comments around the code you are",
     "about to touch — they explain why it is the way it is. Check whether this",
-    "request conflicts with an invariant the database enforces (see HANDOVER.md",
-    "section 9). If it does, say so rather than working around it.",
+    "request conflicts with an invariant the database enforces (see",
+    "docs/ON-PREM-HOSTING.md section 19). If it does, say so rather than",
+    "working around it.",
   );
   return lines.join("\n");
 }

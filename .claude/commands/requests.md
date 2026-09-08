@@ -32,7 +32,7 @@ When they do say to work on one:
    `npm run requests -- --start CR-2026-0003`
 2. Do the work. The brief names the likely area of the codebase — read the
    comments around whatever you are about to change before changing it, and
-   check the request against the database invariants in `HANDOVER.md` section 9.
+   check the request against the database invariants in `docs/ON-PREM-HOSTING.md` section 19.
    If it conflicts with one, say so rather than working around it.
 3. When it is finished and verified:
    `npm run requests -- --done CR-2026-0003 "what actually changed"`

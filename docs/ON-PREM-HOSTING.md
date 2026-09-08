@@ -10,11 +10,11 @@ by the operator in their own terminal, because they involve a value Claude
 must never see (unseal keys, a password, a tunnel login) or a change Claude
 must never make on its own judgement (DNS, disks, shutting the old host down).
 
-`HANDOVER.md` still holds the parts that do not change with the hosting
-platform: what the system is (§1), what does not move (§7), the things that
-bite (§8), the invariants the database enforces (§9), the manual verification
-checklist (§11) and the open items (§12). Read those first. This document
-replaces its §4–§6 and §10.
+Part I (sections 1–15) is the hosting work itself. Part II (sections 16–20)
+is what was carried over from the August handover and does not change with
+the hosting platform: what the system is, what does not move, the things
+that bite, the invariants the database enforces, and the open items. Read
+Part II first if you have never worked on this codebase.
 
 ---
 
@@ -314,7 +314,7 @@ symptom of a blocked port and looks exactly like a credentials problem.
 | `github.com` | 22 or 443 | `git fetch` |
 
 ```bash
-nc -vz -w 5 smtp.gmail.com 465            # HANDOVER §8: the one that was blocked on Render
+nc -vz -w 5 smtp.gmail.com 465            # section 18.1: the one that was blocked on Render
 nc -vz -w 5 region1.v2.argotunnel.com 7844
 nc -vzu -w 5 region1.v2.argotunnel.com 7844
 curl -sS -o /dev/null -w '%{http_code}\n' https://router.project-osrm.org/route/v1/driving/44.8,41.7;41.6,41.6
@@ -596,8 +596,9 @@ from outside.
 
 ## 8. Move the data from Neon
 
-Nothing else runs yet, so this is a plain dump and restore. HANDOVER §3 sized
-it at 12 MB; check the counts, do not assume them.
+Nothing else runs yet, so this is a plain dump and restore. On 2026-08-29 the
+database was 12 MB, 52 tables, 26 non-empty, with one driver application and
+zero bookings; check the counts, do not assume them.
 
 **HUMAN:** put the Neon connection string in a file, not a command line:
 
@@ -640,7 +641,7 @@ sudo rm -f /root/neon.env
 ```
 
 **Georgian text:** verify through the application (section 10), not through a
-terminal. HANDOVER §8.
+terminal. Section 18.5.
 
 **Object storage.** `driver_documents` was 0 on 2026-08-29. If it is still 0
 *and* the human confirms the R2 bucket is empty in the Cloudflare dashboard,
@@ -750,11 +751,11 @@ Then the **human**, signed in through Access, in a browser:
 - `/ka`, `/en`, `/ru`, `/ka/schools`, a search that returns priced offers
   (OSRM egress), `/login` with the admin account, `/admin/pricing` showing
   15.00 %, `/driver/contract` with **no `{{PLACEHOLDER}}` and no blanks**
-  (HANDOVER §11).
+  (the full list is section 19.1).
 - Upload a vehicle photo or document in a driver account and read it back
   (Garage round-trip). Check `dc exec garage /garage bucket info
   routeplanner-files` shows objects.
-- Trigger a mail: the FAILED test message HANDOVER §8 left in the outbox
+- Trigger a mail: the FAILED test message section 18.1 describes, left in the outbox
   delivers itself the first time the drainer runs (section 12.2), or use
   `/admin` → notifications console. Check the inbox.
 
@@ -783,7 +784,7 @@ Preconditions: section 9.4 passed; a fresh restic backup has run at least once
    Announce a 15-minute maintenance window if anyone is using the admin.
 2. Take a final Neon dump and diff row counts against on-prem. If a booking,
    inquiry, or driver application landed on Neon since section 8, re-run the
-   restore of just those rows; with the volumes HANDOVER describes, a second
+   restore of just those rows; with the volumes section 8 describes, a second
    full restore into a truncated database is simplest:
 
 ```bash
@@ -819,7 +820,7 @@ curl -sSI https://routeplanner.ge/admin | grep -i '^location'      # 302 to the 
 curl -sSI https://routeplanner.ge/ | grep -iE 'strict-transport|content-security|x-frame'
 ```
 
-Then the HANDOVER §11 checklist once more, on the real domain.
+Then the section 19.1 checklist once more, on the real domain.
 
 ### 10.4 Decommission (after 24 hours of clean traffic)
 
@@ -851,7 +852,7 @@ previous image is put back and the script exits non-zero.
 
 What it requires of you: **migrations must be backward-compatible with the
 running version**, because they run first. Add columns, do not rename or drop
-in the same release as the code that stops using them. HANDOVER §8 already
+in the same release as the code that stops using them. Section 18.4 already
 forbids editing an applied migration.
 
 Rollback by hand, if ever needed:
@@ -1062,12 +1063,12 @@ Cost is cents per month. Trade-off: unsealing now depends on reaching Google.
 | `REDIRECT_FORMER_DOMAIN` | `app.public.env` | `true` |
 | `STORAGE_DRIVER`, `S3_BUCKET`, `S3_ENDPOINT`, `S3_REGION` | `app.public.env` | `s3`, `routeplanner-files`, `http://garage:3900`, `garage` |
 | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | agent → `app.env` | Garage key `routeplanner-app` |
-| `COMPANY_LEGAL_NAME`, `COMPANY_ID_NUMBER`, `COMPANY_ADDRESS` | `app.public.env` | as registered; address still generic (HANDOVER §12) |
+| `COMPANY_LEGAL_NAME`, `COMPANY_ID_NUMBER`, `COMPANY_ADDRESS` | `app.public.env` | as registered; address still generic (section 20) |
 | `SUPPORT_EMAIL`, `SUPPORT_PHONE` | `app.public.env` | phone empty until the SIM exists |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `MAIL_FROM` | `app.public.env` | Google Workspace |
 | `SMTP_PASSWORD` | agent → `app.env` | human |
 | `RESEND_API_KEY` | agent → `app.env` | empty unless 465 is blocked |
-| `SMSOFFICE_SENDER` | `app.public.env` | `Route Plan`, with the space (HANDOVER §8: the stripped form is refused with error 150) |
+| `SMSOFFICE_SENDER` | `app.public.env` | `Route Plan`, with the space (section 18.6: the stripped form is refused with error 150) |
 | `SMSOFFICE_API_KEY` | agent → `app.env` | human |
 | `ROUTING_PROVIDER`, `ROUTING_API_KEY` | public / agent | `osrm`, empty |
 | `COMMISSION_RATE_BPS` … `CHILD_SEAT_FEE_MINOR` | `app.public.env` | fallbacks; live values in `platform_settings` |
@@ -1123,6 +1124,244 @@ Kept by the operator, not on the server, not in Vault, not in this repository:
 | `scripts/vault-seed.sh`, `scripts/vault-keys.sh` | generate secrets without showing them; list key names |
 | `host/*` | `daemon.json`, `jail.local`, tmpfiles, systemd units |
 | `claude/settings.json` | permissions for a Claude Code session on the host |
+
+---
+
+---
+
+# Part II. The system itself
+
+Carried over from the handover written on 2026-08-29 by the session that
+built the contract system and set up mail, and kept current since. Nothing
+here depends on where the site is hosted.
+
+## 16. What this is
+
+A private-driver marketplace for Georgia, live at <https://routeplanner.ge>.
+Travellers book a whole vehicle with a driver; drivers apply, are vetted, sign
+an agreement, and are published. Schools are a separate B2B counterparty with
+their own contract and per-trip order sheets.
+
+| | |
+|---|---|
+| Framework | Next.js 16 (App Router), React 19 |
+| Language | TypeScript, strict |
+| Styling | Tailwind 4 |
+| Database | PostgreSQL 18, accessed with `postgres` (not `pg`) + Drizzle |
+| Validation | Zod 4 |
+| Auth | Own implementation. DB-backed sessions, bcryptjs, RBAC in `src/lib/rbac.ts`. No MFA in the app; Cloudflare Access supplies it for staff paths. |
+| Object storage | S3-compatible behind `src/lib/storage/index.ts`; Garage on-premise |
+| Mail | Nodemailer over SMTP, or Resend over HTTPS |
+| SMS | smsoffice.ge HTTP API |
+| Tests | Vitest; `npm test` |
+
+The codebase is heavily commented, and the comments explain *why* rather than
+*what*. They are worth reading: several encode decisions that are not obvious
+and that you would otherwise undo by accident. `DECISIONS.md` and the
+migration comments are the real documentation.
+
+| Concern | File |
+|---|---|
+| Configuration and env validation | `src/lib/config.ts` |
+| Contracts, signing, placeholder substitution | `src/lib/contract.ts` |
+| Schools, agreements, order sheets | `src/lib/schools.ts` |
+| Pricing engine (versioned, deterministic) | `src/lib/pricing/engine.ts` |
+| Commercial settings | `src/lib/settings.ts` |
+| Mail and SMS transports | `src/lib/notifications.ts` |
+| Outbox, transport status, manual send | `/admin/notifications` |
+| Permissions | `src/lib/rbac.ts` |
+| Object storage | `src/lib/storage/index.ts` |
+| Request-level protections, rate limits | `src/lib/security.ts` |
+| Schema history | `db/migrations/` |
+| Design decisions and their reasoning | `DECISIONS.md` |
+
+Commercial terms (commission, settlement cycle, notice period, school
+cancellation ladder) live in `platform_settings` and are editable from
+`/admin/pricing`, **not** in environment variables. They are substituted into
+contract text at render time, so changing one changes the next contract
+anybody opens and nothing already signed.
+
+## 17. What does NOT move
+
+**All mail configuration is on the domain, not the host.** DKIM, SPF, DMARC
+and MX are DNS records on `routeplanner.ge`. They follow the domain and need
+no work during any move. As of 2026-08-29 all four were correct and verified:
+
+```
+MX      routeplanner.ge         → smtp.google.com (priority 1)
+SPF     routeplanner.ge         → v=spf1 include:_spf.google.com ~all
+DKIM    google._domainkey       → active in Google Admin, key matches DNS exactly
+DMARC   _dmarc.routeplanner.ge  → v=DMARC1; p=none; rua=mailto:info@routeplanner.ge; fo=1
+DMARC   _dmarc.routegeorgia.ge  → v=DMARC1; p=none; rua=mailto:info@routegeorgia.ge; fo=1
+```
+
+`routegeorgia.ge` is the former trading name. It still receives mail through
+Cloudflare Email Routing, forwarding to `info@routeplanner.ge`. Leave it.
+
+**DMARC is deliberately `p=none`**: monitor, do not enforce. Once a few weeks
+of aggregate reports confirm SPF and DKIM align on real sends, tighten to
+`p=quarantine`, then `p=reject`. Do not jump straight to `reject`; that is how
+people silently destroy their own deliverability.
+
+The Google Workspace app password provisioned for `info@routeplanner.ge` works
+from any host. It goes into Vault (section 6) unchanged.
+
+## 18. Things that will bite you
+
+### 18.1 Outbound SMTP is blocked more often than you expect
+
+This cost a full debugging cycle on Render, whose free plan blocks outbound
+25, 465 and 587. The symptom is not an auth error; it is a **connection
+timeout** that looks like a credentials problem and is not. Many ISPs and
+datacentres block the same ports. Section 3.8 tests it. If 465 hangs, set
+`RESEND_API_KEY` in Vault; `getTransport()` in `src/lib/notifications.ts`
+prefers SMTP and falls back to Resend with no code change. Resend needs its
+own DKIM record on the domain.
+
+There is a test message in the `notifications` outbox in `FAILED` state from
+that diagnosis. It retries and delivers itself the moment sending works, which
+is a free end-to-end proof. Leave it there until it goes.
+
+### 18.2 `/api/health` reports the build, and that matters
+
+A failed deploy leaves the *previous* version running and returning HTTP 200;
+a healthy response is exactly what a failed deploy looks like from outside.
+That cost a run of deploys that looked fine and were not. `deploy.sh` compares
+the served `build` with the commit and rolls back on mismatch. **Verify
+deploys by fingerprint, never by 200.**
+
+### 18.3 Two environment flags can take the site down instantly
+
+`ENFORCE_CANONICAL_HOST` redirects the hosting subdomain to the custom domain
+(dead on-premise; keep `false`). `REDIRECT_FORMER_DOMAIN` redirects
+`routegeorgia.ge` to `routeplanner.ge`. Both are opt-in because enabling
+either before DNS resolves sends every visitor to an address that does not
+answer. The reasoning is written out in `next.config.ts`; read it before
+changing either.
+
+### 18.4 Migrations are forward-only and must never be edited
+
+`db/migrations/*.sql`, applied in filename order, each inside a transaction,
+recorded in `schema_migrations`. **Never edit a migration that has been
+applied anywhere.** Add a new one. `0016` demonstrates the pattern for
+amending contract text: it *refuses to run at all* if any signature exists,
+because rewriting text somebody has signed would falsify the record. On this
+host migrations also run before the new server is built (section 11), so they
+must be backward-compatible with the running version.
+
+### 18.5 Georgian text is everywhere
+
+Contracts, UI copy, place names. Everything must be UTF-8 end to end:
+database, connection, terminal, editor. `psql` on a mis-set console will
+mangle Georgian and make you think the data is corrupt. It usually is not.
+Verify through the application, not the console.
+
+### 18.6 The SMS sender name has a trap, and it has already been sprung once
+
+The name registered with smsoffice.ge is **`Route Plan`, with the space.** The
+gateway's published character list says letters, digits, `-` and `.` only, so
+the code used to strip the space and transmit `RoutePlan`, and every send came
+back as error 150, *sender name is not registered on the account*: a failure
+that reads like a credential problem and is a spelling one. `normalizeSender`
+now keeps the space; the cap is still eleven characters. The value in
+`deploy/env/app.public.env` must match what smsoffice approved, character for
+character. `/admin/notifications` prints the configured name next to the name
+that will be transmitted, shows the outbox, and can send one message by hand
+under a sender you type, which is the only way to find out what the account
+accepts without a redeploy.
+
+### 18.7 Money is `bigint` minor units
+
+Never floats. Tetri, not lari. `src/lib/money.ts` has the helpers. A booking
+freezes its commission rate at creation so historic statements never change
+retroactively.
+
+## 19. Invariants enforced by the database
+
+These are deliberate. If a migration or an ORM change trips one, the
+constraint is almost certainly right and your code is wrong. The change-request
+brief (`src/lib/change-request-brief.ts`) points here for the same reason.
+
+**Append-only tables.** UPDATE is refused by trigger on `audit_logs`,
+`contract_signatures`, `school_agreement_signatures`, `ledger_entries`,
+`booking_revisions`, `booking_status_history`, `driver_decisions`,
+`support_notes`. Evidence that can be edited is not evidence.
+
+**A driver cannot be published without a signed agreement.**
+`driver_publish_requires_signature_trg` fires on the transition into
+`published` and checks for a signature against the *currently published*
+contract version. Drivers already live are not retroactively pulled down, but
+the next publish applies the current rule.
+
+**A school cannot be sent a confirmed booking without a signed agreement.**
+`school_order_requires_agreement_trg`, same shape, on `school_orders`.
+
+**Driver availability cannot overlap.** An `EXCLUDE USING gist` constraint,
+which is why `btree_gist` is required.
+
+**Contract signatures store a hash of the resolved text**, not a pointer to a
+row that can later be edited. The hash covers the company details, the
+commercial terms *and* the driver's own name and personal number as they were
+at signing. Two drivers get different documents and different hashes; the
+blank template is different again.
+
+Rule of thumb: **if it is legal evidence or money, the database defends it and
+the application cannot be trusted to.**
+
+### 19.1 Manual verification checklist
+
+Run against staging before cutting DNS (section 9.4), and again on the real
+domain after (section 10.3).
+
+```bash
+npm run typecheck                    # clean (on a dev machine)
+npm test                             # all pass; database suites need TEST_DATABASE_URL
+curl -s https://<host>/api/health    # status ok, build = the commit you deployed
+```
+
+Then by hand, signed in through Access where applicable:
+
+- [ ] `/`, `/ka`, `/en`, `/ru` all render, Georgian text intact
+- [ ] `/ka/schools` shows the three packages and the Safety Coordinator section
+- [ ] `/login` accepts the admin account
+- [ ] `/admin` loads; `/admin/schools` lists schools
+- [ ] `/admin/pricing` shows commission **15.00%** and the agreement terms form
+- [ ] `/driver/contract` renders the agreement **with no `{{PLACEHOLDER}}` text
+      and no `____________` blanks** on the company side
+- [ ] A search returns priced offers (exercises the routing provider)
+- [ ] Uploading a driver document succeeds and reads back (exercises Garage)
+- [ ] `/admin/notifications` shows the transport as SMTP (or Resend) and a
+      hand-sent email and SMS both arrive
+
+That contract check is the one people skip. A leaked placeholder in a legal
+document is the failure mode the whole substitution layer exists to prevent,
+and `tests/contract-render.test.ts` guards it, but only against a database it
+can reach.
+
+## 20. Open items
+
+Ordered by how much they matter. Dates are when each was last confirmed.
+
+1. **`COMPANY_ADDRESS` is the generic "თბილისი, საქართველო"** rather than the
+   registered street address. It prints in every contract. Not blocking, but
+   it should be the real address before volume. Lives in
+   `deploy/env/app.public.env`.
+2. **`SMSOFFICE_SENDER` was still `RoutePlan` in the Render environment on
+   2026-09-08** and must be `Route Plan` there until Render is off. The
+   on-premise value is already correct.
+3. **One driver is waiting.** Sandro Avsajanishvili, status `SUBMITTED`. The
+   flow is: approve the application and the vehicle in `/admin/drivers/<id>`,
+   then he can enter his personal number and address and sign the agreement,
+   then he can be published.
+4. **DMARC is still `p=none`** (section 17). Tighten after a few weeks of clean
+   reports from real sends, which only start once mail works.
+5. **Schools have a contract and an admin section but no self-service portal.**
+   Deliberate. Schools are managed by operations; they sign on paper and
+   operations raises the order sheets. Do not assume a portal was forgotten.
+6. **Deferred by design:** return-leg/last-minute transfer board (needs fleet
+   density to be useful), and automatic commission collection (needs a payment
+   provider decision; the current provider is a sandbox stub).
+7. **Ubuntu 22.04 leaves standard support in April 2027** (section 14.3).
 
 ---
 
