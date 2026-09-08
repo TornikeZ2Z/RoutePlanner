@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui";
+import { Card, Field, Select } from "@/components/ui";
 import { getTranslator, isLocale, type Locale, type MessageKey } from "@/lib/i18n";
 import { VEHICLE_CATEGORIES } from "@/lib/vehicle-categories";
 
@@ -137,20 +137,14 @@ export function OfferFiltersPanel({
           a desktop and a drawer on a phone, and five radios in either would
           push the tiers below the fold of the drawer they live in.
         */}
-        <div>
-          <label htmlFor="vehicle" className="mb-1.5 block text-sm font-medium text-ink-800">
-            {t("search.vehicle")}
-          </label>
-          <select
-            id="vehicle" name="vehicle" defaultValue={category?.id ?? ""}
-            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm select-chevron cursor-pointer"
-          >
+        <Field label={t("search.vehicle")} htmlFor="vehicle">
+          <Select id="vehicle" name="vehicle" defaultValue={category?.id ?? ""}>
             <option value="">{t("search.vehAny")}</option>
             {VEHICLE_CATEGORIES.map((c) => (
               <option key={c.id} value={c.id}>{t(c.label)}</option>
             ))}
-          </select>
-        </div>
+          </Select>
+        </Field>
 
         <fieldset>
           <legend className="mb-1.5 text-sm font-medium text-ink-800">{t("filters.vehicleClass")}</legend>
@@ -176,14 +170,8 @@ export function OfferFiltersPanel({
           </div>
         </fieldset>
 
-        <div>
-          <label htmlFor="language" className="mb-1.5 block text-sm font-medium text-ink-800">
-            {t("filters.driverSpeaks")}
-          </label>
-          <select
-            id="language" name="language" defaultValue={state.language}
-            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm select-chevron cursor-pointer"
-          >
+        <Field label={t("filters.driverSpeaks")} htmlFor="language">
+          <Select id="language" name="language" defaultValue={state.language}>
             <option value="">{t("filters.anyLanguage")}</option>
             {/* Always these three, whatever the current fleet happens to
                 speak. A list that changes with whoever is free today makes the
@@ -196,8 +184,8 @@ export function OfferFiltersPanel({
                 </option>
               );
             })}
-          </select>
-        </div>
+          </Select>
+        </Field>
 
         <fieldset>
           <legend className="mb-1.5 text-sm font-medium text-ink-800">{t("filters.features")}</legend>

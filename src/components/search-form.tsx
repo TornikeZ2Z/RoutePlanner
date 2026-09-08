@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Field, Input } from "@/components/ui";
+import { Button, Field, Input, Select } from "@/components/ui";
 import { getTranslator, isLocale, type Locale } from "@/lib/i18n";
 import { VEHICLE_CATEGORIES } from "@/lib/vehicle-categories";
 import { toLocalInput } from "@/lib/format";
@@ -291,13 +291,10 @@ export function SearchForm({
           </Field>
         </div>
         <Field label={t("search.vehicle")} htmlFor="vehicle-compact">
-          <select
-            id="vehicle-compact" name="vehicle" value={vehicle}
-            onChange={(e) => setVehicle(e.target.value)}
-            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm select-chevron cursor-pointer"
-          >
+          <Select id="vehicle-compact" name="vehicle" value={vehicle}
+                  onChange={(e) => setVehicle(e.target.value)}>
             {vehicleOptions}
-          </select>
+          </Select>
         </Field>
 
         <Button type="submit" className="w-full">{t("search.submit")}</Button>

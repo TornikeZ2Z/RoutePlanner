@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Alert, Card, Field, Input } from "@/components/ui";
+import { Alert, Card, Field, Input, Select } from "@/components/ui";
 import { SubmitButton } from "@/components/form-state";
 import {
   createSchoolAction, recordSchoolSignatureAction, createSchoolOrderAction,
@@ -87,25 +87,23 @@ export function RecordSignatureForm({ schoolId }: { schoolId: string }) {
             <Input id="signedAt" name="signedAt" type="date" required />
           </Field>
           <Field label="Language of the copy signed" htmlFor="locale">
-            <select
+            <Select
               id="locale" name="locale" defaultValue="ka"
-              className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm select-chevron cursor-pointer"
             >
               <option value="ka">Georgian (governing)</option>
               <option value="en">English</option>
-            </select>
+            </Select>
           </Field>
         </div>
 
         <Field label="How it was signed" htmlFor="method" required>
-          <select
+          <Select
             id="method" name="method" defaultValue="IN_PERSON" required
-            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm select-chevron cursor-pointer"
           >
             <option value="IN_PERSON">In person, on paper</option>
             <option value="SCANNED">Scanned copy returned</option>
             <option value="ELECTRONIC">Electronically</option>
-          </select>
+          </Select>
         </Field>
 
         <Field
@@ -173,14 +171,13 @@ export function NewOrderForm({ schoolId }: { schoolId: string }) {
 
         <div className="grid gap-3 sm:grid-cols-3">
           <Field label="Package" htmlFor="package" required>
-            <select
+            <Select
               id="package" name="package" value={pkg} onChange={(e) => setPkg(e.target.value)}
-              className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm select-chevron cursor-pointer"
             >
               <option value="STANDARD">STANDARD — vehicle, driver, route</option>
               <option value="PLUS">PLUS — plus Safety Coordinator</option>
               <option value="PREMIUM">PREMIUM — plus organisational support</option>
-            </select>
+            </Select>
           </Field>
           <Field label="Total price" htmlFor="totalPrice" hint="In GEL, e.g. 1250.00">
             <Input id="totalPrice" name="totalPrice" inputMode="decimal" defaultValue="0" />
