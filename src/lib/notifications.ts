@@ -87,6 +87,14 @@ export interface Transport {
     to: string; subject: string; body: string; channel: string;
     /** Correlates a delivery receipt back to the queued row. SMS only. */
     reference?: string;
+    /**
+     * Overrides the configured sender for this one message. SMS only, and set
+     * only by the console: it is how a newly registered brand name can be
+     * proved to work before the deployment's environment is changed to it.
+     * Not a way to send as somebody else — smsoffice refuses any name that is
+     * not registered on the same account.
+     */
+    sender?: string;
   }): Promise<{ ref: string }>;
 }
 
@@ -212,17 +220,23 @@ export function normalizeGeorgianMobile(raw: string): string {
 /**
  * Sender names are far more constrained than a brand name is.
  *
- * smsoffice allows only letters, digits, hyphen and full stop, up to eleven
- * characters — no spaces. A brand with a space in it therefore cannot be
- * registered as typed, so anything disallowed is stripped rather than sent to
- * be rejected with error 110 or 150. The result must still match the sender
- * actually registered on the account, which is why the substitution is
- * announced in the log the first time it happens.
+ * smsoffice allows up to eleven characters. This used to strip spaces too, on
+ * the published rule that they are not permitted — and that cost a working
+ * integration: the name registered on the account is "Route Plan", the code
+ * transmitted "RoutePlan", and every send came back as error 150, "sender name
+ * is not registered". The gateway is the authority on what it accepts, and it
+ * accepted a space when the name was registered.
+ *
+ * So a space is now passed through, and the sanitiser keeps only the job it
+ * can still justify: removing characters that would make the request itself
+ * malformed, and enforcing the length cap. Whatever survives must match the
+ * registered name exactly, which is why any substitution is announced in the
+ * log and shown in /admin/notifications.
  */
 let senderWarned = false;
 
 export function normalizeSender(raw: string): string {
-  const cleaned = raw.replace(/[^A-Za-z0-9.-]/g, "").slice(0, 11);
+  const cleaned = raw.replace(/[^A-Za-z0-9 .-]/g, "").trim().slice(0, 11);
   if (!senderWarned && cleaned !== raw) {
     senderWarned = true;
     console.warn(
@@ -265,7 +279,7 @@ const smsOfficeTransport: Transport = {
     const params = new URLSearchParams({
       key: config.sms.apiKey,
       destination: normalizeGeorgianMobile(message.to),
-      sender: normalizeSender(config.sms.sender),
+      sender: normalizeSender(message.sender || config.sms.sender),
       // SMS has no subject line; the body is the whole message.
       content: message.body,
       // Delivery receipts are only correlated when a reference was sent, and
@@ -359,7 +373,10 @@ export async function dispatchPending(
 
   const ids = only && only.length > 0 ? [...only] : null;
 
-  const claimed = await rootSql<{ id: string; channel: string; to_address: string; subject: string; body: string }[]>`
+  const claimed = await rootSql<{
+    id: string; channel: string; to_address: string; subject: string; body: string;
+    sender: string | null;
+  }[]>`
     UPDATE notifications SET state = 'SENDING', attempts = attempts + 1
     WHERE id IN (
       SELECT id FROM notifications
@@ -368,12 +385,15 @@ export async function dispatchPending(
       ORDER BY created_at
       LIMIT ${limit}
       FOR UPDATE SKIP LOCKED)
-    RETURNING id, channel::text, to_address, subject, body`;
+    RETURNING id, channel::text, to_address, subject, body,
+              payload->>'sender' AS sender`;
 
   for (const row of claimed) {
     try {
       await transport.send({
         to: row.to_address, subject: row.subject ?? "", body: row.body, channel: row.channel,
+        // Null for everything the app raises itself; set only by the console.
+        ...(row.sender ? { sender: row.sender } : {}),
         // Hyphens stripped so a UUID still fits the gateway's 20-char cap with
         // enough of it left to identify the row uniquely.
         reference: row.id.replace(/-/g, "").slice(0, 20),

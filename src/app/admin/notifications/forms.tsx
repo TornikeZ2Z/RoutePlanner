@@ -15,7 +15,7 @@ const INITIAL = { ok: false } as const;
  * gateway is configured and the sender name approved; anything that sends to
  * more than one person at a time is a different tool with different rules.
  */
-export function SendSmsForm({ defaultPhone }: { defaultPhone?: string }) {
+export function SendSmsForm({ defaultPhone, defaultSender }: { defaultPhone?: string; defaultSender?: string }) {
   const [state, action] = useActionState(sendOpsSmsAction, INITIAL);
 
   return (
@@ -40,6 +40,20 @@ export function SendSmsForm({ defaultPhone }: { defaultPhone?: string }) {
           <Textarea id="ops-sms-body" name="body" rows={3} required maxLength={480} />
         </Field>
       </div>
+      <Field
+        label="Sender"
+        htmlFor="ops-sms-sender"
+        hint="Leave as it is to use SMSOFFICE_SENDER. Type another registered brand name to try it — the gateway refuses any name that is not on this account."
+      >
+        <Input
+          id="ops-sms-sender"
+          name="sender"
+          maxLength={11}
+          defaultValue={defaultSender}
+          className="max-w-[18rem]"
+          autoComplete="off"
+        />
+      </Field>
       <div className="flex items-center gap-3">
         <SubmitButton>Send</SubmitButton>
         {state.message && (

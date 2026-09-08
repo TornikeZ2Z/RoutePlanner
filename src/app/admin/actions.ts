@@ -1690,6 +1690,18 @@ export async function saveAgreementTermsAction(
 const OpsSmsSchema = z.object({
   phone: z.string().trim().min(9).max(20),
   body: z.string().trim().min(1).max(480),
+  /*
+     Optional, and the reason this form is worth more than a curl command.
+
+     The registered brand name is the one thing about this gateway that cannot
+     be checked from anywhere but a send: smsoffice answers 150 for any name
+     not on the account, and says nothing about which name would work. Leaving
+     it blank uses SMSOFFICE_SENDER; typing one tries that instead, so a newly
+     approved brand can be proved before the deployment's environment is
+     changed to it. It is not a way to send as somebody else — the gateway only
+     accepts names registered to the same account.
+  */
+  sender: z.string().trim().max(11).optional(),
 });
 
 export async function sendOpsSmsAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -1698,6 +1710,7 @@ export async function sendOpsSmsAction(_prev: ActionState, formData: FormData): 
   const parsed = OpsSmsSchema.safeParse({
     phone: formData.get("phone"),
     body: formData.get("body"),
+    sender: String(formData.get("sender") ?? "").trim() || undefined,
   });
   if (!parsed.success) {
     return { ok: false, message: "A phone number and a message are both required (message up to 480 characters)." };
@@ -1728,6 +1741,7 @@ export async function sendOpsSmsAction(_prev: ActionState, formData: FormData): 
     subject: "",
     body: parsed.data.body,
     dedupe: `${actor.id}:${to}:${Date.now()}`,
+    ...(parsed.data.sender ? { payload: { sender: parsed.data.sender } } : {}),
   });
   if (!id) return { ok: false, message: "Could not queue the message." };
 
@@ -1742,7 +1756,10 @@ export async function sendOpsSmsAction(_prev: ActionState, formData: FormData): 
     action: "notification.manual_sms",
     objectType: "notification",
     objectId: id,
-    after: { to, chars: parsed.data.body.length, state: row?.state ?? "UNKNOWN" },
+    after: {
+      to, chars: parsed.data.body.length, state: row?.state ?? "UNKNOWN",
+      sender: parsed.data.sender ?? config.sms.sender,
+    },
     reason: "one-off SMS sent from the console",
   });
 

@@ -33,11 +33,12 @@ const STATE_TONE: Record<string, "success" | "warning" | "danger" | "neutral"> =
  * answerable by reading Render's environment tab:
  *
  *   1. Is the SMS gateway configured, and under exactly which sender name?
- *      The name matters more than it looks — smsoffice.ge allows eleven
- *      characters of letters, digits, hyphen and full stop and no spaces, so a
- *      brand written with a space is silently rewritten before it is sent, and
- *      the rewritten form is the one that has to be registered with them.
- *      The value we will actually transmit is printed here.
+ *      The name matters more than it looks — smsoffice.ge caps it at eleven
+ *      characters and refuses, with error 150, any name not registered on the
+ *      account. It refuses silently in the sense that matters: the reply names
+ *      no alternative. So the value we will actually transmit is printed here,
+ *      next to the value that was configured, because a difference between
+ *      those two is the whole bug.
  *
  *   2. Did the last thing we sent arrive? The outbox already recorded that;
  *      nothing in the console showed it outside a single booking.
@@ -91,17 +92,17 @@ export default async function NotificationsConsole() {
         </dl>
 
         {/*
-          The one failure this page is here to catch. A sender configured as
-          "Route Plan" leaves as "RoutePlan", and smsoffice answers code 150 —
-          "sender name is not registered" — unless that is the string on their
-          side too. Saying so here is cheaper than reading it off a rejection.
+          The one failure this page is here to catch, and it has already
+          happened once: the account is registered as "Route Plan", the code
+          transmitted "RoutePlan", and smsoffice answered 150 every time.
+          Saying so here is cheaper than reading it off a rejection.
         */}
         {senderRaw !== senderSent && (
           <Alert tone="warning" title="The sender name is rewritten before sending">
-            {`Configured as "${senderRaw}", transmitted as "${senderSent}". smsoffice.ge allows only
-            letters, digits, hyphen and full stop, up to eleven characters. Whatever is registered
-            with them must match the transmitted form exactly, or every send is refused with
-            code 150.`}
+            {`Configured as "${senderRaw}", transmitted as "${senderSent}". Eleven characters is the
+            cap, and characters that would corrupt the request are removed. Whatever survives has to
+            match the name registered with smsoffice exactly, or every send is refused with code
+            150 — which is what happened when the space in "Route Plan" was being stripped.`}
           </Alert>
         )}
         {!smsReady && (
@@ -118,7 +119,7 @@ export default async function NotificationsConsole() {
           Goes through the outbox like everything else, so it appears in the table below with
           whatever the gateway answered.
         </p>
-        <SendSmsForm />
+        <SendSmsForm defaultSender={senderRaw} />
       </Card>
 
       <Card className="p-5">
