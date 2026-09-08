@@ -306,7 +306,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
                             <p className="mt-0.5 text-xs text-ink-500">{t("search.priceForVehicle")}</p>
                             <Link
                               href={`/${locale}/drivers/${offer.handle}?quote=${offer.quoteId}${addressThread}`}
-                              className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700"
+                              className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700"
                             >
                               {t("search.viewBook")} →
                             </Link>

@@ -19,7 +19,7 @@ export function CancelBooking({ code, token, locale }: { code: string; token: st
     return (
       <button
         onClick={() => setConfirming(true)}
-        className="w-full rounded-lg border border-ink-300 px-4 py-2 text-sm text-ink-700 hover:bg-ink-50"
+        className="w-full rounded-full border border-ink-300 px-4 py-2 text-sm text-ink-700 hover:bg-ink-50"
       >
         {t("booking.cancelBtn")}
       </button>
@@ -37,7 +37,7 @@ export function CancelBooking({ code, token, locale }: { code: string; token: st
       <div className="flex gap-2">
         <SubmitButton variant="danger">{t("booking.confirmCancel")}</SubmitButton>
         <button type="button" onClick={() => setConfirming(false)}
-                className="rounded-lg border border-ink-200 px-3 py-2 text-sm">{t("booking.keep")}</button>
+                className="rounded-full border border-ink-200 px-3 py-2 text-sm">{t("booking.keep")}</button>
       </div>
     </form>
   );

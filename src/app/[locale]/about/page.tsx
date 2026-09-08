@@ -107,7 +107,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
           <p className="max-w-xl text-sm leading-relaxed text-ink-700">{t("home.driveBody")}</p>
           <Link
             href="/driver"
-            className="inline-flex min-h-11 items-center rounded-lg bg-brand-600 px-5 py-2.5 text-sm text-white shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-brand-700"
+            className="inline-flex min-h-11 items-center rounded-full bg-brand-600 px-5 py-2.5 text-sm text-white shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-brand-700"
           >
             {t("nav.becomeDriver")}
           </Link>

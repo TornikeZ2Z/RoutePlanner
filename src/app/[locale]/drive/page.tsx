@@ -105,7 +105,7 @@ export default async function DrivePage({
           <p className="mt-6 text-sm text-ink-500">{t("drive.sentSpam")}</p>
           <Link
             href={`/${locale}`}
-            className="mt-8 inline-flex min-h-11 items-center rounded-xl border border-ink-300 px-5 text-sm font-semibold text-ink-900 hover:border-ink-500"
+            className="mt-8 inline-flex min-h-11 items-center rounded-full border border-ink-300 px-5 text-sm font-semibold text-ink-900 hover:border-ink-500"
           >
             {t("common.home")}
           </Link>

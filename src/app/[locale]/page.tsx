@@ -638,7 +638,7 @@ function PlanChip({ href, label, icon }: { href: string; label: string; icon?: s
     <li className="flex">
       <Link
         href={href}
-        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-ink-200 bg-white px-3.5 py-2 text-center text-sm font-medium text-ink-600 transition-colors hover:border-brand-600 hover:text-ink-900"
+        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-ink-200 bg-white px-3.5 py-2 text-center text-sm font-medium text-ink-600 transition-colors hover:border-brand-600 hover:text-ink-900"
       >
         {icon && (
           <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-brand-600" fill="none" stroke="currentColor"

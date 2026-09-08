@@ -91,7 +91,7 @@ export default async function LocaleLayout({
             {user ? (
               <Link
                 href={user.isStaff ? "/admin" : "/driver"}
-                className="rounded-xl border border-ink-300 px-3 py-2 text-sm text-ink-900 hover:border-ink-500 dark:border-white/25 dark:text-white dark:hover:border-white/60"
+                className="rounded-full border border-ink-300 px-3 py-2 text-sm text-ink-900 hover:border-ink-500 dark:border-white/25 dark:text-white dark:hover:border-white/60"
               >
                 {user.isStaff ? "Operations" : "My driving"}
               </Link>

@@ -131,7 +131,7 @@ export default async function DestinationPage({ params }: Props) {
           <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">{t("dest.whenT")}</p>
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {dest.seasons.map((s) => (
-              <li key={s} className="rounded-xl border border-ink-200 px-2.5 py-1 text-sm text-ink-700">
+              <li key={s} className="rounded-full border border-ink-200 px-2.5 py-1 text-sm text-ink-700">
                 {t(SEASON_LABEL[s])}
               </li>
             ))}
@@ -142,7 +142,7 @@ export default async function DestinationPage({ params }: Props) {
           <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">{t("dest.themesT")}</p>
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {dest.categories.map((c) => (
-              <li key={c} className="flex items-center gap-1.5 rounded-xl border border-ink-200 px-2.5 py-1 text-sm text-ink-700">
+              <li key={c} className="flex items-center gap-1.5 rounded-full border border-ink-200 px-2.5 py-1 text-sm text-ink-700">
                 <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-brand-600" fill="none" stroke="currentColor"
                      strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d={CATEGORY_ICONS[c]} />
@@ -177,13 +177,13 @@ export default async function DestinationPage({ params }: Props) {
           <div className="mt-5 flex flex-wrap gap-3">
             <Link
               href={`/${locale}/search?from=tbilisi&to=${slug}&passengers=2&luggage=2`}
-              className="inline-flex min-h-11 items-center rounded-xl bg-brand-600 px-5 py-2.5 font-bold tracking-[-0.02em] text-white shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-brand-700"
+              className="inline-flex min-h-11 items-center rounded-full bg-brand-600 px-5 py-2.5 font-bold tracking-[-0.02em] text-white shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-brand-700"
             >
               {t("dest.bookCta")}
             </Link>
             <Link
               href={`/${locale}/plan`}
-              className="inline-flex min-h-11 items-center rounded-xl border border-ink-300 px-5 py-2.5 font-semibold text-ink-900 transition-colors hover:border-ink-500"
+              className="inline-flex min-h-11 items-center rounded-full border border-ink-300 px-5 py-2.5 font-semibold text-ink-900 transition-colors hover:border-ink-500"
             >
               {t("dest.planCta")}
             </Link>
