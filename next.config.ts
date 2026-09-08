@@ -20,6 +20,15 @@ const CANONICAL_HOST = "routeplanner.ge";
 const FORMER_HOSTS = ["routegeorgia.ge", "www.routegeorgia.ge"];
 
 const config: NextConfig = {
+  /**
+   * Self-contained server for the container image.
+   *
+   * Opt-in rather than unconditional: `next start` (what Render runs) does not
+   * serve a standalone build, so switching this on for every build would break
+   * the platform deploy the moment it shipped. The Dockerfile sets
+   * NEXT_OUTPUT=standalone; nothing else does. See docs/ON-PREM-HOSTING.md.
+   */
+  output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
   reactStrictMode: true,
   poweredByHeader: false,
   // Kept out of the bundle: native or large server-only libraries that must

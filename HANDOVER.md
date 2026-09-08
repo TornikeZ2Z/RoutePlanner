@@ -7,6 +7,13 @@ current contract system and set up mail.
 Read the whole of "Things that will bite you" before touching anything. Most
 of it was learned expensively.
 
+> **Superseded in part (2026-09-09).** The on-premise target is now fixed:
+> Ubuntu 22.04, Docker Compose, Cloudflare Tunnel, self-hosted Vault.
+> `docs/ON-PREM-HOSTING.md` is the executable runbook for that and replaces
+> §4 (prerequisites), §5–§6 (repository and migration runbook) and §10 (the
+> environment table) of this file. Everything else here still applies and is
+> referenced from there rather than repeated.
+
 ---
 
 ## 1. What this is
@@ -138,7 +145,7 @@ will refuse. Do not use `--clean`; you are restoring into an empty database.
 **3. Verify the copy** before trusting it:
 
 ```sql
-SELECT count(*) FROM schema_migrations;   -- expect 16
+SELECT count(*) FROM schema_migrations;   -- expect `ls db/migrations | wc -l` (25 as of 2026-09-09)
 SELECT count(*) FROM users;               -- expect 4
 SELECT count(*) FROM contract_versions;   -- expect 6
 SELECT version, locale, published FROM contract_versions ORDER BY version;

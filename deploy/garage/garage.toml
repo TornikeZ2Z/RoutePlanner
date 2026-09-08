@@ -1,0 +1,37 @@
+# Garage, single node. Replaces Cloudflare R2 on-premise.
+#
+# The application talks S3 to http://garage:3900 with path-style addressing,
+# which is what src/lib/storage/index.ts already does whenever S3_ENDPOINT is
+# set. Region is the literal string "garage". Nothing is served from the
+# bucket directly: the app streams every object through its own audited
+# routes, so the bucket stays private and the CSP stays img-src 'self'.
+#
+# replication_factor = 1 is the single-host reality. Durability comes from
+# the nightly restic backup of meta/ and data/ (deploy/scripts/backup.sh),
+# not from Garage.
+
+metadata_dir = "/var/lib/garage/meta"
+data_dir     = "/var/lib/garage/data"
+db_engine    = "lmdb"
+
+replication_factor = 1
+compression_level  = 2
+
+# Consistent metadata snapshots land in meta/snapshots; the backup picks
+# those up rather than the live database.
+metadata_auto_snapshot_interval = "6h"
+
+rpc_bind_addr   = "127.0.0.1:3901"
+rpc_public_addr = "127.0.0.1:3901"
+rpc_secret_file = "/secrets/garage/rpc_secret"
+
+[s3_api]
+s3_region     = "garage"
+api_bind_addr = "0.0.0.0:3900"
+root_domain   = ".s3.garage.internal"
+
+[admin]
+# /health is unauthenticated and is what Uptime Kuma probes. Everything else
+# on this port needs the admin token, which only the operator's CLI uses.
+api_bind_addr    = "0.0.0.0:3903"
+admin_token_file = "/secrets/garage/admin_token"

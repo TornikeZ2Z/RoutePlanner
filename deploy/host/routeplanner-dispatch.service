@@ -1,0 +1,13 @@
+[Unit]
+Description=Route Planner notification outbox drainer
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/routeplanner/repo/deploy
+# The app dispatches opportunistically after each booking action; this is
+# the scheduled worker src/lib/notifications.ts assumes exists, so a FAILED
+# email or SMS retries within minutes instead of whenever someone next acts.
+ExecStart=/usr/bin/docker compose --profile ops run --rm --no-deps tools npx tsx deploy/scripts/dispatch-notifications.ts 50
+TimeoutStartSec=240

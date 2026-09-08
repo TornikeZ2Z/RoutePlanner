@@ -1,0 +1,12 @@
+[Unit]
+Description=Route Planner nightly backup to R2 (restic)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/srv/routeplanner/repo/deploy/scripts/backup.sh
+Nice=10
+IOSchedulingClass=idle
+# Failures are visible in `systemctl status` and in Uptime Kuma's push
+# monitor (docs section 12); nothing here retries, the next night does.

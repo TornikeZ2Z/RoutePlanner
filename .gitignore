@@ -23,3 +23,10 @@ wetransfer_*.zip
 # into a commit before this rule existed.
 /.[a-z].mjs
 /scratch_*
+
+# On-premise deploy state written by deploy/scripts/deploy.sh (current image tag).
+/deploy/.env
+/deploy/.env.previous
+
+# Per-machine Claude Code permissions (the server copies deploy/claude/settings.json here).
+/.claude/settings.local.json

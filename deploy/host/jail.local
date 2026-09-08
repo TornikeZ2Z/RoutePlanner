@@ -1,0 +1,12 @@
+# fail2ban for sshd on Ubuntu 22.04. sshd logs to journald there, so the
+# backend must be systemd or the jail silently watches nothing.
+[DEFAULT]
+bantime  = 1h
+findtime = 10m
+maxretry = 5
+banaction = ufw
+
+[sshd]
+enabled = true
+backend = systemd
+mode    = aggressive

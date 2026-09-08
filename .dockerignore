@@ -1,0 +1,22 @@
+# Only what the image needs. Everything secret or local stays out.
+.git
+.next
+.pgdata
+.storage
+.request-images
+node_modules
+.env
+.env.*
+!.env.example
+!.env.production.example
+Photoes
+*.zip
+*.tsbuildinfo
+coverage
+tests
+docs
+.claude
+.stage.mjs
+scratch_*
+deploy/.env
+deploy/.env.previous

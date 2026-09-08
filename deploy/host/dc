@@ -1,0 +1,7 @@
+#!/bin/sh
+# `dc` = docker compose for the Route Planner stack, from any directory.
+# Install: install -m 0755 deploy/host/dc /usr/local/bin/dc
+exec sudo docker compose \
+  --project-directory /srv/routeplanner/repo/deploy \
+  -f /srv/routeplanner/repo/deploy/docker-compose.yml \
+  "$@"

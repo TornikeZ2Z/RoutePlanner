@@ -16,7 +16,11 @@ export const dynamic = "force-dynamic";
  * healthy response is exactly what a failed deploy looks like from outside.
  * That cost us a run of deploys that looked fine and were not.
  */
-const BUILD = (process.env.RENDER_GIT_COMMIT ?? "").slice(0, 7) || "local";
+// BUILD_COMMIT is the host-neutral name, set at image build time by
+// deploy/scripts/deploy.sh on the on-premise host. RENDER_GIT_COMMIT stays so
+// the Render deploy keeps reporting until it is switched off.
+const BUILD =
+  (process.env.BUILD_COMMIT ?? process.env.RENDER_GIT_COMMIT ?? "").slice(0, 7) || "local";
 
 /**
  * Health check for the host.

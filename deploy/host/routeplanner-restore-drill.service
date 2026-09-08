@@ -1,0 +1,9 @@
+[Unit]
+Description=Route Planner monthly restore drill
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/srv/routeplanner/repo/deploy/scripts/restore-drill.sh
+Nice=10

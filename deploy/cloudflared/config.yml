@@ -1,0 +1,56 @@
+# Cloudflare Tunnel, locally managed. The tunnel makes an OUTBOUND connection
+# to Cloudflare (7844 TCP+UDP); nothing on this host listens to the internet.
+#
+# Replace TUNNEL_UUID with the id printed by `cloudflared tunnel create`.
+# The credentials file it wrote lives at
+#   /srv/routeplanner/secrets/cloudflared/<uuid>.json   (0400, uid 65532)
+# and is mounted read-only at /etc/cloudflared/creds/.
+#
+# Hostname rules only take effect once the matching DNS record is a CNAME to
+# <uuid>.cfargotunnel.com (`cloudflared tunnel route dns`). The production
+# names are listed below from day one so the cutover is a DNS change and
+# nothing else; until then they are inert.
+#
+# httpHostHeader is set on every HTTP rule on purpose. The app decides the
+# www -> apex and routegeorgia -> routeplanner redirects from the Host header,
+# and src/lib/security.ts compares Origin against x-forwarded-host / host on
+# every write. Without this, the app would see "app:3000".
+
+tunnel: TUNNEL_UUID
+credentials-file: /etc/cloudflared/creds/TUNNEL_UUID.json
+protocol: quic
+
+ingress:
+  # ---- staging: same container, private behind Cloudflare Access ----------
+  - hostname: staging.routeplanner.ge
+    service: http://app:3000
+    originRequest:
+      httpHostHeader: staging.routeplanner.ge
+      connectTimeout: 10s
+
+  # ---- operator SSH, browser-rendered through Cloudflare Access -----------
+  # Works while Vault is sealed: this is the reboot-recovery path.
+  - hostname: ssh.routeplanner.ge
+    service: ssh://host.docker.internal:22
+
+  # ---- production -----------------------------------------------------------
+  - hostname: routeplanner.ge
+    service: http://app:3000
+    originRequest:
+      httpHostHeader: routeplanner.ge
+      connectTimeout: 10s
+  - hostname: www.routeplanner.ge
+    service: http://app:3000
+    originRequest:
+      httpHostHeader: www.routeplanner.ge
+  - hostname: routegeorgia.ge
+    service: http://app:3000
+    originRequest:
+      httpHostHeader: routegeorgia.ge
+  - hostname: www.routegeorgia.ge
+    service: http://app:3000
+    originRequest:
+      httpHostHeader: www.routegeorgia.ge
+
+  # Anything else that reaches the tunnel gets nothing.
+  - service: http_status:404

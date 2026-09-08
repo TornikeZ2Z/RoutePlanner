@@ -1,0 +1,308 @@
+# Route Planner on one on-premise host.
+#
+# Read docs/ON-PREM-HOSTING.md before running anything here. In particular:
+#   - nothing publishes a port to the network. The only `ports:` entries bind
+#     to 127.0.0.1 and exist for the operator's SSH port-forward (Vault UI,
+#     Uptime Kuma) and for the image build (Postgres).
+#   - every secret arrives as a file under /run/routeplanner/secrets, written
+#     by vault-agent into a host tmpfs and readable only by group 1200. No
+#     container has a secret in its environment or its image.
+#   - the app runs as ONE instance. Rate limits live in process memory.
+#
+# Operational commands:
+#   docker compose up -d                          the whole stack
+#   docker compose --profile ops run --rm tools   migrations (default command)
+#   docker compose --profile ops run --rm vault-snapshot
+#   deploy/scripts/deploy.sh <git-ref>            build, migrate, roll out
+
+name: routeplanner
+
+x-hardened: &hardened
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "5" }
+
+networks:
+  # cloudflared <-> app. Nothing else.
+  edge:
+  # app <-> postgres, garage. Also tools and kuma.
+  backend:
+  # vault <-> vault-agent. Fixed subnet so the AppRole can be CIDR-bound.
+  vault:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+
+services:
+  # ------------------------------------------------------------------ Vault
+  vault:
+    <<: *hardened
+    image: hashicorp/vault:2.1.0
+    # Dedicated uid, not the image's vault user (100:1000 would collide with
+    # host accounts). 2.0.2+ dropped cap_ipc_lock, so no
+    # capability is needed and disable_mlock=true is set in vault.hcl.
+    user: "1100:1100"
+    command: ["server", "-config=/vault/config/vault.hcl"]
+    environment:
+      VAULT_ADDR: https://127.0.0.1:8200
+      VAULT_CACERT: /vault/tls/ca.crt
+      SKIP_SETCAP: "true"
+      SKIP_CHOWN: "true"
+    volumes:
+      - ./vault/vault.hcl:/vault/config/vault.hcl:ro
+      - /srv/routeplanner/secrets/tls:/vault/tls:ro
+      - /srv/routeplanner/data/vault:/vault/data
+      - /srv/routeplanner/data/vault-audit:/vault/logs
+    read_only: true
+    tmpfs: ["/tmp"]
+    ports:
+      - "127.0.0.1:8200:8200"
+    networks:
+      vault:
+        ipv4_address: 172.28.0.10
+    # `vault status` exits 0 unsealed, 2 sealed, 1 error. Healthy therefore
+    # means "unsealed and answering", which is what every dependent needs.
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    mem_limit: 512m
+    pids_limit: 256
+
+  vault-agent:
+    <<: *hardened
+    image: hashicorp/vault:2.1.0
+    # Dedicated uid/gid. Rendered files are owned by this user and readable
+    # by this group; consumers join the group and nothing more.
+    user: "1200:1200"
+    command: ["agent", "-config=/vault/config/agent.hcl"]
+    environment:
+      SKIP_SETCAP: "true"
+      SKIP_CHOWN: "true"
+    volumes:
+      - ./vault/agent.hcl:/vault/config/agent.hcl:ro
+      - /srv/routeplanner/secrets/tls/ca.crt:/vault/tls/ca.crt:ro
+      - /srv/routeplanner/secrets/approle:/vault/approle:ro
+      - /run/routeplanner/secrets:/secrets
+    read_only: true
+    tmpfs: ["/tmp"]
+    networks:
+      vault:
+    depends_on:
+      vault:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: ["CMD-SHELL", "test -s /secrets/app/app.env && test -s /secrets/postgres/superuser_password && test -s /secrets/garage/rpc_secret"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 15s
+    mem_limit: 128m
+    pids_limit: 64
+
+  # --------------------------------------------------------------- Postgres
+  postgres:
+    <<: *hardened
+    image: postgres:18.6
+    # Run as the image's postgres user from the start (no root entrypoint),
+    # plus the secrets group. The data directory on the host is owned 999:999.
+    user: "999:999"
+    group_add: ["1200"]
+    environment:
+      POSTGRES_DB: routeplanner
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /secrets/postgres/superuser_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+    volumes:
+      # postgres:18 moved the volume to /var/lib/postgresql (PGDATA is
+      # /var/lib/postgresql/18/docker beneath it). Mounting at the old
+      # /var/lib/postgresql/data would leave the cluster outside the volume.
+      - /srv/routeplanner/data/postgres:/var/lib/postgresql
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+      - /run/routeplanner/secrets/postgres:/secrets/postgres:ro
+    tmpfs: ["/tmp", "/var/run/postgresql"]
+    shm_size: 256m
+    # Loopback only. Needed by the image build (prerender) and by the
+    # operator's psql. Docker's own daemon.json also pins published ports to
+    # 127.0.0.1, so this is belt and braces.
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      backend:
+    depends_on:
+      vault-agent:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d routeplanner"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    mem_limit: 1g
+    pids_limit: 256
+
+  # ------------------------------------------------------------------ Garage
+  garage:
+    <<: *hardened
+    image: dxflrs/garage:v2.4.1
+    user: "1300:1300"
+    group_add: ["1200"]
+    # --single-node creates the layout automatically (Garage >= 2.3). If this
+    # image ever refuses the flag, drop it and run the manual layout commands
+    # in docs/ON-PREM-HOSTING.md section 7.
+    command: ["server", "--single-node"]
+    environment:
+      GARAGE_CONFIG_FILE: /etc/garage.toml
+    volumes:
+      - ./garage/garage.toml:/etc/garage.toml:ro
+      - /srv/routeplanner/data/garage/meta:/var/lib/garage/meta
+      - /srv/routeplanner/data/garage/data:/var/lib/garage/data
+      - /run/routeplanner/secrets/garage:/secrets/garage:ro
+    read_only: true
+    tmpfs: ["/tmp"]
+    networks:
+      backend:
+    depends_on:
+      vault-agent:
+        condition: service_healthy
+        restart: true
+    # Distroless image, no shell: liveness is checked by Uptime Kuma against
+    # http://garage:3903/health instead.
+    mem_limit: 1g
+    pids_limit: 256
+
+  # --------------------------------------------------------------------- App
+  app:
+    <<: *hardened
+    image: routeplanner/app:${BUILD_COMMIT:-local}
+    group_add: ["1200"]
+    env_file:
+      - ./env/app.public.env
+    volumes:
+      - /run/routeplanner/secrets/app:/secrets/app:ro
+    read_only: true
+    # Next writes its image/fetch cache under .next/cache; nothing else.
+    tmpfs: ["/tmp", "/app/.next/cache"]
+    networks:
+      edge:
+      backend:
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+      garage:
+        condition: service_started
+      vault-agent:
+        condition: service_healthy
+        restart: true
+    # HEALTHCHECK is baked into the image (GET /api/health == 200).
+    mem_limit: 1g
+    pids_limit: 512
+
+  # One-off jobs: migrations (default command) and the notification drainer.
+  #   docker compose --profile ops run --rm tools
+  #   docker compose --profile ops run --rm tools npx tsx deploy/scripts/dispatch-notifications.ts
+  tools:
+    <<: *hardened
+    restart: "no"
+    profiles: [ops]
+    image: routeplanner/tools:${BUILD_COMMIT:-local}
+    group_add: ["1200"]
+    env_file:
+      - ./env/app.public.env
+    volumes:
+      - /run/routeplanner/secrets/app:/secrets/app:ro
+    read_only: true
+    tmpfs: ["/tmp"]
+    networks:
+      backend:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 512m
+    pids_limit: 256
+
+  # ------------------------------------------------------------- cloudflared
+  cloudflared:
+    <<: *hardened
+    # Pin by digest after the first pull (see docs section 7); the image has
+    # no shell, so nothing here can be checked from inside it.
+    image: cloudflare/cloudflared:latest
+    # The tunnel credentials live on the host, NOT in Vault, on purpose: after
+    # a reboot Vault is sealed, and this is the path the operator uses to reach
+    # the machine and unseal it.
+    command:
+      - tunnel
+      - --config
+      - /etc/cloudflared/config.yml
+      - --metrics
+      - 0.0.0.0:2000
+      - run
+    volumes:
+      - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      - /srv/routeplanner/secrets/cloudflared:/etc/cloudflared/creds:ro
+    read_only: true
+    tmpfs: ["/tmp"]
+    # For the SSH-over-Access ingress: the host is reachable from inside the
+    # container at this name.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      edge:
+    mem_limit: 256m
+    pids_limit: 128
+
+  # -------------------------------------------------------------- Monitoring
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    volumes:
+      - /srv/routeplanner/data/kuma:/app/data
+    ports:
+      - "127.0.0.1:3001:3001"
+    networks:
+      edge:
+      backend:
+      vault:
+    mem_limit: 512m
+    pids_limit: 256
+
+  # ------------------------------------------------------- Vault Raft backup
+  #   docker compose --profile ops run --rm vault-snapshot
+  vault-snapshot:
+    <<: *hardened
+    restart: "no"
+    profiles: [ops]
+    image: hashicorp/vault:2.1.0
+    user: "1100:1100"
+    group_add: ["1200"]
+    environment:
+      VAULT_ADDR: https://vault:8200
+      VAULT_CACERT: /vault/tls/ca.crt
+      SKIP_SETCAP: "true"
+      SKIP_CHOWN: "true"
+    # The agent's token is read from its sink file inside this process only.
+    entrypoint: ["sh", "-c"]
+    command:
+      - 'export VAULT_TOKEN="$(cat /secrets/backup/vault-token)"; exec vault operator raft snapshot save "/snapshots/vault-$(date +%Y%m%d-%H%M%S).snap"'
+    volumes:
+      - /srv/routeplanner/secrets/tls/ca.crt:/vault/tls/ca.crt:ro
+      - /run/routeplanner/secrets/backup:/secrets/backup:ro
+      - /srv/routeplanner/backups/vault:/snapshots
+    read_only: true
+    tmpfs: ["/tmp"]
+    networks:
+      vault:
+    mem_limit: 256m
+    pids_limit: 64
