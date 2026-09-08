@@ -117,7 +117,7 @@ export default async function DestinationPage({ params }: Props) {
           )}
           <span className="absolute inset-0 bg-gradient-to-t from-pine-900/90 via-pine-900/30 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-            <p className="eyebrow text-gold-300">{t("dest.eyebrow")}</p>
+            <p className="eyebrow !text-white/70">{t("dest.eyebrow")}</p>
             <h1 className="font-display mt-1 text-4xl sm:text-5xl">{name}</h1>
           </div>
         </div>
@@ -143,7 +143,7 @@ export default async function DestinationPage({ params }: Props) {
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {dest.categories.map((c) => (
               <li key={c} className="flex items-center gap-1.5 rounded-xl border border-ink-200 px-2.5 py-1 text-sm text-ink-700">
-                <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-gold-600" fill="none" stroke="currentColor"
+                <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-brand-600" fill="none" stroke="currentColor"
                      strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d={CATEGORY_ICONS[c]} />
                 </svg>

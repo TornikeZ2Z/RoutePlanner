@@ -204,7 +204,7 @@ export default async function Home({
             Ours is a two-part sentence in Georgian, so it keeps its line break
             but loses the gold on the second half and the bold weight on both.
           */}
-          <h1 className="font-display mx-auto max-w-4xl text-center text-[1.7rem] !font-normal leading-[1.15] sm:text-[2.4rem] lg:text-[3rem]">
+          <h1 className="font-display mx-auto max-w-4xl text-center text-[1.7rem] leading-[1.15] sm:text-[2.4rem] lg:text-[3rem]">
             {t("home.heroTitle")}{" "}
             <span className="text-white/80">{t("home.heroTitle2")}</span>
           </h1>
@@ -259,7 +259,7 @@ export default async function Home({
       */}
       <section>
         <div>
-          <h2 className="font-display text-[1.9rem] !font-normal leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.catsTitle")}</h2>
+          <h2 className="font-display text-[1.9rem] leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.catsTitle")}</h2>
           <p className="mt-2 text-ink-500">{t("home.catsSub")}</p>
         </div>
         {/*
@@ -336,7 +336,7 @@ export default async function Home({
         <section>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="font-display text-[1.9rem] !font-normal leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.popularTitle")}</h2>
+              <h2 className="font-display text-[1.9rem] leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.popularTitle")}</h2>
               <p className="mt-2 text-ink-500">{t("home.popularSub")}</p>
             </div>
             <Link href={`/${locale}/transfers`} className="text-sm font-semibold text-ink-900 underline underline-offset-4">
@@ -395,7 +395,7 @@ export default async function Home({
         <div className="grid gap-8 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-center lg:gap-12">
           <div>
             <p className="eyebrow">{t("home.planTeaserEyebrow")}</p>
-            <h2 className="font-display mt-2 text-[1.9rem] !font-normal leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.planTeaserTitle")}</h2>
+            <h2 className="font-display mt-2 text-[1.9rem] leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.planTeaserTitle")}</h2>
             <p className="mt-4 leading-relaxed text-ink-500">{t("home.planTeaserBody")}</p>
             <Link
               href={`/${locale}/plan`}
@@ -468,7 +468,7 @@ export default async function Home({
       */}
       <section>
         <div>
-          <h2 className="font-display text-[1.9rem] !font-normal leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.seasonsTitle")}</h2>
+          <h2 className="font-display text-[1.9rem] leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.seasonsTitle")}</h2>
           <p className="mt-2 text-ink-500">{t("home.seasonsSub")}</p>
         </div>
         <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -542,7 +542,7 @@ export default async function Home({
       {/* -------------------------------------------- why + contact ------- */}
       <section className={config.contact.phone ? "grid gap-4 lg:grid-cols-[1fr_20rem]" : "grid gap-4"}>
         <div className="rounded-2xl bg-pine-50 p-6 sm:p-10">
-          <h2 className="font-display text-[1.6rem] !font-normal leading-[1.15] text-ink-900 sm:text-[2rem]">{t("home.whyRG")}</h2>
+          <h2 className="font-display text-[1.6rem] leading-[1.15] text-ink-900 sm:text-[2rem]">{t("home.whyRG")}</h2>
           <ul className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
             {([["home.why1t", "home.why1b"], ["home.why2t", "home.why2b"],
                ["home.why3t", "home.why3b"], ["home.why4t", "home.why4b"]] as const).map(([tt, bb]) => (
@@ -597,7 +597,7 @@ export default async function Home({
       {travellers.length > 0 && (
         <section>
           <p className="eyebrow">{t("home.travellersEyebrow")}</p>
-          <h2 className="font-display mt-2 text-[1.9rem] !font-normal leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.travellersTitle")}</h2>
+          <h2 className="font-display mt-2 text-[1.9rem] leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.travellersTitle")}</h2>
           <p className="mt-3 max-w-xl text-ink-500">{t("home.travellersBody")}</p>
           <ul className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
             {travellers.map((photo) => (
@@ -613,7 +613,7 @@ export default async function Home({
 
       {/* ------------------------------------------------ closing CTA ----- */}
       <section className="rounded-2xl bg-pine-800 px-6 py-14 text-center text-white sm:px-12">
-        <h2 className="font-display text-[1.9rem] !font-normal leading-[1.15] sm:text-[2.5rem]">{t("home.closingTitle")}</h2>
+        <h2 className="font-display text-[1.9rem] leading-[1.15] sm:text-[2.5rem]">{t("home.closingTitle")}</h2>
         <p className="mx-auto mt-4 max-w-xl leading-relaxed text-pine-100">{t("home.closingBody")}</p>
         <a
           href="#book"

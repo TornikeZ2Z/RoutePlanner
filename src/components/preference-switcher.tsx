@@ -51,9 +51,9 @@ function Menu<T extends string>({
   }, [open]);
 
   const pill = dark
-    ? "border-white/25 text-pine-100 hover:border-gold-400 hover:text-white"
-    : "border-ink-300 text-ink-600 hover:border-gold-500 hover:text-ink-900 " +
-      "dark:border-white/25 dark:text-pine-100 dark:hover:border-gold-400 dark:hover:text-white";
+    ? "border-white/25 text-pine-100 hover:border-white/60 hover:text-white"
+    : "border-ink-300 text-ink-600 hover:border-brand-600 hover:text-ink-900 " +
+      "dark:border-white/25 dark:text-pine-100 dark:hover:border-white/60 dark:hover:text-white";
   const panel = dark
     ? "border-white/15 bg-pine-700 text-pine-100"
     : "border-ink-200 bg-white text-ink-900 dark:border-white/15 dark:bg-pine-700 dark:text-pine-100";
@@ -88,7 +88,7 @@ function Menu<T extends string>({
               >
                 <span>{describe(v)}</span>
                 {v === value && (
-                  <svg viewBox="0 0 24 24" className="size-4 text-gold-500" fill="none" stroke="currentColor"
+                  <svg viewBox="0 0 24 24" className="size-4 text-ink-500" fill="none" stroke="currentColor"
                        strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                     <path d="m5 12 5 5L20 7" />
                   </svg>
@@ -129,7 +129,7 @@ export function PreferenceSwitcher({
         value={locale} options={LOCALES}
         button={
           <>
-            <svg viewBox="0 0 24 24" className="size-3.5 text-gold-500" fill="none" stroke="currentColor"
+            <svg viewBox="0 0 24 24" className="size-3.5 text-ink-500" fill="none" stroke="currentColor"
                  strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <circle cx="12" cy="12" r="9" />
               <path d="M3 12h18M12 3a15.6 15.6 0 0 1 0 18M12 3a15.6 15.6 0 0 0 0 18" />
@@ -146,7 +146,7 @@ export function PreferenceSwitcher({
         button={<>{CURRENCY_META[currency].symbol}&nbsp;{currency}</>}
         describe={(c) => (
           <span className="flex items-baseline gap-2">
-            <span className="w-4 text-gold-600">{CURRENCY_META[c].symbol}</span>
+            <span className="w-4 text-ink-500">{CURRENCY_META[c].symbol}</span>
             {CURRENCY_META[c].name}
           </span>
         )}

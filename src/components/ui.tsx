@@ -13,7 +13,7 @@ export function Button({
   // Minimum 44px tall at md and above: the driver app is used one-handed on a
   // phone, often in a moving vehicle.
   const base =
-    "inline-flex items-center justify-center gap-2 rounded-xl font-semibold " +
+    "inline-flex items-center justify-center gap-2 rounded-full font-semibold " +
     "transition-[background-color,box-shadow,transform] duration-150 " +
     "active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0";
   const sizes = {
@@ -32,7 +32,7 @@ export function Button({
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <div className={cx("rounded-2xl border border-ink-200 bg-white shadow-[0_1px_3px_rgba(11,29,51,.06)]", className)}>
+    <div className={cx("rounded-2xl border border-ink-200 bg-white", className)}>
       {children}
     </div>
   );

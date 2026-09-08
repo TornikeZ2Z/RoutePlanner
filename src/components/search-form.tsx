@@ -46,10 +46,10 @@ const TONE = {
   light: {
     shell: "border-ink-200 bg-white lg:divide-ink-200 [&>*+*]:border-ink-100",
     label: "text-ink-400",
-    icon: "text-gold-600",
+    icon: "text-brand-600",
     control: "text-ink-900 placeholder:text-ink-400",
     hint: "text-ink-500",
-    addStop: "text-gold-600 hover:text-gold-700",
+    addStop: "text-brand-600 hover:text-brand-700",
   },
   glass: {
     shell: "border-white/25 bg-white/10 backdrop-blur-md lg:divide-white/20 [&>*+*]:border-white/15",

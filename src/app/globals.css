@@ -124,8 +124,22 @@ body {
 
 /* Display voice: medium weight, tight leading, no synthetic boldness.
    The reference calibrates its display face for large sizes only. */
+/*
+ * The display face sets family, tracking and leading — not weight.
+ *
+ * It used to pin font-weight: 700 here, and because this rule is unlayered it
+ * beat every Tailwind weight utility in the codebase regardless of source
+ * order. Two consequences, both of which were live: `font-display font-bold`
+ * was a tautology, and `font-display font-normal` did nothing at all — which
+ * is how a heading conversion shipped in 613280b and rendered no differently.
+ *
+ * Weight now comes from the utilities, so a heading gets 400 by inheritance
+ * unless it asks for more. That is CR-2026-0034's reference voice: every
+ * heading on it is weight 400 from 64px up, and bold at a smaller size is the
+ * opposite of what makes it read as considered. The eleven places that do want
+ * bold already say so with a utility, and those are unaffected.
+ */
 .font-display {
-  font-weight: 700;
   letter-spacing: -0.015em;
   line-height: 1.12;
 }

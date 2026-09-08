@@ -75,9 +75,9 @@ export default async function LocaleLayout({
             {config.contact.phone && (
               <a
                 href={`tel:${config.contact.phone.replace(/\s+/g, "")}`}
-                className="hidden items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-semibold text-ink-900 hover:text-gold-600 dark:text-white dark:hover:text-gold-300 xl:flex"
+                className="hidden items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-semibold text-ink-900 hover:text-brand-600 dark:text-white dark:hover:text-brand-300 xl:flex"
               >
-                <svg viewBox="0 0 24 24" className="size-4 text-gold-400" fill="none" stroke="currentColor"
+                <svg viewBox="0 0 24 24" className="size-4 text-brand-600" fill="none" stroke="currentColor"
                      strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M4 5c0-1.1.9-2 2-2h2.2c.5 0 .9.3 1 .8l.9 3.3c.1.4 0 .9-.4 1.1l-1.6 1.2a13.5 13.5 0 006.5 6.5l1.2-1.6c.2-.4.7-.5 1.1-.4l3.3.9c.5.1.8.5.8 1V18c0 1.1-.9 2-2 2h-1C10.6 20 4 13.4 4 5.5V5z" />
                 </svg>

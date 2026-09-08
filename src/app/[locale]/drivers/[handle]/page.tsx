@@ -133,7 +133,7 @@ export default async function DriverProfile({ params, searchParams }: Props) {
         <div className="sticky top-[4.2rem] z-20 rounded-2xl border border-ink-200 bg-white/95 p-4 shadow-[var(--shadow-soft)] backdrop-blur-md dark:border-white/10 sm:px-6">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gold-600">{t("driver.yourTrip")}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-500">{t("driver.yourTrip")}</p>
               <p className="truncate font-semibold text-ink-900">
                 {trip.points.join(" → ")}{trip.returnAt ? " ⇄" : ""}
               </p>
@@ -157,7 +157,7 @@ export default async function DriverProfile({ params, searchParams }: Props) {
               </div>
               <a
                 href={`/${locale}/checkout?quote=${trip.id}${addressThread}`}
-                className="inline-flex min-h-11 items-center rounded-lg bg-gold-400 px-6 py-2.5 font-bold tracking-[-0.01em] text-pine-900 shadow-sm transition-colors hover:bg-gold-300"
+                className="inline-flex min-h-11 items-center rounded-full bg-brand-600 px-6 py-2.5 font-semibold text-white shadow-sm transition-colors hover:bg-brand-700"
               >
                 {t("driver.bookNow")}
               </a>

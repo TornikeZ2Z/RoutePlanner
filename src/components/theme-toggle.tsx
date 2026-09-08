@@ -26,8 +26,8 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       aria-label="Switch between light and dark mode"
       className={
         "flex size-9 items-center justify-center rounded-full border transition-colors " +
-        "border-ink-300 text-ink-600 hover:border-gold-500 hover:text-gold-600 " +
-        "dark:border-white/25 dark:text-pine-100 dark:hover:border-gold-400 dark:hover:text-gold-400 " +
+        "border-ink-300 text-ink-600 hover:border-brand-600 hover:text-brand-600 " +
+        "dark:border-white/25 dark:text-pine-100 dark:hover:border-white/60 dark:hover:text-white " +
         className
       }
     >

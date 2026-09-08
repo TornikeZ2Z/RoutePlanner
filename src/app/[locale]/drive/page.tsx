@@ -320,7 +320,7 @@ export default async function DrivePage({
 
             <button
               type="submit"
-              className="min-h-12 w-full rounded-xl bg-gold-400 px-6 text-base font-bold text-pine-900 transition-colors hover:bg-gold-300 sm:w-auto"
+              className="min-h-12 w-full rounded-full bg-brand-600 px-6 text-base font-semibold text-white transition-colors hover:bg-brand-700 sm:w-auto"
             >
               {t("drive.submit")}
             </button>
