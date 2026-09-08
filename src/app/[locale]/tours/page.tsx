@@ -135,8 +135,40 @@ export default async function ToursIndex({ params, searchParams }: Props) {
         them would have hidden the expensive end of the catalogue, which is the
         opposite of what a request to show four bands was asking for.
       */}
-      {shown.length === 0 ? (
+      {/*
+        Two different nothings, which this page used to conflate and then
+        conflated the other way round for an hour.
+
+        It was guarded on `tours`, so a category with no tours drew an empty
+        grid and said nothing at all. Guarding it on `shown` instead made it
+        say "No tours published yet" — on a live catalogue of five, because
+        Sea and Winter genuinely have none. Both are wrong; they are just wrong
+        about different things.
+
+        So: an empty CATALOGUE says the catalogue is empty. An empty FILTER says
+        the theme is empty and offers the two ways out — every tour, or the
+        planner, which will build something on this theme from the same drivers.
+      */}
+      {tours.length === 0 ? (
         <EmptyState title={t("tours.empty")} />
+      ) : shown.length === 0 ? (
+        <EmptyState title={t("tours.catEmpty")}>
+          <p>{t("tours.catEmptyBody")}</p>
+          <div className="mt-4 flex flex-wrap justify-center gap-3">
+            <Link
+              href={`/${locale}/tours`}
+              className="inline-flex min-h-11 items-center rounded-full border border-ink-900 px-5 text-sm font-semibold text-ink-900 transition-colors hover:bg-ink-900 hover:text-white dark:hover:text-pine-900"
+            >
+              {t("tours.catEmptyAll")}
+            </Link>
+            <Link
+              href={`/${locale}/plan`}
+              className="inline-flex min-h-11 items-center rounded-full border border-ink-300 px-5 text-sm font-semibold text-ink-700 transition-colors hover:border-ink-500"
+            >
+              {t("nav.plan")}
+            </Link>
+          </div>
+        </EmptyState>
       ) : (
         bands.map(({ band, tours: inBand }) => (
         <section key={band.id} className="space-y-5">
