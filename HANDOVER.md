@@ -351,16 +351,24 @@ Secrets are marked ✱ — never commit them, never log them.
 | `MAIL_FROM` | Envelope sender | `Route Planner <info@routeplanner.ge>` |
 | `RESEND_API_KEY` ✱ | HTTPS mail fallback | Only if SMTP ports are blocked |
 | `SMSOFFICE_API_KEY` ✱ | SMS gateway | |
-| `SMSOFFICE_SENDER` | SMS sender name | `RoutePlan` — see below |
+| `SMSOFFICE_SENDER` | SMS sender name | `Route Plan` — see below |
 | `ROUTING_PROVIDER` | `osrm` or `haversine` | `osrm` is a free public service |
 | `ROUTING_API_KEY` ✱ | Paid routing, if used | |
 | `COMMISSION_RATE_BPS` | Fallback only | Live value is in `platform_settings` |
 
-**The SMS sender name has a trap.** smsoffice.ge allows only letters, digits,
-`-` and `.`, maximum 11 characters — **no spaces.** "Route Plan" cannot be
-registered. It is `RoutePlan`, and the code sanitises anything else with a
-one-time warning (`normalizeSender`). The value here must match exactly what
-smsoffice has approved.
+**The SMS sender name has a trap, and it has already been sprung once.** The
+name registered with smsoffice.ge is **`Route Plan`, with the space.** The
+published character list says letters, digits, `-` and `.` only, so the code
+used to strip the space and transmit `RoutePlan` — and every send came back as
+error 150, *sender name is not registered on the account*, a failure that reads
+like a credential problem and is a spelling one. `normalizeSender` now keeps
+the space; the cap is still eleven characters. The value here must match what
+smsoffice approved, character for character.
+
+`/admin/notifications` prints the configured name next to the name that will
+actually be transmitted, shows the outbox, and can send one message by hand —
+including under a sender you type, which is the only way to find out which
+brand name the account will accept without a redeploy.
 
 Commercial terms — commission, settlement cycle, notice period, school
 cancellation ladder — live in `platform_settings` and are editable from
@@ -409,8 +417,11 @@ Ordered by how much they matter.
 2. **`COMPANY_ADDRESS` is the generic "თბილისი, საქართველო"** rather than the
    registered street address. It prints in every contract. Not blocking, but
    it should be the real address before volume.
-3. **`SMSOFFICE_SENDER` awaits approval** from smsoffice.ge. Key and sender are
-   both configured; SMS starts working when they approve `RoutePlan`.
+3. **`SMSOFFICE_SENDER` is still `RoutePlan` in the Render environment and
+   must become `Route Plan`.** The gateway works — a message sent from
+   `/admin/notifications` under the sender `Route Plan` was accepted on
+   8 September — but anything the app raises by itself still goes out under the
+   environment value and is refused with error 150. One variable, one redeploy.
 4. **One driver is waiting.** Sandro Avsajanishvili, status `SUBMITTED`. The
    flow is: approve the application and the vehicle in `/admin/drivers/<id>`,
    then he can enter his personal number and address and sign the agreement,
@@ -434,6 +445,7 @@ Ordered by how much they matter.
 | Pricing engine (versioned, deterministic) | `src/lib/pricing/engine.ts` |
 | Commercial settings | `src/lib/settings.ts` |
 | Mail and SMS transports | `src/lib/notifications.ts` |
+| Outbox, transport status, manual send | `/admin/notifications` |
 | Permissions | `src/lib/rbac.ts` |
 | Object storage | `src/lib/storage/index.ts` |
 | Schema history | `db/migrations/` |
