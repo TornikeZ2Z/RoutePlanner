@@ -6,7 +6,7 @@ import { isLocale, getTranslator, LOCALES } from "@/lib/i18n";
 import { Badge, Card } from "@/components/ui";
 import { PlaceImage } from "@/components/place-image";
 import { sitePhoto, listTravellerPhotos } from "@/lib/site-photos";
-import { DESTINATIONS } from "@/lib/destinations";
+import { DESTINATIONS, REGIONS } from "@/lib/destinations";
 import { CATEGORY_ICONS } from "@/lib/map-icons";
 import { config } from "@/lib/config";
 import { listTours } from "@/lib/tours";
@@ -338,6 +338,17 @@ export default async function Home({
                 return name ? [{ ...d, name }] : [];
               });
             if (picks.length === 0) return null;
+            /*
+              Grouped by province, which is what CR-2026-0036 asked for in so
+              many words — "separate the places by region", its own example
+              being Guria. With nine coastal places under Sea and eleven under
+              Mountains, an ungrouped list had stopped being readable anyway.
+              A theme that turns out to sit in one province shows no headings,
+              because a single heading over a whole list says nothing.
+            */
+            const groups = REGIONS
+              .map((r) => ({ region: r, items: picks.filter((p) => p.region === r) }))
+              .filter((gr) => gr.items.length > 0);
             const photo = sitePhoto(`categories/${cat}.jpg`);
             return (
               <li key={cat}>
@@ -368,22 +379,40 @@ export default async function Home({
                     </span>
                   </summary>
 
-                  <ul className="mt-2 space-y-1 rounded-2xl border border-ink-200 bg-white p-2 shadow-[0_1px_3px_rgba(11,29,51,.06)]">
-                    {picks.map((d) => (
-                      <li key={d.slug}>
-                        <Link
-                          href={`/${locale}/destinations/${d.slug}`}
-                          className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 hover:text-ink-900"
-                        >
-                          <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-brand-600" fill="none" stroke="currentColor"
-                               strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                            <path d={CATEGORY_ICONS[d.icon]} />
-                          </svg>
-                          <span className="min-w-0">{d.name}</span>
-                        </Link>
-                      </li>
+                  <div className="mt-2 space-y-1 rounded-2xl border border-ink-200 bg-white p-2 shadow-[0_1px_3px_rgba(11,29,51,.06)]">
+                    {groups.map((gr) => (
+                      <div key={gr.region}>
+                        {/*
+                          No heading over a province that IS the place: Tusheti
+                          under the heading "Tusheti" says nothing twice. The
+                          test is structural — the destination slug equals the
+                          region key — rather than comparing display names,
+                          which would only hold in one language.
+                        */}
+                        {groups.length > 1 && !(gr.items.length === 1 && gr.items[0]!.slug === gr.region) && (
+                          <p className="px-2.5 pb-1 pt-2 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-ink-400">
+                            {t(`region.${gr.region}` as never)}
+                          </p>
+                        )}
+                        <ul className="space-y-1">
+                          {gr.items.map((d) => (
+                            <li key={d.slug}>
+                              <Link
+                                href={`/${locale}/destinations/${d.slug}`}
+                                className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 hover:text-ink-900"
+                              >
+                                <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-brand-600" fill="none" stroke="currentColor"
+                                     strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                  <path d={CATEGORY_ICONS[d.icon]} />
+                                </svg>
+                                <span className="min-w-0">{d.name}</span>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </details>
               </li>
             );

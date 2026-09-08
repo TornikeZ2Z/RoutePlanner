@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { isLocale, getTranslator, LOCALES, type Locale, type MessageKey } from "@/lib/i18n";
 import { config } from "@/lib/config";
-import { DESTINATIONS, sightsFor, type MapCategory, type Season } from "@/lib/destinations";
+import {
+  DESTINATIONS, sightsFor, stopsFor, CUISINE, CLASSES_FOR_ROAD,
+  type MapCategory, type Season, type RoadFit,
+} from "@/lib/destinations";
 import { CATEGORY_ICONS } from "@/lib/map-icons";
 import { listRoutes } from "@/lib/routes-content";
 import { listTours } from "@/lib/tours";
@@ -24,6 +27,13 @@ const THEME_LABEL: Record<MapCategory, MessageKey> = {
   wine: "tours.catWine",
   culture: "tours.catCulture",
   nature: "map.catNature",
+};
+
+/** What the road asks of the car — the honest form of "suitable vehicles". */
+const ROAD_NOTE: Record<RoadFit, MessageKey> = {
+  paved: "dest.roadPaved",
+  mountain: "dest.roadMountain",
+  offroad: "dest.roadOffroad",
 };
 
 const SEASON_LABEL: Record<Season, MessageKey> = {
@@ -101,6 +111,8 @@ export default async function DestinationPage({ params }: Props) {
   const relatedTours = tours.filter((tour) => dest.categories.includes(tour.category as MapCategory));
   // Places that share a theme, so the page leads somewhere rather than ending.
   const sights = sightsFor(slug);
+  const stops = stopsFor(slug);
+  const kitchen = CUISINE[dest.region];
   const nearby = DESTINATIONS
     .filter((d) => d.slug !== slug && d.categories.some((c) => dest.categories.includes(c)))
     .slice(0, 6);
@@ -140,6 +152,23 @@ export default async function DestinationPage({ params }: Props) {
         </Card>
 
         {/*
+          How long to give it — CR-2026-0010 item 14, and the first of its four
+          missing blocks. A range rather than a number: one day at Mtskheta is
+          the whole of Mtskheta, and one day in Svaneti is a day spent driving.
+          Days only, deliberately, because nights depend on where you sleep and
+          we do not book beds.
+        */}
+        <Card className="p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">{t("dest.daysT")}</p>
+          <p className="font-display mt-2 text-2xl text-ink-900">
+            {dest.days[0] === dest.days[1]
+              ? t("dest.daysOne")
+              : t("dest.daysRange", { a: dest.days[0], b: dest.days[1] })}
+          </p>
+          <p className="mt-3 text-xs leading-relaxed text-ink-500">{t("dest.daysB")}</p>
+        </Card>
+
+        {/*
           Main sights — CR-2026-0010 item 14, open since 4 September and blocked
           until now because nothing in the system recorded what there is to see
           at a place. CR-2026-0036 supplied the list; the sights attach to their
@@ -163,6 +192,25 @@ export default async function DestinationPage({ params }: Props) {
           </Card>
         )}
 
+        {/*
+          What is worth stopping for on the way — the block that only makes
+          sense because there is a driver. A bus does not stop at Ananuri.
+        */}
+        {stops.length > 0 && (
+          <Card className="p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">{t("dest.stopsT")}</p>
+            <ul className="mt-2 space-y-1.5">
+              {stops.map((stop) => (
+                <li key={stop.slug} className="flex items-start gap-2 text-sm text-ink-700">
+                  <span aria-hidden className="mt-1.5 size-1.5 shrink-0 rounded-full bg-brand-600" />
+                  {t(`stop.${stop.slug}` as never)}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs leading-relaxed text-ink-500">{t("dest.stopsB")}</p>
+          </Card>
+        )}
+
         <Card className="p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">{t("dest.themesT")}</p>
           <ul className="mt-2 flex flex-wrap gap-1.5">
@@ -176,6 +224,48 @@ export default async function DestinationPage({ params }: Props) {
               </li>
             ))}
           </ul>
+        </Card>
+
+        {/*
+          Suitable vehicles, answered by the road rather than by taste. The
+          classes are the vehicle_class enum members, so what this recommends is
+          what a driver can actually register and what the search filters offer.
+        */}
+        <Card className="p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">{t("dest.carsT")}</p>
+          <ul className="mt-2 flex flex-wrap gap-1.5">
+            {CLASSES_FOR_ROAD[dest.road].map((c) => (
+              <li key={c} className="rounded-full border border-ink-200 px-2.5 py-1 text-sm text-ink-700">
+                {t(`console.cls${c}` as never)}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs leading-relaxed text-ink-500">{t(ROAD_NOTE[dest.road])}</p>
+        </Card>
+
+        {/*
+          The local kitchen. CR-2026-0036 asked for wine and gastronomy to stay
+          a theme and be filled in "for every corner"; this follows the historic
+          province, because that is what the cooking follows.
+        */}
+        <Card className="p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">{t("dest.foodT")}</p>
+          <ul className="mt-2 flex flex-wrap gap-1.5">
+            {kitchen.dishes.map((dish) => (
+              <li key={dish} className="rounded-full border border-ink-200 px-2.5 py-1 text-sm text-ink-700">
+                {t(`dish.${dish}` as never)}
+              </li>
+            ))}
+          </ul>
+          {kitchen.wine && (
+            <p className="mt-3 text-sm text-ink-700">
+              <span className="font-medium text-ink-900">{t("dest.wineT")}: </span>
+              {t(`wine.${dest.region}` as never)}
+            </p>
+          )}
+          <p className="mt-3 text-xs leading-relaxed text-ink-500">
+            {t("dest.foodB", { region: t(`region.${dest.region}` as never) })}
+          </p>
         </Card>
 
         {/* Only where a priced route exists. Fifteen of the twenty-three have
