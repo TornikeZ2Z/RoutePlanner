@@ -322,7 +322,7 @@ export function SearchForm({
             <input id="bags" name="luggage" type="number" min={0} max={20} value={luggage}
                    onChange={(e) => setLuggage(Number(e.target.value))} className={CELL_CONTROL} />
           </Cell>
-          <Cell icon={ICONS.car} label={t("search.vehicle")} htmlFor="vehicle" className="sm:basis-1/2 lg:max-w-44 lg:basis-auto">
+          <Cell icon={ICONS.car} label={t("search.vehicle")} htmlFor="vehicle" className="sm:basis-1/2 lg:max-w-40 lg:basis-auto">
             <select id="vehicle" name="vehicle" value={vehicle}
                     onChange={(e) => setVehicle(e.target.value)} className={CELL_CONTROL + " cursor-pointer"}>
               {vehicleOptions}
