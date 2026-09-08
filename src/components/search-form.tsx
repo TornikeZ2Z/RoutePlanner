@@ -42,7 +42,7 @@ const ICONS = {
  */
 export type SearchTone = "light" | "glass";
 
-const TONE = {
+export const TONE = {
   light: {
     shell: "border-ink-200 bg-white lg:divide-ink-200 [&>*+*]:border-ink-100",
     label: "text-ink-400",
@@ -61,9 +61,26 @@ const TONE = {
   },
 } as const;
 
-const CELL_BASE = "w-full border-0 bg-transparent p-0 text-sm font-semibold focus:outline-none focus:ring-0";
+export const CELL_BASE = "w-full border-0 bg-transparent p-0 text-sm font-semibold focus:outline-none focus:ring-0";
 
-function Cell({
+/**
+ * The pill the cells sit in, and the button that ends it.
+ *
+ * Exported because the hero now carries a SECOND bar — the three planner
+ * questions, CR-2026-0039 — and two bars side by side in the same widget
+ * that are only approximately the same shape look like a mistake. One
+ * string each, so they cannot drift.
+ */
+export const BAR_SHELL =
+  "flex flex-1 flex-col rounded-full border sm:flex-row sm:flex-wrap lg:flex-nowrap " +
+  "lg:divide-x [&>*+*]:border-t sm:[&>*+*]:border-t-0 lg:[&>*+*]:border-t-0";
+
+export const BAR_SUBMIT =
+  "inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-brand-600 px-7 " +
+  "text-base font-semibold tracking-[-0.01em] text-white shadow-[var(--shadow-soft)] " +
+  "transition-colors hover:bg-brand-700";
+
+export function Cell({
   icon, label, htmlFor, children, className = "", tone = "light",
 }: { icon: string; label: string; htmlFor: string; children: React.ReactNode; className?: string; tone?: SearchTone }) {
   const c = TONE[tone];
@@ -327,7 +344,7 @@ export function SearchForm({
       {stopsEditor}
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch">
-        <div className={`flex flex-1 flex-col rounded-full border sm:flex-row sm:flex-wrap lg:flex-nowrap lg:divide-x [&>*+*]:border-t sm:[&>*+*]:border-t-0 lg:[&>*+*]:border-t-0 ${tint.shell}`}>
+        <div className={`${BAR_SHELL} ${tint.shell}`}>
           {!lockRoute && (
             <Cell icon={ICONS.from} label={t("search.from")} htmlFor="from" className="sm:basis-1/2 lg:min-w-[14.75rem] lg:basis-auto">
               <input id="from" name="from" value={from} list={LIST_ID} autoComplete="off"
@@ -366,10 +383,7 @@ export function SearchForm({
           </Cell>
         </div>
 
-        <button
-          type="submit"
-          className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-brand-600 px-7 text-base font-semibold tracking-[-0.01em] text-white shadow-[var(--shadow-soft)] transition-colors hover:bg-brand-700"
-        >
+        <button type="submit" className={BAR_SUBMIT}>
           {t("search.submit")}
           <span aria-hidden>→</span>
         </button>

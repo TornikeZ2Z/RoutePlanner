@@ -463,83 +463,23 @@ export default async function Home({
         </section>
       )}
 
-      {/* -------------------------------------- plan your perfect trip ---- */}
       {/*
-        Depth by surface, not by shadow. The system is flat-by-default and
-        allows exactly three shadows, so the card is raised by giving it
-        something to be raised OFF: a tinted band under the whole section, the
-        white card on the resting shadow above it, and a recessed track under
-        each question's answers. The ladder has to keep its direction in dark
-        too, which is why the track names pine-900 explicitly -- bg-white and
-        bg-ink-50 both resolve to #10233c there, so the obvious pairing would
-        have flattened to nothing.
+        The "plan your perfect trip" band stood here and is gone —
+        CR-2026-0039: "the field that is big down below, let us delete it
+        altogether."
 
-        All fifteen answers are one chip with an optional leading icon. The
-        interests row used to be an icon-above-caption stack twice the height
-        of its neighbours, which is what made the middle of the card lurch.
-        Each question's label now sits on its own full-width line, so long
-        Georgian compounds are never squeezed into a fixed-width column.
+        It was a tinted band carrying the planner's three questions as fifteen
+        chips in a white card, each chip a link into /plan with the answer
+        pre-set. The questions are not lost: the same request asked for them in
+        the hero, and they are now the Build-my-route tab of the booking widget
+        (src/components/plan-bar.tsx), asked once on a bar instead of twice on
+        one page.
+
+        This is a deletion, not a move that left a hole. The band was the
+        page's only remaining explanation of what the planner is; that sentence
+        now sits above the bar itself, which is where somebody about to use it
+        is looking.
       */}
-      <section className="rounded-2xl bg-brand-50 p-6 dark:bg-pine-800 sm:p-10">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-center lg:gap-12">
-          <div>
-            <p className="eyebrow">{t("home.planTeaserEyebrow")}</p>
-            <h2 className="font-display mt-2 text-[1.9rem] leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.planTeaserTitle")}</h2>
-            <p className="mt-4 leading-relaxed text-ink-500">{t("home.planTeaserBody")}</p>
-            <Link
-              href={`/${locale}/plan`}
-              className="mt-6 inline-flex min-h-12 items-center rounded-full bg-brand-600 px-6 py-3 font-semibold text-white shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-brand-700"
-            >
-              {t("home.planTeaserCta")}
-            </Link>
-          </div>
-
-          <ol className="divide-y divide-ink-200 rounded-2xl border border-ink-200 bg-white shadow-[0_1px_3px_rgba(11,29,51,.06)]">
-            {/* step 1 — days */}
-            <li className="p-5 sm:p-6">
-              <div className="flex items-center gap-3">
-                <StepBadge n={1} />
-                <p className="font-semibold text-ink-900">{t("home.planStep1")}</p>
-              </div>
-              <ul className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-ink-50 p-2.5 dark:bg-pine-900 lg:grid-cols-4">
-                {([["1", "home.day1t"], ["3", "home.day2t"], ["5", "home.day3t"], ["7", "home.day4t"]] as const).map(([d, label]) => (
-                  <PlanChip key={d} href={`/${locale}/plan?d=${d}&i=nature`} label={t(label)} />
-                ))}
-              </ul>
-            </li>
-
-            {/* step 2 — interests */}
-            <li className="p-5 sm:p-6">
-              <div className="flex items-center gap-3">
-                <StepBadge n={2} />
-                <p className="font-semibold text-ink-900">{t("home.planStep2")}</p>
-              </div>
-              <ul className="mt-3 grid gap-2 rounded-xl bg-ink-50 p-2.5 dark:bg-pine-900 sm:grid-cols-2 lg:grid-cols-3">
-                {([["nature", "nature", "plan.int1"], ["culture", "culture", "plan.int2"], ["wine", "wine", "plan.int3"],
-                   ["adventure", "mountains", "plan.int4"], ["sea", "sea", "plan.int6"],
-                   ["rest", "winter", "plan.int5"]] as const).map(([interest, icon, label]) => (
-                  <PlanChip key={interest} href={`/${locale}/plan?d=3&i=${interest}`} label={t(label)} icon={CATEGORY_ICONS[icon]} />
-                ))}
-              </ul>
-            </li>
-
-            {/* step 3 — pace. Was "who is travelling", which the wizard now
-                asks beside the booking button because it picks the car rather
-                than the route. */}
-            <li className="p-5 sm:p-6">
-              <div className="flex items-center gap-3">
-                <StepBadge n={3} />
-                <p className="font-semibold text-ink-900">{t("home.planStep3")}</p>
-              </div>
-              <ul className="mt-3 grid grid-cols-1 gap-2 rounded-xl bg-ink-50 p-2.5 dark:bg-pine-900 sm:grid-cols-3">
-                {([["calm", "plan.pace1"], ["balanced", "plan.pace2"], ["active", "plan.pace3"]] as const).map(([p, key]) => (
-                  <PlanChip key={p} href={`/${locale}/plan?d=3&i=nature&pace=${p}`} label={t(key)} />
-                ))}
-              </ul>
-            </li>
-          </ol>
-        </div>
-      </section>
 
       {/*
         "ოთხი ნაბიჯი, ვაჭრობის გარეშე" stood here and is gone — CR-2026-0037.
@@ -660,35 +600,3 @@ export default async function Home({
   );
 }
 
-
-/** One answer to one of the three questions. The optional leading icon is what
-    lets the interests row share a shape with days and party instead of being an
-    icon-above-caption stack twice their height. No fixed width anywhere: the
-    chip sizes to its label, so an unbreakable Georgian compound like
-    თავგადასავალი simply makes its own chip wider and wraps the line sooner. */
-function PlanChip({ href, label, icon }: { href: string; label: string; icon?: string }) {
-  return (
-    <li className="flex">
-      <Link
-        href={href}
-        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-ink-200 bg-white px-3.5 py-2 text-center text-sm font-medium text-ink-600 transition-colors hover:border-brand-600 hover:text-ink-900"
-      >
-        {icon && (
-          <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-brand-600" fill="none" stroke="currentColor"
-               strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d={icon} />
-          </svg>
-        )}
-        <span className="min-w-0">{label}</span>
-      </Link>
-    </li>
-  );
-}
-
-function StepBadge({ n }: { n: number }) {
-  return (
-    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-600 font-display text-sm font-bold text-white">
-      {n}
-    </span>
-  );
-}

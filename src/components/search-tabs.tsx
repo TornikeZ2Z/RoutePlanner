@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { SearchForm } from "@/components/search-form";
+import { PlanBar } from "@/components/plan-bar";
 import { getTranslator, isLocale, type Locale } from "@/lib/i18n";
 
 interface LocationOption { slug: string; name_en: string; type: string }
@@ -12,8 +13,12 @@ interface LocationOption { slug: string; name_en: string; type: string }
  *
  * Transfer carries a one-way / round-trip toggle inside the panel, with a
  * quiet link to hourly hire (no online pricing yet, so it routes to an
- * inquiry rather than pretending). Tours points at the curated catalogue;
- * Build my route hands over to the three-question planner.
+ * inquiry rather than pretending). Tours points at the curated catalogue.
+ *
+ * Build my route asks the planner's first three questions here, on a bar built
+ * from the same cells as the transfer bar — CR-2026-0039. It used to be a
+ * teaser too, and the questions lived in a large band lower down the page; the
+ * band is gone and the questions came up here, which is what was asked for.
  *
  * Pills, and no explaining line under the label.
  *
@@ -123,9 +128,12 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
               {id === "tours" && (
                 <TeaserPanel body={t("home.toursTabBody")} cta={t("home.toursTabCta")} href={`/${locale}/tours`} />
               )}
-              {id === "plan" && (
-                <TeaserPanel body={t("home.planTabBody")} cta={t("nav.plan")} href={`/${locale}/plan`} />
-              )}
+              {/*
+                Build my route is a form now, not an advertisement for one —
+                CR-2026-0039. The three questions it asks used to live in a
+                large band far down the page, which is gone.
+              */}
+              {id === "plan" && <PlanBar locale={locale} />}
             </div>
           );
         })}

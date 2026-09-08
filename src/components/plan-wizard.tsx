@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getTranslator, isLocale, type Locale, type MessageKey } from "@/lib/i18n";
 import {
   buildPlan, startHour, TIER_LABEL,
+  DAYS, INTERESTS, PACES, DAY_LABEL, INTEREST_LABEL, PACE_LABEL,
   type DaysBucket, type Interest, type Origin, type Pace, type Budget, type Party,
 } from "@/lib/plan";
 import { RouteMap, type RoutePoint } from "@/components/route-map";
@@ -14,26 +15,20 @@ import { toLocalInput } from "@/lib/format";
 interface TourInfo { slug: string; title: string; durationDays: number }
 
 const ORIGINS: Origin[] = ["tbilisi", "kutaisi", "batumi"];
-const DAYS: DaysBucket[] = ["1", "3", "5", "7"];
-const INTERESTS: Interest[] = ["nature", "culture", "wine", "sea", "adventure", "rest"];
-const PACES: Pace[] = ["calm", "balanced", "active"];
 const BUDGETS: Budget[] = ["economy", "middle", "comfort", "premium"];
 const PARTIES: Party[] = ["solo", "couple", "family", "friends"];
 
-const INTEREST_KEY: Record<Interest, MessageKey> = {
-  nature: "plan.int1", culture: "plan.int2", wine: "plan.int3",
-  adventure: "plan.int4", rest: "plan.int5", sea: "plan.int6",
-};
-const PACE_KEY: Record<Pace, MessageKey> = {
-  calm: "plan.pace1", balanced: "plan.pace2", active: "plan.pace3",
-};
+/* The three the hero also asks now live in @/lib/plan, beside the types they
+   enumerate, so the wizard and the booking widget cannot drift apart. */
+const INTEREST_KEY = INTEREST_LABEL;
+const PACE_KEY = PACE_LABEL;
 const BUDGET_KEY: Record<Budget, MessageKey> = {
   economy: "plan.budget1", middle: "plan.budget2", comfort: "plan.budget3", premium: "plan.budget4",
 };
 const PARTY_KEY: Record<Party, MessageKey> = {
   solo: "plan.party1", couple: "plan.party2", family: "plan.party3", friends: "plan.party4",
 };
-const DAY_LABEL_KEY = { "1": "home.day1t", "3": "home.day2t", "5": "home.day3t", "7": "home.day4t" } as const;
+const DAY_LABEL_KEY = DAY_LABEL;
 
 /**
  * The five-question wizard. State lives in the URL (?o=&d=&i=&pace=&b=&p=), so

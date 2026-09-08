@@ -444,3 +444,37 @@ export const TIER_LABEL: Record<Tier, MessageKey> = {
   standard: "filters.tierStandard",
   premium: "filters.tierPremium",
 };
+
+/**
+ * The answers, and the words for them.
+ *
+ * These lived inside plan-wizard.tsx, which is the right place for exactly as
+ * long as the wizard is the only thing that asks the questions. It is not: the
+ * home page's booking widget asks the first three in the hero (CR-2026-0039),
+ * and importing them from the wizard would drag the map, the itinerary builder
+ * and every destination into the hero's bundle to borrow six strings.
+ *
+ * So they sit beside the types they enumerate. Two lists that must agree — the
+ * options offered and the options the plan accepts — are now one list.
+ */
+export const DAYS: DaysBucket[] = ["1", "3", "5", "7"];
+export const INTERESTS: Interest[] = ["nature", "culture", "wine", "sea", "adventure", "rest"];
+export const PACES: Pace[] = ["calm", "balanced", "active"];
+
+export const DAY_LABEL: Record<DaysBucket, MessageKey> = {
+  "1": "home.day1t", "3": "home.day2t", "5": "home.day3t", "7": "home.day4t",
+};
+export const INTEREST_LABEL: Record<Interest, MessageKey> = {
+  nature: "plan.int1", culture: "plan.int2", wine: "plan.int3",
+  adventure: "plan.int4", rest: "plan.int5", sea: "plan.int6",
+};
+export const PACE_LABEL: Record<Pace, MessageKey> = {
+  calm: "plan.pace1", balanced: "plan.pace2", active: "plan.pace3",
+};
+
+/** Which map icon stands for each interest, so the hero's chips and the
+    destination themes use one vocabulary rather than two. */
+export const INTEREST_ICON: Record<Interest, string> = {
+  nature: "nature", culture: "culture", wine: "wine",
+  adventure: "mountains", rest: "winter", sea: "sea",
+};

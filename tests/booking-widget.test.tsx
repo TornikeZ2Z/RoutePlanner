@@ -47,6 +47,7 @@ vi.mock("next/link", () => ({
 const { SearchTabs } = await import("@/components/search-tabs");
 const { VEHICLE_CATEGORIES } = await import("@/lib/vehicle-categories");
 const { OfferFiltersPanel } = await import("@/components/offer-filters");
+const { DAYS, INTERESTS, PACES } = await import("@/lib/plan");
 
 /** No filter applied — the state the panel is in when results first load. */
 const EMPTY_FILTERS = {
@@ -136,6 +137,8 @@ describe.each(LOCALES)("booking widget (%s)", (locale) => {
     await user.click(tabAt(2));
     expect(open().textContent).toContain(t("home.planTabBody"));
     expect(open().textContent).not.toContain(t("home.toursTabBody"));
+    // Build my route is a form now, not an advertisement for one — CR-2026-0039.
+    expect(open().querySelector("#plan-days"), "the plan panel asks its questions").not.toBeNull();
 
     // Exactly one open at a time, whichever is chosen.
     expect(screen.getAllByRole("tab").filter((x) => x.ariaSelected === "true")).toHaveLength(1);
@@ -149,7 +152,86 @@ describe.each(LOCALES)("booking widget (%s)", (locale) => {
     const { container } = render(<SearchTabs locale={locale} locations={LOCATIONS} />);
     // translate() returns the key itself when it is unknown, which is how a
     // typo in a t() call reaches a visitor looking like "home.tabToursSub".
-    expect(container.textContent).not.toMatch(/\b(home|search|nav|checkout)\.[a-zA-Z]/);
+    expect(container.textContent).not.toMatch(/\b(home|search|nav|checkout|plan)\.[a-zA-Z]/);
+  });
+});
+
+/*
+ * CR-2026-0039 moved the planner's first three questions onto the bar and
+ * deleted the band that used to carry them lower down the page. That band was
+ * fifteen links with the answer baked into the href; this is three selects and
+ * a submit, so the thing that can now break silently is the URL they build —
+ * a plan reached without `d` renders the empty questionnaire instead of an
+ * itinerary, which looks like the button did nothing.
+ */
+describe("booking widget, build my route", () => {
+  const t = getTranslator("en");
+
+  const openPlan = async () => {
+    const user = userEvent.setup();
+    render(<SearchTabs locale="en" locations={LOCATIONS} />);
+    await user.click(screen.getAllByRole("tab")[2]!);
+    return user;
+  };
+  const sel = (id: string) => document.querySelector<HTMLSelectElement>(id)!;
+
+  it("offers exactly the answers the planner accepts", async () => {
+    await openPlan();
+
+    // The lists come from @/lib/plan, which is also what buildPlan validates
+    // against — two lists that must agree are now one list.
+    expect([...sel("#plan-days").options].map((o) => o.value)).toEqual([...DAYS]);
+    expect([...sel("#plan-interest").options].map((o) => o.value)).toEqual([...INTERESTS]);
+    expect([...sel("#plan-pace").options].map((o) => o.value)).toEqual([...PACES]);
+
+    // Opens on the plan the wizard would build if asked nothing.
+    expect([sel("#plan-days").value, sel("#plan-interest").value, sel("#plan-pace").value])
+      .toEqual(["3", "nature", "balanced"]);
+
+    // Every option says something in words rather than showing its own slug.
+    for (const id of ["#plan-days", "#plan-interest", "#plan-pace"]) {
+      for (const option of [...sel(id).options]) {
+        expect(option.text, `${id} ${option.value}`).not.toBe(option.value);
+        expect(option.text.length).toBeGreaterThan(1);
+      }
+    }
+  });
+
+  it("lands on a built plan, carrying all three answers", async () => {
+    const user = await openPlan();
+    await user.selectOptions(sel("#plan-days"), "7");
+    await user.selectOptions(sel("#plan-interest"), "wine");
+    await user.selectOptions(sel("#plan-pace"), "calm");
+    await user.click(screen.getByRole("button", { name: new RegExp(t("nav.plan")) }));
+
+    // `d` is what makes the wizard render an itinerary rather than its own
+    // empty questions, so its presence is the assertion that matters most.
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(push.mock.calls[0]![0]).toBe("/en/plan?d=7&i=wine&pace=calm");
+  });
+
+  it("submits without JavaScript, like the bar beside it", async () => {
+    await openPlan();
+    const form = document.querySelector<HTMLFormElement>("#plan-days")!.closest("form")!;
+
+    // The named fields ARE the query string the planner reads, so the browser
+    // alone produces the same URL the click handler does. search-form.tsx says
+    // this in as many words about the transfer bar; the hero carousel records
+    // sessions where the page never hydrated, which is why it matters.
+    expect(form.getAttribute("method")).toBe("get");
+    expect(form.getAttribute("action")).toBe("/en/plan");
+    expect([
+      form.querySelector<HTMLSelectElement>("#plan-days")!.name,
+      form.querySelector<HTMLSelectElement>("#plan-interest")!.name,
+      form.querySelector<HTMLSelectElement>("#plan-pace")!.name,
+    ]).toEqual(["d", "i", "pace"]);
+  });
+
+  it("keeps its own button, not the transfer bar's", async () => {
+    await openPlan();
+    // The two bars share their chrome deliberately; sharing the submit wording
+    // would make the open tab unreadable.
+    expect(screen.queryByRole("button", { name: new RegExp(t("search.submit")) })).toBeNull();
   });
 });
 
