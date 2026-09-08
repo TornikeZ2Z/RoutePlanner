@@ -1,5 +1,7 @@
 import type { Locale } from "@/lib/i18n";
 import { config } from "@/lib/config";
+import { LEGAL_KA } from "@/lib/legal-ka";
+import { LEGAL_RU } from "@/lib/legal-ru";
 
 /**
  * Terms, privacy and cancellation copy.
@@ -41,7 +43,31 @@ const CONTACT = config.contact.email;
 export const LEGAL_SLUGS = ["terms", "privacy", "cancellation"] as const;
 export type LegalSlug = (typeof LEGAL_SLUGS)[number];
 
-export function getLegalDocument(slug: string, _locale: Locale): LegalDocument | null {
+/**
+ * The English text below is the operative version.
+ *
+ * getLegalDocument serves the reader's language where a translation exists and
+ * falls back to English otherwise. The translations were checked back against
+ * this file section by section, but they are translations of text no lawyer has
+ * reviewed, so two things are true at once and the page says both: the document
+ * is unreviewed, AND the English governs if the two ever disagree.
+ *
+ * That second line is not boilerplate. A translation error in a liability
+ * clause would otherwise be as binding as the clause itself.
+ */
+function translated(slug: string, locale: Locale): LegalDocument | null {
+  const table = locale === "ka" ? LEGAL_KA : locale === "ru" ? LEGAL_RU : null;
+  const doc = table?.[slug];
+  const english = englishDocument(slug);
+  // The date belongs to the document version, not to the language.
+  return doc && english ? { ...doc, updated: english.updated } : null;
+}
+
+export function getLegalDocument(slug: string, locale: Locale): LegalDocument | null {
+  return translated(slug, locale) ?? englishDocument(slug);
+}
+
+function englishDocument(slug: string): LegalDocument | null {
   switch (slug) {
     case "terms":
       return {

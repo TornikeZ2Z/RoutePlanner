@@ -285,6 +285,13 @@ export const en = {
   "contact.ruleCancel": "Cancellation policy — currently free of charge",
 
   // ---- cookie notice -----------------------------------------------------
+  "legal.eyebrow": "Legal",
+  "legal.updated": "Last updated {date}",
+  "legal.unreviewedT": "Not yet reviewed by a Georgian lawyer",
+  "legal.unreviewedB": "These documents describe accurately what this service does and what it stores, but they have not been checked by qualified local counsel. That review is required before trading.",
+  "legal.contact": "Contact",
+  "legal.governT": "English is the governing version",
+  "legal.governB": "These pages are available in Georgian and Russian. Where a translation and the English differ, the English text applies.",
   "cookie.body": "We use only the cookies the site needs to work, and to remember your language and currency.",
   "cookie.link": "Privacy policy",
   "cookie.accept": "Got it",

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { isLocale, LOCALES, type Locale } from "@/lib/i18n";
+import { isLocale, LOCALES, getTranslator, type Locale } from "@/lib/i18n";
 import { getLegalDocument, LEGAL_SLUGS } from "@/lib/legal";
 import { sql } from "@db/client";
 
@@ -69,50 +69,43 @@ export default async function LegalPage({ params }: Props) {
   const doc = (await getOverride(slug, locale)) ?? getLegalDocument(slug, locale as Locale);
   if (!doc) notFound();
   const edited = "edited" in doc;
+  const t = getTranslator(locale as Locale);
 
   return (
     <div className="mx-auto max-w-3xl">
       <nav aria-label="Breadcrumb" className="text-sm text-ink-500">
-        <Link href={`/${locale}`} className="hover:text-ink-800">Home</Link>
+        <Link href={`/${locale}`} className="hover:text-ink-800">{t("common.home")}</Link>
         <span className="mx-2" aria-hidden>/</span>
         <span className="text-ink-700">{doc.title}</span>
       </nav>
 
       <header className="mt-6">
-        <p className="eyebrow">Legal</p>
+        <p className="eyebrow">{t("legal.eyebrow")}</p>
         <h1 className="font-display mt-3 text-4xl text-ink-900 sm:text-5xl">{doc.title}</h1>
-        <p className="mt-2 text-sm text-ink-500">Last updated {doc.updated}</p>
+        <p className="mt-2 text-sm text-ink-500">{t("legal.updated", { date: doc.updated })}</p>
         <p className="mt-5 text-lg leading-relaxed text-ink-700">{doc.intro}</p>
       </header>
 
       {/*
-        Two separate warnings, because they are two separate problems and a
-        reader deserves to know which one applies.
+        Two notices, because they answer two different questions.
 
-        The lawyer notice has always been here. The language notice is new: the
-        code default is written in English and there are no ka or ru rows in
-        content_pages yet, so a Georgian visitor opening /ka/legal/terms has
-        been reading English with nothing on the page saying so. Silently
-        serving a legal document in a language the reader did not ask for is
-        worse than saying plainly that it is only available in English.
-
-        Translating the current text is deliberately NOT the fix. It is due for
-        review by Georgian counsel and will change; translating first means
-        translating twice, and a translated-but-unreviewed document reads more
-        authoritative than it is. Which comes first is the open question on
-        CR-2026-0018.
+        Neither is shown once a lawyer-reviewed version has been published
+        through content_pages — that is what `edited` means, and it is why the
+        translations went into code rather than through that table: publishing
+        them there would have silently suppressed the warning below and implied
+        counsel had seen the text.
       */}
       {!edited && <div className="mt-6 space-y-3">
-        <Alert tone="warning" title="Not yet reviewed by a Georgian lawyer">
-          These terms describe accurately what this service does and what it stores, but they have
-          not been checked by qualified local counsel. That review is required before trading.
-        </Alert>
+        <Alert tone="warning" title={t("legal.unreviewedT")}>{t("legal.unreviewedB")}</Alert>
+        {/*
+          The English-only notice that stood here is gone: the documents are
+          translated now. What replaces it is the other half of the same
+          honesty — a translation of unreviewed text is two removes from
+          settled, and if a translated clause and the English ever disagree it
+          matters which one binds.
+        */}
         {locale !== "en" && (
-          <Alert tone="warning" title="Available in English only">
-            {locale === "ka"
-              ? "ეს დოკუმენტი ჯერ მხოლოდ ინგლისურადაა. ქართული ვერსია გამოქვეყნდება იურისტის შემოწმების შემდეგ."
-              : "Этот документ пока доступен только на английском. Русская версия появится после проверки юристом."}
-          </Alert>
+          <Alert tone="info" title={t("legal.governT")}>{t("legal.governB")}</Alert>
         )}
       </div>}
 
@@ -139,7 +132,7 @@ export default async function LegalPage({ params }: Props) {
             </Link>
           );
         })}
-        <Link href={`/${locale}/contact`} className="text-ink-900 underline underline-offset-4">Contact</Link>
+        <Link href={`/${locale}/contact`} className="text-ink-900 underline underline-offset-4">{t("legal.contact")}</Link>
       </nav>
     </div>
   );
