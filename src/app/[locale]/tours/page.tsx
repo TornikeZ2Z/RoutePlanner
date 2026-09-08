@@ -17,15 +17,37 @@ interface Props { params: Promise<{ locale: string }>; searchParams: Promise<Rec
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
+  if (!isLocale(locale)) return {};
+  /*
+     Both of these were English on every locale.
+
+     A Georgian visitor's search result and shared link read "Day trips and
+     multi-day tours in Georgia" — the same defect the route pages had, fixed
+     there and missed here, because the two pages were written months apart and
+     only one of them was in the ticket. The keys existed the whole time: the
+     page's own <h1> has rendered tours.title in three languages since it was
+     built.
+  */
+  const t = getTranslator(locale as Locale);
   const url = `${config.appUrl}/${locale}/tours`;
+  const title = t("tours.title");
+  const description = t("tours.metaDesc");
   return {
-    title: "Day trips and multi-day tours in Georgia",
-    description:
-      "Curated routes with a private driver — Mtskheta, Kakheti wine country, Kazbegi, " +
-      "Vardzia and Svaneti. Fixed price for the whole vehicle.",
+    title,
+    description,
     alternates: {
       canonical: url,
       languages: Object.fromEntries(LOCALES.map((l) => [l, `${config.appUrl}/${l}/tours`])),
+    },
+    /*
+       images is restated, not inherited: a page's openGraph REPLACES the root
+       layout's rather than merging into it, so declaring title and description
+       here without it would drop the site image and make every shared link a
+       bare grey box. Same reasoning, same fix, as the tour and route pages.
+    */
+    openGraph: {
+      title, description, url, type: "website",
+      images: [{ url: "/og.jpg", width: 1200, height: 630, alt: title }],
     },
   };
 }

@@ -164,6 +164,7 @@ export const en = {
   "tours.eyebrow": "Tours",
   "tours.title": "Routes worth taking, with someone who knows them",
   "tours.intro": "Each of these is a full itinerary with a private driver and vehicle. The price covers the car for the whole trip, including the drive home — not a seat, and not per person.",
+  "tours.metaDesc": "Curated routes with a private driver — Mtskheta, Kakheti wine country, Kazbegi, Vardzia and Svaneti. One fixed price for the whole vehicle.",
   "tours.dayTrip": "Day trip",
   "tours.days": "{count} days",
   "tours.from": "from",
