@@ -158,7 +158,7 @@ export default async function ToursIndex({ params, searchParams }: Props) {
         <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {inBand.map((tour) => {
             const price = prices.get(tour.slug);
-            const route = collapse(stopsByTour[tour.slug] ?? []);
+            const route = routeLine(stopsByTour[tour.slug] ?? []);
             return (
               <li key={tour.slug}>
                 <Link
@@ -193,9 +193,9 @@ export default async function ToursIndex({ params, searchParams }: Props) {
                       card, so anything placed after it competes for that space
                       and the cards stop lining up.
 
-                      tour_stops already holds this and already includes the
-                      origin at both ends, so the chain reads Tbilisi → Borjomi
-                      → Vardzia → Tbilisi without anything being prepended.
+                      tour_stops already holds this, so nothing is prepended and
+                      nothing is written twice; routeLine below trims it to the
+                      shape the request's own examples use.
                     */}
                     {route.length > 1 && (
                       <p className="mt-1.5 text-xs leading-relaxed text-ink-500">
@@ -240,13 +240,24 @@ export default async function ToursIndex({ params, searchParams }: Props) {
 }
 
 /**
- * Consecutive repeats out of a stop chain.
+ * A stop chain, shortened to the shape the request itself uses.
  *
- * A three-day Svaneti tour records Mestia on day one and day two, so its stops
- * read Kutaisi, Mestia, Mestia, Kutaisi — correct as an itinerary, and noise on
- * one line. Only ADJACENT repeats go: a tour that returns to Tbilisi in the
- * middle and again at the end is telling the truth about its shape both times.
+ * Two steps. First, consecutive repeats go: a three-day Svaneti tour records
+ * Mestia on day one and day two, so its stops read Kutaisi, Mestia, Mestia,
+ * Kutaisi — correct as an itinerary, noise on one line. Only ADJACENT repeats,
+ * though: a tour that comes back through Tbilisi in the middle and again at the
+ * end is telling the truth about its shape both times.
+ *
+ * Then the trailing return to the origin goes. Every tour_stops row set ends
+ * where it started, because it is a round trip and that is the honest record —
+ * but the founder wrote his own examples as "თბილისი → კახეთი", origin then
+ * where you go, and a card that answers with "Tbilisi → Mtskheta → Tbilisi" is
+ * in a different shape from the band subtitle three inches above it. The return
+ * is not lost: the meta row already says "From Tbilisi" and the detail page
+ * still draws the full circuit, stop by stop, with the map.
  */
-function collapse(names: string[]): string[] {
-  return names.filter((name, i) => name !== names[i - 1]);
+function routeLine(names: string[]): string[] {
+  const seq = names.filter((name, i) => name !== names[i - 1]);
+  if (seq.length > 2 && seq[seq.length - 1] === seq[0]) seq.pop();
+  return seq;
 }
