@@ -15,15 +15,18 @@ interface LocationOption { slug: string; name_en: string; type: string }
  * inquiry rather than pretending). Tours points at the curated catalogue;
  * Build my route hands over to the three-question planner.
  *
- * Each tab carries a line of its own saying what it is. The three names read
- * as near-synonyms to someone who has not used the site — CR-2026-0008 item 4
- * — and a visitor who cannot tell them apart picks the first one.
+ * Pills, and no explaining line under the label.
  *
- * That line is the first thing to go on a phone. Three two-line tabs stacked
- * full width came to roughly two hundred pixels before the first field, which
- * is most of what CR-2026-0030 was complaining about: the widget now shares
- * the hero, so anything above the fields is charged against the fields. Three
- * columns at every width, the explaining line from sm up.
+ * That line existed for a reason: CR-2026-0008 item 4 said the three names read
+ * as near-synonyms to someone who has not used the site, and a visitor who
+ * cannot tell them apart picks the first one. It has been removed anyway, on
+ * the reference layout attached to CR-2026-0033 and an explicit instruction to
+ * follow that reference where it conflicts with an earlier decision.
+ *
+ * What is left carrying that job is the icon and the pill shape, which is
+ * thinner cover than a sentence. If people start booking transfers when they
+ * wanted tours, this is the first place to look, and the keys — home.tabTransferSub,
+ * home.tabToursSub, home.tabPlanSub — are still in all three dictionaries.
  */
 const PANELS = ["transfer", "tours", "plan"] as const;
 
@@ -40,26 +43,22 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
 
   return (
     <div>
-      <div role="tablist" aria-label={t("home.planTitle")} className="grid grid-cols-3 gap-1.5 border-b border-ink-100 pb-2.5 sm:gap-2 sm:pb-3">
+      <div role="tablist" aria-label={t("home.planTitle")} className="flex flex-wrap gap-1.5 border-b border-ink-100 pb-2.5 sm:gap-2 sm:pb-3">
         {tabs.map(({ id, label, sub, icon }) => (
           <button
             key={id} role="tab" type="button"
             aria-selected={tab === id}
+            title={sub}
             onClick={() => setTab(id)}
-            className={`flex items-start gap-1.5 rounded-xl px-2.5 py-2 text-left transition-colors sm:gap-2.5 sm:px-3.5 sm:py-2.5 ${
+            className={`inline-flex items-center gap-2 rounded-full px-3.5 py-2 transition-colors sm:px-4 ${
               tab === id ? "bg-brand-600 text-white" : "text-ink-500 hover:bg-ink-50 hover:text-ink-900"
             }`}
           >
-            <svg viewBox="0 0 24 24" className="mt-0.5 size-4 shrink-0" fill="none" stroke="currentColor"
+            <svg viewBox="0 0 24 24" className="size-4 shrink-0" fill="none" stroke="currentColor"
                  strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d={icon} />
             </svg>
-            <span className="min-w-0">
-              <span className="block text-xs font-semibold leading-tight sm:text-[13px]">{label}</span>
-              <span className={`mt-0.5 hidden text-[11px] leading-snug sm:block ${tab === id ? "text-white/80" : "text-ink-400"}`}>
-                {sub}
-              </span>
-            </span>
+            <span className="text-xs font-semibold leading-tight sm:text-[13px]">{label}</span>
           </button>
         ))}
       </div>

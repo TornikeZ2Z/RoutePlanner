@@ -283,7 +283,15 @@ export default async function Home({
           <h2 className="font-display text-3xl text-ink-900 sm:text-4xl">{t("home.catsTitle")}</h2>
           <p className="mt-2 text-ink-500">{t("home.catsSub")}</p>
         </div>
-        <ul className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-3">
+        {/*
+          Six across on a wide screen, from the CR-2026-0033 reference. They
+          stay expand-in-place rather than becoming links: the reference draws a
+          circular arrow that navigates, but opening the destinations under the
+          tile is a feature rather than a style, and losing it was not part of
+          what was asked for. A tile is narrower now, so its label is the only
+          thing on the face — the place count moves below the fold of the card.
+        */}
+        <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 lg:gap-4">
           {CATEGORY_TILES.map(({ cat, label }) => {
             const picks = DESTINATIONS.filter((d) => d.categories.includes(cat))
               .flatMap((d) => {

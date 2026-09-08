@@ -81,12 +81,18 @@ describe.each(LOCALES)("booking widget (%s)", (locale) => {
     const tabs = screen.getAllByRole("tab");
     expect(tabs).toHaveLength(3);
 
-    // CR-2026-0008 item 4: the three names read as synonyms on their own, so
-    // the line underneath is the part doing the work. Assert both.
+    /*
+     * CR-2026-0008 item 4 said the three names read as synonyms on their own,
+     * so the line underneath was doing the work. CR-2026-0033's reference has
+     * no such line and that reference won, so the line is now the tab's title
+     * rather than visible text. It is still asserted: it is the only remaining
+     * place the distinction is written down, and dropping it silently is how
+     * the tabs go back to being three synonyms.
+     */
     tabs.forEach((tab, i) => {
       const [label, sub] = TABS[i]!;
       expect(tab.textContent, `tab ${i} label`).toContain(label);
-      expect(tab.textContent, `tab ${i} sub-label`).toContain(sub);
+      expect(tab.getAttribute("title"), `tab ${i} explains itself`).toBe(sub);
     });
   });
 
@@ -169,22 +175,54 @@ describe("booking widget, round trip", () => {
 });
 
 /*
- * CR-2026-0027 moved the body type off the booking bar and onto the results
- * page: "this should not be here — when they get to the cars, a filter should
- * come up in the corner there". The question survives the move, so both halves
- * are asserted — gone from the bar, present and complete on the panel — because
- * a change like this fails silently in the middle, with the choice removed from
- * one place and never arriving in the other.
+ * The body type has moved twice: onto the bar (CR-2026-0008 item 5), off it and
+ * onto the results panel (CR-2026-0027), and back onto the bar as well
+ * (CR-2026-0033's reference layout). It now lives in BOTH places, so both are
+ * asserted — a change like this fails silently in the middle, with the choice
+ * removed from one place and never arriving in the other — and so is the one
+ * thing they share, the `vehicle` query parameter.
  */
-describe("vehicle category, after CR-2026-0027", () => {
+describe("vehicle category, on the bar and on the results panel", () => {
   const t = getTranslator("en");
 
-  it("is not asked on the booking bar", () => {
-    render(<SearchTabs locale="en" locations={LOCATIONS} />);
+  it("is asked on the booking bar, any vehicle by default", () => {
+    const { container } = render(<SearchTabs locale="en" locations={LOCATIONS} />);
 
-    for (const category of [{ label: "search.vehAny" as const }, ...VEHICLE_CATEGORIES]) {
-      expect(screen.queryByRole("radio", { name: t(category.label) }), t(category.label)).toBeNull();
+    const select = container.querySelector<HTMLSelectElement>("#vehicle")!;
+    expect(select, "the bar carries a vehicle control").not.toBeNull();
+    expect(select.name).toBe("vehicle");
+    expect(select.value).toBe("");
+    for (const category of VEHICLE_CATEGORIES) {
+      expect(
+        [...select.options].some((o) => o.value === category.id && o.text === t(category.label)),
+        `${category.id} is offered on the bar`,
+      ).toBe(true);
     }
+  });
+
+  it("carries the chosen category into the search it runs", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<SearchTabs locale="en" locations={LOCATIONS} />);
+
+    await user.selectOptions(container.querySelector<HTMLSelectElement>("#vehicle")!, "minivan");
+    await user.click(screen.getByRole("button", { name: new RegExp(t("search.submit")) }));
+
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(String(push.mock.calls[0]![0])).toContain("vehicle=minivan");
+  });
+
+  it("refuses a category that cannot seat the passengers, without searching", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<SearchTabs locale="en" locations={LOCATIONS} />);
+
+    const passengers = container.querySelector<HTMLInputElement>("#pax")!;
+    await user.clear(passengers);
+    await user.type(passengers, "5");
+    await user.selectOptions(container.querySelector<HTMLSelectElement>("#vehicle")!, "sedan");
+    await user.click(screen.getByRole("button", { name: new RegExp(t("search.submit")) }));
+
+    expect(screen.getByRole("alert").textContent).toBe(t("search.errVehiclePax", { count: 5 }));
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("is offered by the results filter, with its seat range, any by default", () => {

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Field, Input } from "@/components/ui";
 import { getTranslator, isLocale, type Locale } from "@/lib/i18n";
+import { VEHICLE_CATEGORIES } from "@/lib/vehicle-categories";
 import { toLocalInput } from "@/lib/format";
 
 interface LocationOption { slug: string; name_en: string; type: string }
@@ -24,6 +25,7 @@ const ICONS = {
   ret: "M4 8h13m0 0-3.5-3.5M17 8l-3.5 3.5M20 16H7m0 0 3.5-3.5M7 16l3.5 3.5",
   pax: "M12 11a3.4 3.4 0 1 0 0-6.8A3.4 3.4 0 0 0 12 11Zm-7 9a7 7 0 0 1 14 0",
   bag: "M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m-9 0h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z",
+  car: "M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11m-14 0h14m-14 0a2 2 0 0 0-2 2v4h2m14-6a2 2 0 0 1 2 2v4h-2m-12 0v2m10-2v2m-9-5h.01M17 13h.01",
 } as const;
 
 const CELL_CONTROL =
@@ -75,6 +77,9 @@ export function SearchForm({
   const [returnWhen, setReturnWhen] = useState(defaultReturnWhen());
   const [passengers, setPassengers] = useState(2);
   const [luggage, setLuggage] = useState(2);
+  // "" is any vehicle, and stays the default: a traveller who does not care
+  // which body they get should not have to say so before seeing a price.
+  const [vehicle, setVehicle] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   function submit(e: React.FormEvent) {
@@ -91,6 +96,12 @@ export function SearchForm({
       if (!isTourEndpoints) return setError(t("search.errAdjacent"));
     }
     if (new Date(when).getTime() < Date.now()) return setError(t("search.errPast"));
+    // Caught here rather than on the results page, where it would read as
+    // "no drivers on this route" — which would be a lie about the route.
+    const category = VEHICLE_CATEGORIES.find((c) => c.id === vehicle);
+    if (category && passengers > category.maxPassengers) {
+      return setError(t("search.errVehiclePax", { count: passengers }));
+    }
     if (roundTrip && new Date(returnWhen).getTime() <= new Date(when).getTime()) {
       return setError(t("search.errReturn"));
     }
@@ -98,6 +109,7 @@ export function SearchForm({
     const q = new URLSearchParams({
       from, to, when, passengers: String(passengers), luggage: String(luggage),
     });
+    if (vehicle) q.set("vehicle", vehicle);
     if (roundTrip) q.set("return", returnWhen);
     if (tourSlug) q.set("tour", tourSlug);
     for (const s of stops) q.append("stop", s);
@@ -143,21 +155,29 @@ export function SearchForm({
   );
 
   /*
-     The body type is no longer asked here.
+     The body type, asked here AND on the results page.
 
-     It used to be a row of radio chips on the bar, from CR-2026-0008 item 5.
-     CR-2026-0027 moved it: "this should not be here — when they get to the
-     cars, a filter should come up in the corner there". It is the same
-     question either way, but on the results page it is asked next to the cars
-     it filters, and a traveller who does not yet know what a minivan seats can
-     see four of them before deciding. The control now lives in
-     OfferFiltersPanel; `vehicle` in the query string still works, so links and
-     bookmarks made before this change keep filtering.
+     It has moved twice. CR-2026-0008 item 5 put it on the bar as a row of radio
+     chips; CR-2026-0027 took it off — "this should not be here, when they get
+     to the cars a filter should come up in the corner there" — and it became a
+     control in OfferFiltersPanel; CR-2026-0033 arrived with a reference layout
+     that has it back in the field row, and the tie was broken in favour of that
+     reference.
 
-     The passenger check that lived here went with it. It refused a search a
-     category could not seat before it cost a page load, which is only worth
-     doing while the category is chosen before the search.
+     So it is in both places rather than swapped back, because the two requests
+     are not actually in conflict about what a traveller needs: one wanted to
+     say "minivan" before seeing prices, the other wanted to change their mind
+     while looking at cars. Both now work, and `vehicle` in the query string is
+     the single thing they share, so a link made from either still filters.
+
+     A select rather than the old chips: it is one cell of the segmented bar
+     like every other field, which is what the reference shows and what keeps
+     the bar one row tall. CR-2026-0032 had just finished shrinking it.
   */
+  const vehicleOptions = [
+    <option key="any" value="">{t("search.vehAny")}</option>,
+    ...VEHICLE_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{t(c.label)}</option>),
+  ];
 
   if (compact) {
     return (
@@ -208,6 +228,15 @@ export function SearchForm({
                    onChange={(e) => setLuggage(Number(e.target.value))} />
           </Field>
         </div>
+        <Field label={t("search.vehicle")} htmlFor="vehicle-compact">
+          <select
+            id="vehicle-compact" name="vehicle" value={vehicle}
+            onChange={(e) => setVehicle(e.target.value)}
+            className="w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm"
+          >
+            {vehicleOptions}
+          </select>
+        </Field>
 
         <Button type="submit" className="w-full">{t("search.submit")}</Button>
         {error && <p className="text-sm text-[--color-danger]" role="alert">{error}</p>}
@@ -280,9 +309,15 @@ export function SearchForm({
             <input id="pax" name="passengers" type="number" min={1} max={20} value={passengers}
                    onChange={(e) => setPassengers(Number(e.target.value))} className={CELL_CONTROL} />
           </Cell>
-          <Cell icon={ICONS.bag} label={t("search.luggage")} htmlFor="bags" className="sm:basis-1/4 lg:max-w-36 lg:basis-auto">
+          <Cell icon={ICONS.bag} label={t("search.luggage")} htmlFor="bags" className="sm:basis-1/4 lg:max-w-32 lg:basis-auto">
             <input id="bags" name="luggage" type="number" min={0} max={20} value={luggage}
                    onChange={(e) => setLuggage(Number(e.target.value))} className={CELL_CONTROL} />
+          </Cell>
+          <Cell icon={ICONS.car} label={t("search.vehicle")} htmlFor="vehicle" className="sm:basis-1/2 lg:max-w-48 lg:basis-auto">
+            <select id="vehicle" name="vehicle" value={vehicle}
+                    onChange={(e) => setVehicle(e.target.value)} className={CELL_CONTROL + " cursor-pointer"}>
+              {vehicleOptions}
+            </select>
           </Cell>
         </div>
 
