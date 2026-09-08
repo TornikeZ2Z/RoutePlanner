@@ -1,29 +1,41 @@
+import { getTranslator, type Locale } from "@/lib/i18n";
 /**
- * Human durations.
+ * Human durations and distances, in the reader's language.
  *
  * "about 0 h driving" appeared on every route under an hour — technically the
- * result of integer division, and immediately reads as broken. Sub-hour
- * trips are stated in minutes, and hours are only rounded once there are
- * enough of them for rounding to be honest.
+ * result of integer division, and immediately reads as broken. Sub-hour trips
+ * are stated in minutes, and hours are only rounded once there are enough of
+ * them for rounding to be honest.
+ *
+ * The units used to be hard-coded English. "150 km" and "about 3 h 20 min"
+ * rendered exactly like that on every Georgian and Russian page — on route
+ * cards, tour cards, destination pages and the results list — because these
+ * helpers had no idea who was reading. The numbers are the same in every
+ * language; only the unit and the word order change, so both live in the
+ * dictionaries and the shape comes from the translated string rather than from
+ * concatenation here.
+ *
+ * The locale defaults to English because the admin console calls these too,
+ * and it has its own dictionary; there is no reader-language question there.
  */
-export function formatDuration(minutes: number): string {
+export function formatDuration(minutes: number, locale: Locale = "en"): string {
   if (!Number.isFinite(minutes) || minutes <= 0) return "—";
-  if (minutes < 60) return `${Math.round(minutes / 5) * 5} min`;
+  const t = getTranslator(locale);
+  if (minutes < 60) return t("unit.min", { n: String(Math.round(minutes / 5) * 5) });
 
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
-  if (rest === 0) return `${hours} h`;
-  if (rest < 8) return `${hours} h`;
-  if (rest > 52) return `${hours + 1} h`;
-  return `${hours} h ${Math.round(rest / 5) * 5} min`;
+  if (rest === 0 || rest < 8) return t("unit.hour", { n: String(hours) });
+  if (rest > 52) return t("unit.hour", { n: String(hours + 1) });
+  return t("unit.hourMin", { h: String(hours), m: String(Math.round(rest / 5) * 5) });
 }
 
-/** "about 2 h", "about 25 min" — for estimates that should not look precise. */
-export const formatApproxDuration = (minutes: number): string =>
-  minutes <= 0 ? "—" : `about ${formatDuration(minutes)}`;
+/** "about 2 h", "დაახლოებით 25 წთ" — for estimates that should not look precise. */
+export const formatApproxDuration = (minutes: number, locale: Locale = "en"): string =>
+  minutes <= 0 ? "—" : getTranslator(locale)("unit.about", { value: formatDuration(minutes, locale) });
 
-export function formatDistance(km: number): string {
-  return `${Math.round(km)} km`;
+export function formatDistance(km: number, locale: Locale = "en"): string {
+  return getTranslator(locale)("unit.km", { n: String(Math.round(km)) });
 }
 
 /**

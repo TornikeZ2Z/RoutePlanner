@@ -132,8 +132,8 @@ export default async function TourPage({ params }: Props) {
 
         <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-3 border-t border-ink-200 pt-4 text-sm">
           <div><dt className="text-ink-500">{t("tours.startsFrom")}</dt><dd className="font-medium text-ink-900">{tour.originName}</dd></div>
-          <div><dt className="text-ink-500">{t("tours.distance")}</dt><dd className="font-medium text-ink-900">{t("tours.roundTrip", { km: formatDistance(tour.distanceKm) })}</dd></div>
-          <div><dt className="text-ink-500">{t("tours.drivingTime")}</dt><dd className="font-medium text-ink-900">{formatDuration(tour.driveMinutes)}</dd></div>
+          <div><dt className="text-ink-500">{t("tours.distance")}</dt><dd className="font-medium text-ink-900">{t("tours.roundTrip", { km: formatDistance(tour.distanceKm, locale as Locale) })}</dd></div>
+          <div><dt className="text-ink-500">{t("tours.drivingTime")}</dt><dd className="font-medium text-ink-900">{formatDuration(tour.driveMinutes, locale as Locale)}</dd></div>
           {price && (
             <div>
               <dt className="text-ink-500">{t("tours.priceFrom")}</dt>
@@ -231,7 +231,7 @@ export default async function TourPage({ params }: Props) {
                       className="block h-full rounded-xl border border-ink-200 bg-white p-4 hover:border-ink-500">
                   <p className="font-medium text-ink-900">{t2.title}</p>
                   <p className="mt-1 text-xs text-ink-500">
-                    {t2.durationDays === 1 ? t("tours.dayTrip") : t("tours.days", { count: t2.durationDays })} · {formatDistance(t2.distanceKm)}
+                    {t2.durationDays === 1 ? t("tours.dayTrip") : t("tours.days", { count: t2.durationDays })} · {formatDistance(t2.distanceKm, locale as Locale)}
                   </p>
                 </Link>
               </li>

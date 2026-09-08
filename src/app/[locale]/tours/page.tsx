@@ -117,7 +117,7 @@ export default async function ToursIndex({ params, searchParams }: Props) {
                       <p className="text-xs text-ink-500">
                         {t("tours.fromPlace", { place: tour.originName })}
                         <span className="mt-0.5 block">
-                          {formatDistance(tour.distanceKm)} · {formatDuration(tour.driveMinutes)} {t("tours.driving")}
+                          {formatDistance(tour.distanceKm, locale as Locale)} · {formatDuration(tour.driveMinutes, locale as Locale)} {t("tours.driving")}
                         </span>
                       </p>
                       {price && (

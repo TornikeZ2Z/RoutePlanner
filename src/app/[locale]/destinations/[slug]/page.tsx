@@ -160,7 +160,7 @@ export default async function DestinationPage({ params }: Props) {
           <Card className="p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-400">{t("dest.fromTbilisiT")}</p>
             <p className="font-display mt-2 text-2xl text-ink-900">
-              {formatDuration(fromTbilisi.driveMinutes)}
+              {formatDuration(fromTbilisi.driveMinutes, locale as Locale)}
             </p>
             <p className="text-sm text-ink-500">
               {t("dest.km", { km: Math.round(fromTbilisi.distanceKm) })}
@@ -204,7 +204,7 @@ export default async function DestinationPage({ params }: Props) {
                   <span className="min-w-0 text-sm font-medium text-ink-900">
                     {r.originName} → {r.destinationName}
                   </span>
-                  <span className="shrink-0 text-sm text-ink-500">{formatDuration(r.driveMinutes)}</span>
+                  <span className="shrink-0 text-sm text-ink-500">{formatDuration(r.driveMinutes, locale as Locale)}</span>
                 </Link>
               </li>
             ))}

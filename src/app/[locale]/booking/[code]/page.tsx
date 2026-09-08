@@ -137,7 +137,7 @@ export default async function BookingPage({ params, searchParams }: Props) {
               <div><dt className="text-ink-500">{t("booking.departure")}</dt>
                 <dd className="font-medium">{startsAt.toLocaleString(locale, { dateStyle: "full", timeStyle: "short" })}</dd></div>
               <div><dt className="text-ink-500">{t("booking.drivingTime")}</dt>
-                <dd>{formatDuration(booking.drive_minutes)} {t("booking.excludesStops")}</dd></div>
+                <dd>{formatDuration(booking.drive_minutes, locale as Locale)} {t("booking.excludesStops")}</dd></div>
               <div><dt className="text-ink-500">{t("booking.pickup")}</dt><dd>{booking.pickup_address}</dd></div>
               <div><dt className="text-ink-500">{t("booking.dropoff")}</dt><dd>{booking.dropoff_address}</dd></div>
               {booking.flight_number && (

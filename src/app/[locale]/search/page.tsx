@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { isLocale, getTranslator } from "@/lib/i18n";
+import { isLocale, getTranslator, type Locale } from "@/lib/i18n";
 import { searchOffers, availableFacets, resolvePlace, type SortKey } from "@/lib/offers";
 import { formatMoney } from "@/lib/money";
 import { formatDuration } from "@/lib/format";
@@ -197,7 +197,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
         {result.offers.length > 0 && (
           <>
             <p className="mt-1 text-sm text-ink-600">
-              {t("search.driveEstimate", { minutes: formatDuration(result.route.driveMinutes), km })}
+              {t("search.driveEstimate", { minutes: formatDuration(result.route.driveMinutes, locale as Locale), km })}
             </p>
             <p className="mt-1 text-xs text-ink-500">{t("search.estimateNote")}</p>
           </>

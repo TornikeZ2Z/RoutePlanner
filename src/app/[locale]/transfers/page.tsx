@@ -63,7 +63,7 @@ export default async function TransfersIndex({ params }: Props) {
                 {r.originName} <span className="text-ink-400" aria-hidden>→</span> {r.destinationName}
               </p>
               <p className="mt-1 text-sm text-ink-500">
-                {formatDistance(r.distanceKm)} · {formatDuration(r.driveMinutes)}
+                {formatDistance(r.distanceKm, locale as Locale)} · {formatDuration(r.driveMinutes, locale as Locale)}
               </p>
               {r.requires4x4 && <span className="mt-2 inline-block"><Badge tone="warning">{t("tours.fourByFour")}</Badge></span>}
               </div>

@@ -156,8 +156,8 @@ export default async function RoutePage({ params }: Props) {
           {t("transfers.routeTitle", { from: data.originName, to: data.destinationName })}
         </h1>
         <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-600">
-          <span>{formatDistance(data.distanceKm)}</span>
-          <span>{formatDuration(data.driveMinutes)} {t("tours.driving")}</span>
+          <span>{formatDistance(data.distanceKm, locale as Locale)}</span>
+          <span>{formatDuration(data.driveMinutes, locale as Locale)} {t("tours.driving")}</span>
           {fromPrice && (
             <span className="font-medium text-ink-900">
               {t("transfers.fromPrice", { price: fromPrice })}
@@ -216,7 +216,7 @@ export default async function RoutePage({ params }: Props) {
                   <span className="mx-2 text-ink-400" aria-hidden>→</span>
                   <span className="font-medium text-ink-800">{r.destinationName}</span>
                   <span className="mt-0.5 block text-xs text-ink-500">
-                    {formatDistance(r.distanceKm)} · {formatDuration(r.driveMinutes)}
+                    {formatDistance(r.distanceKm, locale as Locale)} · {formatDuration(r.driveMinutes, locale as Locale)}
                   </span>
                 </Link>
               </li>
