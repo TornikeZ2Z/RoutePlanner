@@ -87,10 +87,15 @@
   --color-gold-600: #a8871f;
   --color-gold-700: #7d6417;
 
-  /* Feedback (design system semantics) */
+  /* Feedback (design system semantics).
+
+     --color-danger was declared HERE as #b43b42 and again forty lines below as
+     #b3261e. Both were in the same @theme, so the later one won and the
+     rendered colour happened to match DESIGN-SYSTEM.md — by accident, not by
+     intent. Anyone editing the first would have changed nothing and had no way
+     to see why. One declaration now, kept beside its -bg pair below. */
   --color-success: #157a55;
   --color-warning: #a56610;
-  --color-danger:  #b43b42;
   --color-info:    #2e6e9e;
 
   /* Motion (design system: small / component / spatial) */
