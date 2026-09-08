@@ -36,17 +36,35 @@
   --color-steel-100: #e7eaee;
   --color-steel-700: #39434f;
 
-  /* Signal Blue. Conversion only: filled buttons that move money or book. */
-  --color-brand-50:  #eef2f8;
-  --color-brand-100: #dbe4f0;
-  --color-brand-200: #b6c8e0;
-  --color-brand-300: #89a3c6;
-  --color-brand-400: #56779f;
-  --color-brand-500: #2b4a74;
-  --color-brand-600: #0b1d33;
-  --color-brand-700: #183a5b; /* Route Blue — hover depth */
-  --color-brand-800: #081524;
-  --color-brand-900: #050e19;
+  /*
+     Signal Blue. Conversion only: filled buttons that move money or book.
+
+     It now is one. brand-600 was #0b1d33 — the same hex as pine-800, the dark
+     surface token — so the one colour meant to say "press this" was
+     indistinguishable from the bands it sat on, and a scale labelled Signal
+     Blue held no blue at any step a button used. CR-2026-0033 asked for lighter
+     colours and attached a reference with a bright blue call to action; this is
+     that, and it also gives the two tokens separate jobs so lightening a dark
+     band no longer silently restyles every primary button.
+
+     #1d4ed8 carries white at 6.7:1, so the button label clears AA with room —
+     the old near-black cleared it by being nearly black, which is not the same
+     thing as being legible-by-design.
+
+     brand-700 is the hover and is now genuinely darker. It used to be #183a5b,
+     LIGHTER than the brand-600 it was the hover for, so pressing the primary
+     button lifted it instead of pushing it.
+  */
+  --color-brand-50:  #eef3fd;
+  --color-brand-100: #d8e4fb;
+  --color-brand-200: #b3c9f6;
+  --color-brand-300: #83a6ef;
+  --color-brand-400: #4f7ee6;
+  --color-brand-500: #2a60dd;
+  --color-brand-600: #1d4ed8;
+  --color-brand-700: #1740b0; /* hover depth */
+  --color-brand-800: #143691;
+  --color-brand-900: #102a6f;
 
   /* Dark inverted band (footer, hero overlay, announcement-style blocks). */
   --color-pine-50:  #f2f2f2;

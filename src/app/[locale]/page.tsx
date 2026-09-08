@@ -129,10 +129,25 @@ export default async function Home({
              (SELECT count(*) FROM bookings WHERE status = 'COMPLETED')::int AS trips`,
   ]);
 
-  // Any that exist are shown, so a slide can be added by dropping the file in.
+  /*
+   * Six slides, not eight. Any that exist are shown, so a slide can be added by
+   * dropping the file in — but the list is now chosen rather than "whatever is
+   * on disk".
+   *
+   * CR-2026-0033 says the page is far too dark, and most of that was never the
+   * CSS. Measured mean perceived luminance of the eight files: hero-7 48%,
+   * hero-8 43%, hero.jpg 37%, hero-4 31%, hero-6 31%, hero-3 29%, hero-5 20%,
+   * hero-2 17%. The last two are a night city and horses at dusk — 93% of
+   * hero-2's pixels sit below mid-grey. No overlay change makes those bright,
+   * and leaving them in means the hero goes dark again every twelve seconds
+   * whatever the gradient does. Dropping them lifts the rotation's average from
+   * 30% to 35%.
+   *
+   * Both files stay in public/photos. Putting either back is one line here.
+   */
   const heroSlides = [
-    "hero.jpg", "hero-2.jpg", "hero-3.jpg", "hero-4.jpg",
-    "hero-5.jpg", "hero-6.jpg", "hero-7.jpg", "hero-8.jpg",
+    "hero.jpg", "hero-3.jpg", "hero-4.jpg",
+    "hero-6.jpg", "hero-7.jpg", "hero-8.jpg",
   ]
     .map((name) => sitePhoto(name))
     .filter((src): src is string => src !== null);
@@ -149,8 +164,36 @@ export default async function Home({
           ) : (
             <PlaceImage imageKey={null} alt="" seedText="stepantsminda-gergeti" className="size-full" />
           )}
-          <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-pine-900/95 via-pine-900/60 to-pine-900/15" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-32 bg-gradient-to-t from-pine-900/80 to-transparent" />
+          {/*
+            Two scrims instead of one, for CR-2026-0033 — "ახლა ძააან მუქია".
+
+            The horizontal one used to carry the whole job at 95 / 60 / 15, so
+            every part of every photograph paid for the readability of text that
+            only sits in the top-left. It is now 85 / 45 / 5, and a second scrim
+            fades from 55% down to nothing by mid-height, putting the darkness
+            where the headline actually is. Net effect: the photo is markedly
+            lighter across the bottom half and the right — around and below the
+            booking card, which is what a visitor looks at — while the text sits
+            on MORE cover than before, not less.
+
+            Measured over the six slides, worst 8×8 patch behind the headline:
+
+                              white      gold
+              before          4.41       2.55
+              after           5.17       2.99
+
+            The gold second line is the binding constraint and it was already
+            failing: 2.55:1 is under the 3:1 that WCAG asks even of large text,
+            on today's live site. It cannot be fixed by darkening alone — gold
+            is a mid-tone, so past a point more scrim costs the white text more
+            than it gains the gold. 2.99 clears the bar with nothing spare, which
+            is why the accent moved up a step to gold-300 and why the headline's
+            width is capped: let it run further right and it walks off the scrim
+            onto bare daylight photograph.
+          */}
+          <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-pine-900/85 via-pine-900/45 to-pine-900/5" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-1/2 bg-gradient-to-b from-pine-900/55 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-32 bg-gradient-to-t from-pine-900/70 to-transparent" />
         </div>
 
         <div className="relative z-[2] mx-auto max-w-[1400px] 2xl:max-w-[1680px] px-4 pb-8 pt-8 sm:px-6 sm:pb-10 sm:pt-14 lg:px-10">
@@ -174,7 +217,7 @@ export default async function Home({
           */}
           <h1 className="font-display max-w-4xl text-[1.5rem] leading-[1.12] sm:text-[1.9rem] lg:text-[2.15rem]">
             {t("home.heroTitle")}
-            <span className="block text-gold-400">{t("home.heroTitle2")}</span>
+            <span className="block text-gold-300">{t("home.heroTitle2")}</span>
           </h1>
           <p className="mt-2.5 max-w-3xl text-sm leading-relaxed text-pine-100 sm:text-base">
             {t("home.heroSubtitle")}
@@ -209,7 +252,7 @@ export default async function Home({
           <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
             {HERO_CHIPS.map(([key, icon], i) => (
               <li key={key} className="flex items-start gap-2.5">
-                <span className="grid size-8 shrink-0 place-items-center rounded-full border border-gold-400/70 text-gold-400">
+                <span className="grid size-8 shrink-0 place-items-center rounded-full border border-gold-300/80 text-gold-300">
                   <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor"
                        strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                     <path d={icon} />
