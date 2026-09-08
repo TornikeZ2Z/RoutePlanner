@@ -110,7 +110,7 @@ export async function createBooking(quoteId: string, details: CheckoutDetails): 
            (q.inputs->>'distanceKm100')::int AS distance_km100,
            d.public_name AS driver_name, u.email AS driver_email, u.locale AS driver_locale,
            u.id AS driver_user_id,
-           v.make, v.model, v.year, v.plate
+           v.make, v.model, v.year, v.plate, v.seats, v.luggage
     FROM quotes q
     JOIN route_searches s ON s.id = q.search_id
     JOIN driver_profiles d ON d.id = q.driver_id
@@ -121,6 +121,30 @@ export async function createBooking(quoteId: string, details: CheckoutDetails): 
   if (!quote) throw new QuoteExpiredError("That quote no longer exists.");
   if (quote.status === "CONSUMED") throw new QuoteExpiredError("That quote has already been used.");
   if (new Date(quote.expires_at) <= new Date()) throw new QuoteExpiredError();
+
+  /*
+     The car has to fit the party that is actually being booked.
+
+     Search only ever offers vehicles with enough seats — offers.ts filters on
+     v.seats >= req.passengers — but the checkout form let the traveller change
+     the number afterwards, and the API validated it as "an integer from 1 to
+     20" and nothing else. So a quote produced for a three-seat saloon could be
+     booked for seven people, and the first anyone would learn of it is a driver
+     arriving at an airport with four passengers too many.
+
+     Checked here rather than only in the form because this is a public
+     endpoint: the form no longer offers the field, and a POST still can.
+  */
+  if (details.passengers > quote.seats) {
+    throw new QuoteExpiredError(
+      `That vehicle seats ${quote.seats}. Search again for ${details.passengers} passengers.`,
+    );
+  }
+  if (details.luggage > quote.luggage) {
+    throw new QuoteExpiredError(
+      `That vehicle takes ${quote.luggage} bags. Search again for ${details.luggage}.`,
+    );
+  }
 
   // Cash creates commission debt, so a driver who is behind cannot take it.
   if (details.paymentMode === "CASH") {
@@ -600,6 +624,8 @@ interface QuoteRow {
   itinerary: unknown; attribution: unknown; drive_minutes: number | null; distance_km100: number | null;
   driver_name: string; driver_email: string; driver_locale: string | null;
   make: string; model: string; year: number; plate: string;
+  /** Capacity of the vehicle this quote was priced for. */
+  seats: number; luggage: number;
 }
 
 interface BookingMoneyRow {
