@@ -260,6 +260,55 @@ h1, h2, h3, h4, h5, nav, button, .font-display {
   color-scheme: dark;
 }
 
+/*
+ * The measure, in one place.
+ *
+ * "mx-auto max-w-[1400px] 2xl:max-w-[1680px] px-4 sm:px-6 lg:px-10" was written
+ * out by hand eight times — the header, main, two footer strips, the operator
+ * line, the hero's inner box, the promises band and the cookie notice.
+ * DESIGN-SYSTEM.md documented the string; nothing enforced it, and a ninth copy
+ * would have been a typo away from a page that does not line up with its own
+ * header.
+ *
+ * A class rather than a React component because four of the eight are in the
+ * layout's own markup and two carry extra layout of their own (flex, grid) that
+ * a wrapper would have had to forward.
+ */
+.measure {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1400px;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) { .measure { padding-inline: 1.5rem } }
+@media (min-width: 1024px) { .measure { padding-inline: 2.5rem } }
+@media (min-width: 1536px) { .measure { max-width: 1680px } }
+
+/*
+ * A section that breaks the measure and runs edge to edge.
+ *
+ * Four coupled facts used to be repeated per band: the escape itself, a
+ * negative top margin cancelling whatever sat above it (two different numbers,
+ * from two different files), a re-declared inner container, and overflow-x-clip
+ * on the layout root to swallow the overhang. Missing the `relative` shipped as
+ * a bug once already — CR-2026-0035, the band half a viewport to the left.
+ *
+ * Known limitation, measured rather than assumed: 100vw includes the classic
+ * scrollbar, so at a 1440px window each band sits 7px left of the viewport and
+ * overhangs 8px right. overflow-x-clip hides it and no horizontal scrollbar
+ * appears. It is invisible on a flat fill and costs the hero photograph a
+ * fifteen-pixel crop. The real fix is for `main` to stop being the width
+ * constraint so a band needs no escape at all; that is a change to every page
+ * and is not this.
+ */
+.band {
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+}
+
 /* A hairline that fades out — used under section headings. */
 .rule-fade {
   height: 1px;

@@ -189,7 +189,7 @@ export default async function Home({
   return (
     <div className="space-y-20 sm:space-y-28">
       {/* ------------------------------------------------ hero ------------ */}
-      <section className="relative left-1/2 -mt-10 w-screen -translate-x-1/2 overflow-hidden bg-pine-800 text-white sm:-mt-12">
+      <section className="band -mt-10 overflow-hidden bg-pine-800 text-white sm:-mt-12">
         <div className="absolute inset-0" aria-hidden>
           {heroSlides.length > 0 ? (
             <HeroCarousel images={heroSlides} />
@@ -229,7 +229,7 @@ export default async function Home({
           have to scroll" — still holds: the cap is what guarantees the bar
           lands inside the first screen.
         */}
-        <div className="relative z-[2] mx-auto flex min-h-[min(78svh,640px)] max-w-[1400px] flex-col justify-end px-4 pb-8 pt-16 sm:px-6 sm:pb-10 lg:px-10 2xl:max-w-[1680px]">
+        <div className="measure relative z-[2] flex min-h-[min(78svh,640px)] flex-col justify-end pb-8 pt-16 sm:pb-10">
           {/*
             Centred, light, and one sentence — the reference's headings are all
             weight 400 at 64px and up, sentence case, ending in a full stop.
@@ -296,8 +296,8 @@ export default async function Home({
         always carried `relative` with the same three classes; this one was
         written without it.
       */}
-      <section className="relative left-1/2 -mt-20 w-screen -translate-x-1/2 border-b border-ink-200 bg-ink-50 sm:-mt-28">
-        <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6 lg:px-10 2xl:max-w-[1680px]">
+      <section className="band -mt-20 border-b border-ink-200 bg-ink-50 sm:-mt-28">
+        <div className="measure py-10">
           {/*
             Titled, and third on the page — CR-2026-0015 item 48 puts "რატომ
             RoutePlanner?" in slot 3 with exactly these four promises. It used

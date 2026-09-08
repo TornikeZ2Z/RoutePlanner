@@ -54,7 +54,7 @@ export default async function LocaleLayout({
       </a>
 
       <header className="sticky top-0 z-30 border-b border-ink-200 bg-white/95 text-ink-900 backdrop-blur-md dark:border-white/10 dark:bg-pine-800/95 dark:text-white">
-        <div className="mx-auto flex max-w-[1400px] 2xl:max-w-[1680px] items-center gap-3 px-4 py-3 sm:px-6 lg:px-10">
+        <div className="measure flex items-center gap-3 py-3">
           <Link href={`/${locale}`} aria-label={t("brand.name")} className="shrink-0">
             <span className="dark:hidden"><Logo /></span>
             <span className="hidden dark:inline"><Logo dark /></span>
@@ -127,12 +127,12 @@ export default async function LocaleLayout({
         </nav>
       </header>
 
-      <main id="main" className="mx-auto w-full max-w-[1400px] 2xl:max-w-[1680px] flex-1 px-4 py-10 sm:px-6 sm:py-12 lg:px-10">{children}</main>
+      <main id="main" className="measure flex-1 py-10 sm:py-12">{children}</main>
 
       <CookieNotice locale={locale as Locale} returnTo={`/${locale}`} />
 
       <footer className="mt-8 bg-pine-900 text-pine-100">
-        <div className="mx-auto grid max-w-[1400px] 2xl:max-w-[1680px] gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-10">
+        <div className="measure grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Logo dark />
             <p className="mt-4 text-sm leading-relaxed text-pine-200">{t("brand.tagline")}</p>
@@ -190,7 +190,7 @@ export default async function LocaleLayout({
         </div>
 
         <div className="border-t border-pine-700/60">
-          <div className="mx-auto flex max-w-[1400px] 2xl:max-w-[1680px] flex-wrap items-center justify-between gap-3 px-4 py-5 text-xs text-pine-300 sm:px-6 lg:px-10">
+          <div className="measure flex flex-wrap items-center justify-between gap-3 py-5 text-xs text-pine-300">
             <p>© {new Date().getFullYear()} {t("brand.name")}</p>
             <ul className="flex gap-4">
               {LOCALES.map((l) => (
@@ -213,7 +213,7 @@ export default async function LocaleLayout({
           document first.
         */}
         <div className="border-t border-white/10">
-          <div className="mx-auto max-w-[1400px] 2xl:max-w-[1680px] px-4 py-5 text-xs leading-relaxed text-pine-300 sm:px-6 lg:px-10">
+          <div className="measure py-5 text-xs leading-relaxed text-pine-300">
             {config.company.legalName}
             {config.company.idNumber && <> · {t("footer.idNumber")} {config.company.idNumber}</>}
             {config.company.address && <> · {config.company.address}</>}
