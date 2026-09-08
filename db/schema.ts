@@ -148,6 +148,10 @@ export const driverProfiles = pgTable("driver_profiles", {
   approvedAt: timestamp("approved_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  /* CR-2026-0011 item 19. public-media only, and PENDING until operations
+     approve it — see migration 0023. */
+  portraitKey: text("portrait_key"),
+  portraitState: reviewState("portrait_state").notNull().default("PENDING"),
 });
 
 export const driverLanguages = pgTable("driver_languages", {

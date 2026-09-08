@@ -335,6 +335,12 @@ const D = {
   "upload.numberHint": { ka: "ინახება მხოლოდ ჰეშის სახით.", en: "Stored as a hash only." },
   "upload.file": { ka: "სკანი ან ფოტო", en: "Scan or photo" },
   "upload.submit": { ka: "ატვირთვა შესამოწმებლად", en: "Upload as pending" },
+  "portrait.title": { ka: "მძღოლის ფოტო", en: "Driver portrait" },
+  "portrait.body": { ka: "ფოტო, რომელიც მძღოლმა გამოგზავნა. ატვირთვისთანავე ქვეყნდება — ჯერ დახედე.", en: "The photograph the driver sent. It goes live the moment you upload it, so look at it first." },
+  "portrait.file": { ka: "ფოტო", en: "Photograph" },
+  "portrait.submit": { ka: "ფოტოს გამოქვეყნება", en: "Publish portrait" },
+  "portrait.remove": { ka: "ფოტოს მოხსნა", en: "Remove portrait" },
+  "portrait.none": { ka: "ფოტო არ არის — პროფილზე სახელის პირველი ასო ჩანს.", en: "No portrait — the profile shows the first letter of the name." },
 
   "create.title": { ka: "მძღოლის დამატება", en: "Add a driver" },
   "create.body": { ka: "ქმნის ანგარიშს და იწყებს განაცხადს. დოკუმენტებს თავად ატვირთავენ და იმავე შემოწმებას გადიან — არცერთი ეტაპი არ იპარება.", en: "Creates their account and starts an application. They still upload their own documents and go through the same verification — this does not skip any check." },

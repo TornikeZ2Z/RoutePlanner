@@ -3,7 +3,7 @@ import { requirePermission } from "@/lib/auth/session";
 import { can } from "@/lib/rbac";
 import { sql } from "@db/client";
 import { Alert, Badge, Card, PageHeader, Table } from "@/components/ui";
-import { DecisionPanel, DocumentDecision, VehicleDecision, LanguageVerification, PublishPanel, UploadDocumentPanel } from "./panels";
+import { DecisionPanel, DocumentDecision, VehicleDecision, LanguageVerification, PublishPanel, UploadDocumentPanel, PortraitPanel } from "./panels";
 import { ReadinessPanel } from "./readiness";
 import { AdminDriverProfileForm, ResetPasswordPanel, WalletPanel } from "../forms";
 import { impersonateDriverAction } from "@/app/admin/actions";
@@ -26,7 +26,7 @@ export default async function DriverDetail({ params }: { params: Promise<{ id: s
     SELECT d.id, d.public_name, d.handle, d.legal_first_name, d.legal_last_name, d.bio,
            d.status::text AS status, d.published, d.submitted_at, d.suspended_reason,
            d.applied_via, d.experience_years, d.referral_source, d.date_of_birth,
-           d.base_location_id,
+           d.base_location_id, d.portrait_key,
            u.email, u.phone, l.name_en AS base_location
     FROM driver_profiles d
     JOIN users u ON u.id = d.user_id
@@ -125,6 +125,12 @@ export default async function DriverDetail({ params }: { params: Promise<{ id: s
                 </tr>
               ))}
             </Table>
+            {mayDecideDocs && (
+              <div className="mt-4">
+                <PortraitPanel driverId={driver.id} portraitKey={driver.portrait_key} locale={actor.locale} />
+              </div>
+            )}
+
             {mayDecideDocs && (
               <div className="mt-4">
                 <UploadDocumentPanel
@@ -372,6 +378,8 @@ interface DriverRow {
   date_of_birth: string | null;
   email: string; phone: string | null; base_location: string | null;
   base_location_id: string | null;
+  /** Raw key: the console shows the portrait whatever its state. */
+  portrait_key: string | null;
 }
 interface DocRow { id: string; type: string; state: string; expires_on: string | null; review_reason: string | null; created_at: Date }
 interface VehicleRow {

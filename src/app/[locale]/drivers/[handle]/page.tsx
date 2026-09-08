@@ -58,7 +58,11 @@ async function loadTripQuote(quoteId: string | undefined, driverId: string): Pro
 async function loadDriver(handle: string) {
   const [driver] = await sql<DriverRow[]>`
     SELECT d.id, d.handle, d.public_name, d.bio, d.rating_sum, d.rating_count,
-           d.completed_trips, d.approved_at, l.name_en AS base_location
+           d.completed_trips, d.approved_at, l.name_en AS base_location,
+           /* The state is the gate, not the key. A portrait that operations
+              have not approved is treated as absent, so a driver cannot make
+              anything public by uploading it. */
+           CASE WHEN d.portrait_state = 'APPROVED' THEN d.portrait_key END AS portrait_key
     FROM driver_profiles d
     LEFT JOIN locations l ON l.id = d.base_location_id
     WHERE d.handle = ${handle} AND d.published AND d.status = 'APPROVED'`;
@@ -181,9 +185,19 @@ export default async function DriverProfile({ params, searchParams }: Props) {
       )}
       <div className="rounded-2xl border border-ink-200 bg-white p-6">
         <div className="flex flex-wrap items-center gap-3">
-          <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-full bg-pine-600 text-lg font-semibold text-white">
-            {driver.public_name.charAt(0)}
-          </span>
+          {driver.portrait_key ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`/api/media/${driver.portrait_key}`}
+              alt={driver.public_name}
+              width={48} height={48}
+              className="size-12 shrink-0 rounded-full object-cover"
+            />
+          ) : (
+            <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-full bg-pine-600 text-lg font-semibold text-white">
+              {driver.public_name.charAt(0)}
+            </span>
+          )}
           <div>
             <h1 className="font-display text-3xl text-ink-900">{driver.public_name}</h1>
             <span className="mt-1 inline-block"><Badge tone="success">{t("card.verified")}</Badge></span>
@@ -322,6 +336,8 @@ interface DriverRow {
   id: string; handle: string; public_name: string; bio: string | null;
   rating_sum: number; rating_count: number; completed_trips: number;
   approved_at: Date | null; base_location: string | null;
+  /** Null unless operations approved it — the query gates on the state. */
+  portrait_key: string | null;
 }
 interface VehicleRow {
   id: string; make: string; model: string; year: number; color: string | null;

@@ -1185,6 +1185,77 @@ const StaffDocSchema = z.object({
   number: z.string().max(64).optional(),
 });
 
+/**
+ * The driver's portrait, uploaded by operations.
+ *
+ * CR-2026-0011 item 19. Both requestors were asked who uploads it and both
+ * insisted on the same guarantee: the photograph is checked before anyone sees
+ * it. One wanted operations to upload it outright ("we cannot take the driver's
+ * word for it"), the other wanted the driver to send it and support to approve.
+ * This is the first, which is also the stricter reading — nothing reaches the
+ * column except through a member of staff.
+ *
+ * It goes to public-media, unlike every other driver upload in this file, and
+ * that difference is the point: a portrait is meant to be looked at, identity
+ * documents are not. Sending it to restricted-kyc would either fail to render
+ * or force that bucket open, and the two buckets exist so that cannot happen by
+ * accident.
+ *
+ * APPROVED on insert rather than PENDING, because a staff member choosing the
+ * file IS the review. The column still defaults to PENDING for anything that
+ * arrives another way, and the public page gates on the state rather than the
+ * key, so a row written by any other route stays invisible.
+ */
+export async function uploadDriverPortraitAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const actor = await requirePermission("admin.drivers.decide");
+  const driverId = String(formData.get("driverId") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(driverId)) return { ok: false, message: "Unknown driver." };
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { ok: false, message: "Choose a photograph to upload." };
+  if (!file.type.startsWith("image/")) return { ok: false, message: "A portrait has to be an image." };
+
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    assertUploadAllowed(file.type, buffer.byteLength);
+    const stored = await getStorage().put("public-media", buffer, file.type);
+
+    await sql`
+      UPDATE driver_profiles
+      SET portrait_key = ${stored.key}, portrait_state = 'APPROVED', updated_at = now()
+      WHERE id = ${driverId}::uuid`;
+
+    await writeAudit({
+      actorUserId: actor.id, action: "driver.portrait_uploaded_by_staff",
+      objectType: "driver_profile", objectId: driverId,
+      after: { portraitKey: stored.key, sizeBytes: stored.sizeBytes },
+      reason: "portrait supplied by the driver and published by staff",
+    });
+    return { ok: true, message: "Portrait published." };
+  } catch (err) {
+    return { ok: false, message: err instanceof Error ? err.message : "Upload failed." };
+  }
+}
+
+/** Take the portrait down again. The file stays; only the reference goes. */
+export async function removeDriverPortraitAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const actor = await requirePermission("admin.drivers.decide");
+  const driverId = String(formData.get("driverId") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(driverId)) return { ok: false, message: "Unknown driver." };
+
+  await sql`
+    UPDATE driver_profiles
+    SET portrait_key = NULL, portrait_state = 'PENDING', updated_at = now()
+    WHERE id = ${driverId}::uuid`;
+
+  await writeAudit({
+    actorUserId: actor.id, action: "driver.portrait_removed_by_staff",
+    objectType: "driver_profile", objectId: driverId,
+    reason: "portrait withdrawn",
+  });
+  return { ok: true, message: "Portrait removed." };
+}
+
 export async function uploadDriverDocumentAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const actor = await requirePermission("admin.drivers.decide");
   const parsed = StaffDocSchema.safeParse(Object.fromEntries(formData));

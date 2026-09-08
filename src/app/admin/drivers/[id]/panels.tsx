@@ -6,6 +6,7 @@ import { SubmitButton } from "@/components/form-state";
 import {
   decideDriverAction, decideDocumentAction, decideVehicleAction,
   verifyLanguageAction, publishDriverAction, uploadDriverDocumentAction,
+  uploadDriverPortraitAction, removeDriverPortraitAction,
 } from "@/app/admin/actions";
 import { Input } from "@/components/ui";
 import { adminT, driverStatusLabel } from "@/lib/i18n/admin";
@@ -143,6 +144,56 @@ export function LanguageVerification({ driverId, language, locale }: { driverId:
       <SubmitButton variant="secondary">{t("common.set")}</SubmitButton>
       {!state.ok && state.message && <span className="text-xs text-[--color-danger]">{state.message}</span>}
     </form>
+  );
+}
+
+/**
+ * The driver's portrait.
+ *
+ * Separate from the document panel above because it is a different thing in
+ * every respect that matters: it goes to public-media rather than
+ * restricted-kyc, it is published rather than filed, and it is the one upload
+ * here a traveller will actually see.
+ *
+ * It goes live immediately, which is deliberate — a staff member choosing the
+ * file IS the review, and that is what both requestors asked for. The copy says
+ * so rather than letting anyone discover it.
+ */
+export function PortraitPanel({
+  driverId, portraitKey, locale,
+}: { driverId: string; portraitKey: string | null; locale: string }) {
+  const [state, action] = useActionState(uploadDriverPortraitAction, INITIAL);
+  const [removeState, removeAction] = useActionState(removeDriverPortraitAction, INITIAL);
+  const t = adminT(locale);
+  return (
+    <Card className="p-4">
+      <h3 className="font-semibold text-ink-900">{t("portrait.title")}</h3>
+      <p className="mt-1 text-xs text-ink-500">{t("portrait.body")}</p>
+
+      {portraitKey ? (
+        <div className="mt-3 flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={`/api/media/${portraitKey}`} alt="" width={64} height={64}
+               className="size-16 rounded-full object-cover" />
+          <form action={removeAction}>
+            <input type="hidden" name="driverId" value={driverId} />
+            <SubmitButton variant="secondary">{t("portrait.remove")}</SubmitButton>
+          </form>
+        </div>
+      ) : (
+        <p className="mt-3 text-xs text-ink-500">{t("portrait.none")}</p>
+      )}
+
+      <form action={action} className="mt-3 space-y-3">
+        <input type="hidden" name="driverId" value={driverId} />
+        <Field label={t("portrait.file")} htmlFor="staff-portrait-file" required>
+          <Input id="staff-portrait-file" name="file" type="file" accept="image/jpeg,image/png,image/webp" required />
+        </Field>
+        <SubmitButton>{t("portrait.submit")}</SubmitButton>
+      </form>
+      <Result state={state} />
+      <Result state={removeState} />
+    </Card>
   );
 }
 
