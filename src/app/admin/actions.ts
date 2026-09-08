@@ -17,7 +17,9 @@ import { hashPassword } from "@/lib/auth/password";
 import { config } from "@/lib/config";
 import { getStorage, assertUploadAllowed, UploadRejectedError, hashDocumentNumber } from "@/lib/storage";
 import { cancelBooking } from "@/lib/booking";
-import { dispatchPending, dispatchInBackground, queue as queueNotification } from "@/lib/notifications";
+import {
+  dispatchPending, dispatchInBackground, queue as queueNotification, normalizeGeorgianMobile,
+} from "@/lib/notifications";
 import { getActiveContract, companyDetailsComplete } from "@/lib/contract";
 import { reassignBooking, refundBooking, recordCashSettlement } from "@/lib/operations";
 import type { ActionState } from "@/app/driver/actions";
@@ -1661,4 +1663,98 @@ export async function saveAgreementTermsAction(
   revalidatePath("/admin/pricing");
   revalidatePath("/driver/contract");
   return { ok: true, message: "Saved. The next contract anyone opens shows these terms." };
+}
+
+// ==========================================================================
+// Notifications
+// ==========================================================================
+
+/**
+ * Send one SMS, typed by an operator, to a number they typed.
+ *
+ * This exists because smsoffice.ge cannot be proved to work from a laptop:
+ * the API key lives only in the deployment's environment, so "is SMS
+ * configured and approved" is a question only the running server can answer.
+ * It is also the honest way to send the occasional one-off notice without
+ * inventing a campaign tool.
+ *
+ * Restricted to `admin.rbac.write` — the owner-level permission that gates
+ * staff and roles — because the ability to send arbitrary text to arbitrary
+ * numbers from the company's registered sender name is not a support task.
+ *
+ * The message goes through the outbox like every other notification, so it is
+ * durable before it is attempted, retriable from the same place, and recorded
+ * next to the automatic traffic. The dispatch IS awaited here, unlike almost
+ * everywhere else: the whole point is to report what the gateway said.
+ */
+const OpsSmsSchema = z.object({
+  phone: z.string().trim().min(9).max(20),
+  body: z.string().trim().min(1).max(480),
+});
+
+export async function sendOpsSmsAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const actor = await requirePermission("admin.rbac.write");
+
+  const parsed = OpsSmsSchema.safeParse({
+    phone: formData.get("phone"),
+    body: formData.get("body"),
+  });
+  if (!parsed.success) {
+    return { ok: false, message: "A phone number and a message are both required (message up to 480 characters)." };
+  }
+
+  const to = normalizeGeorgianMobile(parsed.data.phone);
+  if (!/^995\d{9}$/.test(to)) {
+    return { ok: false, message: `${parsed.data.phone} is not a Georgian mobile number.` };
+  }
+
+  if (!config.sms.apiKey || !config.sms.sender) {
+    return {
+      ok: false,
+      message: "SMSOFFICE_API_KEY and SMSOFFICE_SENDER are not both set on this deployment, so nothing would leave the server.",
+    };
+  }
+
+  /*
+     A manual message is not idempotent the way a booking confirmation is —
+     sending the same words to the same number twice is a legitimate thing to
+     want. The dedupe key therefore includes the moment it was sent, which
+     keeps the unique index satisfied without pretending this is a retry.
+  */
+  const id = await queueNotification(sql, {
+    kind: "ops.manual",
+    channel: "SMS",
+    to,
+    subject: "",
+    body: parsed.data.body,
+    dedupe: `${actor.id}:${to}:${Date.now()}`,
+  });
+  if (!id) return { ok: false, message: "Could not queue the message." };
+
+  await dispatchPending(1, [id]);
+
+  const [row] = await sql<{ state: string; last_error: string | null }[]>`
+    SELECT state::text AS state, last_error FROM notifications WHERE id = ${id}::uuid`;
+
+  await writeAudit({
+    actorUserId: actor.id,
+    actorRole: actor.roles[0] ?? null,
+    action: "notification.manual_sms",
+    objectType: "notification",
+    objectId: id,
+    after: { to, chars: parsed.data.body.length, state: row?.state ?? "UNKNOWN" },
+    reason: "one-off SMS sent from the console",
+  });
+
+  revalidatePath("/admin/notifications");
+
+  if (row?.state === "SENT") {
+    return { ok: true, message: `Accepted by the gateway for ${to}.` };
+  }
+  return {
+    ok: false,
+    message: row?.last_error
+      ? `The gateway refused it: ${row.last_error}`
+      : "The message is queued but was not sent. Check the outbox below.",
+  };
 }

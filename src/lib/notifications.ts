@@ -25,7 +25,17 @@ export type NotificationKind =
   | "review.invitation" | "message.received"
   | "contract.ready"
   | "support.driver_ticket" | "support.driver_reply"
-  | "change_request.submitted";
+  | "change_request.submitted"
+  /*
+   * A message an operator typed and sent by hand from the console.
+   *
+   * Every other kind here is raised by something happening — a booking is
+   * confirmed, a contract is ready. This one has no event behind it, which
+   * is exactly why it goes through the outbox like the rest: it is then
+   * retriable, auditable, and visible next to the automatic traffic rather
+   * than being a POST that vanished into the gateway.
+   */
+  | "ops.manual";
 
 export interface QueueInput {
   kind: NotificationKind;

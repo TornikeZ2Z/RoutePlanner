@@ -47,6 +47,7 @@ const GROUPS: { key: "shell.groupOps" | "shell.groupContent" | "shell.groupSyste
       { href: "/admin/finance", key: "nav.finance", permission: "admin.finance.read" },
       { href: "/admin/staff", key: "nav.staff", permission: "admin.rbac.write" },
       { href: "/admin/audit", key: "nav.audit", permission: "admin.audit.read" },
+      { href: "/admin/notifications", key: "nav.notifications", permission: "admin.rbac.write" },
     ],
   },
 ];

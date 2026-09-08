@@ -108,6 +108,7 @@ const D = {
   "nav.images": { ka: "საიტის ფოტოები", en: "Photography" },
   "nav.staff": { ka: "თანამშრომლები", en: "Staff" },
   "nav.audit": { ka: "აუდიტის ჟურნალი", en: "Audit log" },
+  "nav.notifications": { ka: "შეტყობინებები", en: "Notifications" },
 
   // ------------------------------------------------------------ dashboard --
   "dash.title": { ka: "სამართავი პანელი", en: "Command centre" },
