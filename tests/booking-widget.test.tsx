@@ -197,17 +197,30 @@ describe("booking widget, build my route", () => {
     }
   });
 
-  it("lands on a built plan, carrying all three answers", async () => {
+  it("builds a plan URL carrying all three answers", async () => {
     const user = await openPlan();
     await user.selectOptions(sel("#plan-days"), "7");
     await user.selectOptions(sel("#plan-interest"), "wine");
     await user.selectOptions(sel("#plan-pace"), "calm");
-    await user.click(screen.getByRole("button", { name: new RegExp(t("nav.plan")) }));
 
-    // `d` is what makes the wizard render an itinerary rather than its own
-    // empty questions, so its presence is the assertion that matters most.
-    expect(push).toHaveBeenCalledTimes(1);
-    expect(push.mock.calls[0]![0]).toBe("/en/plan?d=7&i=wine&pace=calm");
+    /*
+     * Serialised the way the browser serialises it, because the browser is
+     * what submits this — there is no click handler to spy on. That makes the
+     * assertion stronger than watching router.push would have been: it proves
+     * the path a reader gets with no JavaScript running at all, which is the
+     * only path this panel has.
+     *
+     * `d` is what makes the wizard render an itinerary rather than its own
+     * empty questions, so its presence matters most of the three.
+     */
+    const form = sel("#plan-days").closest("form")!;
+    const query = new URLSearchParams(new FormData(form) as unknown as string[][]);
+    expect(`${form.getAttribute("action")}?${query}`).toBe("/en/plan?d=7&i=wine&pace=calm");
+
+    // Nothing is intercepting it. A handler here would be re-deriving the
+    // string the browser has already composed above.
+    await user.click(screen.getByRole("button", { name: new RegExp(t("plan.submit")) }));
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("submits without JavaScript, like the bar beside it", async () => {
@@ -220,6 +233,8 @@ describe("booking widget, build my route", () => {
     // sessions where the page never hydrated, which is why it matters.
     expect(form.getAttribute("method")).toBe("get");
     expect(form.getAttribute("action")).toBe("/en/plan");
+    // Uncontrolled, so a reader coming back still finds their answers.
+    expect(form.querySelector<HTMLSelectElement>("#plan-days")!.value).toBe("3");
     expect([
       form.querySelector<HTMLSelectElement>("#plan-days")!.name,
       form.querySelector<HTMLSelectElement>("#plan-interest")!.name,
