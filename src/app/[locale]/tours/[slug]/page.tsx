@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { sql } from "@db/client";
 import { currentWeather } from "@/lib/weather";
 import { isLocale, LOCALES, getTranslator, type Locale } from "@/lib/i18n";
-import { getTour, listTours, tourPriceFrom } from "@/lib/tours";
+import { getTour, listTours, tourPriceFrom, tourDriverPool, listTourReviews } from "@/lib/tours";
 import { formatMoney } from "@/lib/money";
 import { formatDuration, formatDistance } from "@/lib/format";
 import { getDisplayCurrency, getRate, convert, CANONICAL } from "@/lib/currency";
@@ -15,6 +15,19 @@ import { sitePhoto } from "@/lib/site-photos";
 import { SearchForm } from "@/components/search-form";
 
 export const revalidate = 3600;
+
+/**
+ * Languages by their own name, not translated.
+ *
+ * offer-filters.tsx has a LANGUAGE_LABEL map, but it is English-only and lives
+ * in a client component — "Georgian" is the wrong word to show a Georgian
+ * reader. An endonym is right in every locale at once and needs no key in any
+ * dictionary, which is also why airlines and passports use them.
+ */
+const LANGUAGE_ENDONYM: Record<string, string> = {
+  en: "English", ka: "ქართული", ru: "Русский", tr: "Türkçe",
+  de: "Deutsch", fr: "Français", ar: "العربية", he: "עברית",
+};
 
 interface Props { params: Promise<{ locale: string; slug: string }> }
 
@@ -64,7 +77,7 @@ export default async function TourPage({ params }: Props) {
   const weather = far ? await currentWeather(Number(far.lat), Number(far.lon)) : null;
   const t = getTranslator(locale as Locale);
 
-  const [price, locations, others, currency] = await Promise.all([
+  const [price, locations, others, currency, pool, reviews] = await Promise.all([
     tourPriceFrom(slug),
     sql<{ slug: string; name_en: string; type: string }[]>`
       SELECT slug,
@@ -74,8 +87,27 @@ export default async function TourPage({ params }: Props) {
       FROM locations WHERE in_service_area ORDER BY type, 2`,
     listTours(locale as Locale),
     getDisplayCurrency(),
+    tourDriverPool(slug),
+    listTourReviews(slug),
   ]);
   const rate = await getRate(currency);
+
+  /*
+     The gallery: one photograph per place the tour stops at, in road order.
+
+     Shaped like the index card's route line — consecutive repeats collapse, and
+     the closing return to the origin goes — so a round trip does not open and
+     close on the same picture. Stops with no file on disk drop out, which is
+     what makes this degrade to nothing rather than to a grid of placeholder
+     illustrations pretending to be photographs.
+  */
+  const gallery = tour.stops
+    .filter((stop, i) => stop.slug !== tour.stops[i - 1]?.slug)
+    .filter((stop, i, kept) => !(i === kept.length - 1 && i > 1 && stop.slug === kept[0]?.slug))
+    .flatMap((stop) => {
+      const photo = sitePhoto(`destinations/${stop.slug}.jpg`);
+      return photo ? [{ slug: stop.slug, name: stop.name, photo }] : [];
+    });
 
 
   const jsonLd = {
@@ -131,6 +163,21 @@ export default async function TourPage({ params }: Props) {
         <p className="mt-3 text-lg leading-relaxed text-ink-600">{tour.summary}</p>
 
         <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-3 border-t border-ink-200 pt-4 text-sm">
+          {/* Price first, because his list reads Price / Duration and because
+              it is what a reader scans this row for. The duration badge above
+              still comes earlier on the page; prising the badge row apart to
+              chase that would be reordering for its own sake. */}
+          {price && (
+            <div>
+              <dt className="text-ink-500">{t("tours.priceFrom")}</dt>
+              <dd className="font-medium text-ink-900">
+                {formatMoney(price.fromMinor, CANONICAL, locale)}
+                {rate.currency !== CANONICAL && (
+                  <span className="font-normal text-ink-500"> (≈ {formatMoney(convert(price.fromMinor, rate), rate.currency, locale)})</span>
+                )}
+              </dd>
+            </div>
+          )}
           <div><dt className="text-ink-500">{t("tours.startsFrom")}</dt><dd className="font-medium text-ink-900">{tour.originName}</dd></div>
           <div><dt className="text-ink-500">{t("tours.distance")}</dt><dd className="font-medium text-ink-900">{t("tours.roundTrip", { km: formatDistance(tour.distanceKm, locale as Locale) })}</dd></div>
           <div><dt className="text-ink-500">{t("tours.drivingTime")}</dt><dd className="font-medium text-ink-900">{formatDuration(tour.driveMinutes, locale as Locale)}</dd></div>
@@ -152,17 +199,6 @@ export default async function TourPage({ params }: Props) {
               {tour.requires4x4 ? t("tours.vehicle4x4") : t("tours.vehicleAny")}
             </dd>
           </div>
-          {price && (
-            <div>
-              <dt className="text-ink-500">{t("tours.priceFrom")}</dt>
-              <dd className="font-medium text-ink-900">
-                {formatMoney(price.fromMinor, CANONICAL, locale)}
-                {rate.currency !== CANONICAL && (
-                  <span className="font-normal text-ink-500"> (≈ {formatMoney(convert(price.fromMinor, rate), rate.currency, locale)})</span>
-                )}
-              </dd>
-            </div>
-          )}
         </dl>
         {weather && (
         <p className="mt-3 text-sm text-ink-500">
@@ -235,6 +271,47 @@ export default async function TourPage({ params }: Props) {
             <p className="mt-5 text-sm leading-relaxed text-ink-500">{t("tours.inclNote")}</p>
           </section>
 
+          {/*
+            Slot 4 of CR-2026-0018's list: Driver. A POOL, never a person.
+
+            Two reasons it can never name one here. This page is
+            revalidate = 3600 and statically generated per locale, so a name
+            would be up to an hour stale in three languages; and the
+            marketplace does not attach a driver to a trip until a search
+            produces a quote for a real date and party size, so naming one now
+            would describe a booking that has not happened.
+
+            No stars either. Every rating on the site is a seeded
+            rating_sum/rating_count with an empty reviews table behind it, and
+            carrying that onto another page would be repeating a number nobody
+            earned.
+
+            The count comes from searchOffers' own candidate predicate, so it
+            is the number search would actually offer — including the
+            four_wheel_drive rule, which is why a 4x4 tour shows a smaller pool
+            than a paved one. Absent entirely when the pool is empty: a tour
+            nobody can drive should say nothing rather than "0 drivers".
+          */}
+          {pool.drivers > 0 && (
+            <section>
+              <h2 className="font-display text-2xl text-ink-900">{t("tours.driverTitle")}</h2>
+              <p className="font-display mt-3 text-2xl text-ink-900">
+                {pool.drivers === 1
+                  ? t("tours.driverOne")
+                  : t("tours.driverPool", { count: pool.drivers })}
+              </p>
+              {pool.languages.length > 0 && (
+                <p className="mt-2 text-sm text-ink-600">
+                  {t("tours.driverLangs")}{" "}
+                  {pool.languages.map((code) => LANGUAGE_ENDONYM[code] ?? code).join(" · ")}
+                </p>
+              )}
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-500">
+                {t("tours.driverChoose")}
+              </p>
+            </section>
+          )}
+
           <section>
             <h2 className="font-display text-2xl text-ink-900">{t("tours.route")}</h2>
             <ol className="mt-4 space-y-0">
@@ -282,6 +359,81 @@ export default async function TourPage({ params }: Props) {
             meals are inside the quoted price rather than something the
             traveller is billed for later.
           */}
+
+          {/*
+            Slot 6: Photos. The places this tour actually stops at, using the
+            photography the destination pages already serve.
+
+            Nothing here is stock and nothing is generated: place-image.tsx and
+            public/photos/README.txt both forbid a picture that stands in for a
+            place it does not show, so a file filed under a location's slug, on
+            a page for a tour that stops at that location, invents nothing. The
+            note under it says so out loud, because a gallery on a tour page
+            otherwise implies these are pictures OF the tour.
+
+            Consecutive repeats and the closing return to the origin are
+            dropped, the same shaping the index card's route line uses, so a
+            round trip does not show its start twice.
+          */}
+          {gallery.length > 0 && (
+            <section>
+              <h2 className="font-display text-2xl text-ink-900">{t("tours.photosTitle")}</h2>
+              <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {gallery.map((stop) => (
+                  <li key={stop.slug}>
+                    <figure className="overflow-hidden rounded-xl">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={stop.photo}
+                        alt={stop.name}
+                        loading="lazy"
+                        className="h-28 w-full object-cover sm:h-32"
+                      />
+                      <figcaption className="mt-1.5 text-xs text-ink-500">{stop.name}</figcaption>
+                    </figure>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-xs leading-relaxed text-ink-500">{t("tours.photosNote")}</p>
+            </section>
+          )}
+
+          {/*
+            Slot 7: Reviews — and the reason this could not be built until now
+            was not that none exist.
+
+            Nothing in the schema recorded which TOUR a booking was for.
+            reviews -> bookings -> quotes carried route_family_id and no tour,
+            and for a tour booking even that was NULL, because a tour is priced
+            instead of a route family. Migration 0026 adds quotes.tour_id and
+            offers.ts writes it, so the question is now answerable.
+
+            It will answer "none" for a while: no booking has completed. The
+            section is absent until a real review exists, which is the choice
+            already made for the homepage under CR-2026-0015 slot 8 — build it,
+            never seed it, let it appear on the first one. A trip that did not
+            happen cannot earn a review.
+          */}
+          {reviews.length > 0 && (
+            <section>
+              <h2 className="font-display text-2xl text-ink-900">{t("tours.reviewsTitle")}</h2>
+              <ul className="mt-4 space-y-4">
+                {reviews.map((review, i) => (
+                  <li key={i} className="rounded-2xl border border-ink-200 bg-white p-5">
+                    <p className="text-sm leading-relaxed text-ink-700">{review.body}</p>
+                    <p className="mt-3 text-xs text-ink-500">
+                      {review.author ?? ""}
+                      {review.author ? " · " : ""}
+                      <Link href={`/${locale}/drivers/${review.handle}`} className="underline underline-offset-4">
+                        {review.driver}
+                      </Link>
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           {tour.durationDays > 1 && (
             <p className="text-sm leading-relaxed text-ink-500">{t("tours.coversOvernight")}</p>
           )}

@@ -342,10 +342,19 @@ export async function searchOffers(req: SearchRequest): Promise<SearchResult> {
   // price plan per vehicle), so it is a safe key to map ids back by.
   const quoteRows = await sql<{ id: string; vehicle_id: string }[]>`
     INSERT INTO quotes (search_id, driver_id, vehicle_id, price_plan_id, route_family_id,
+                        tour_id,
                         engine_version, inputs, breakdown, currency, gross_minor,
                         commission_rate_bps, commission_minor, driver_net_minor, expires_at)
     SELECT ${searchId}::uuid, x.driver_id::uuid, x.vehicle_id::uuid, x.plan_id::uuid,
-           ${family?.id ?? null}::uuid, ${ENGINE_VERSION},
+           ${family?.id ?? null}::uuid,
+           /*
+              Which product this was. A tour is priced INSTEAD of a route family
+              (see the family lookup above, skipped when a tour is set), so
+              without this a tour booking recorded neither and nothing in the
+              database said what was sold — not for reporting, and not for the
+              reviews CR-2026-0018 asks every tour page to show.
+           */
+           ${tour?.id ?? null}::uuid, ${ENGINE_VERSION},
            x.inputs::jsonb, x.breakdown::jsonb, x.currency,
            x.gross::bigint, ${commissionRateBps},
            x.commission::bigint, x.net::bigint, ${expiresAt.toISOString()}::timestamptz
