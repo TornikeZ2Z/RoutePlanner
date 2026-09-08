@@ -222,6 +222,44 @@ h1, h2, h3, h4, h5, nav, button, .font-display {
   padding-right: 1.35rem;
 }
 
+/*
+ * The option list, in both themes.
+ *
+ * This replaces a bare `text-ink-900` on the booking bar's options, which was
+ * added to stop white-on-white in LIGHT mode — the glass control is text-white
+ * and the popup inherited it — and which produced exactly that bug in DARK
+ * mode instead. Measured in a browser with .dark applied: option colour
+ * #eef4fa, option background rgba(0,0,0,0). ink-900 inverts to near-white, the
+ * control is bg-transparent so the .dark .bg-white remap below has no class to
+ * catch, and the popup falls back to the UA's own white ground. Near-white text
+ * on white, on the four selects that sit on the booking path.
+ *
+ * So both properties are set, in both themes, with literal values: the popup's
+ * ground is never inferred from the control, and neither colour rides a token
+ * that inverts. color-scheme tells the platforms that draw the list themselves
+ * — macOS especially — which set of system colours to use, which is the half
+ * that CSS on an <option> cannot reach.
+ */
+.select-option {
+  color: #1e242c;
+  background-color: #ffffff;
+}
+
+.dark .select-option {
+  color: #eef4fa;
+  background-color: #10233c;
+}
+
+.select-chevron,
+.select-chevron-glass {
+  color-scheme: light;
+}
+
+.dark .select-chevron,
+.dark .select-chevron-glass {
+  color-scheme: dark;
+}
+
 /* A hairline that fades out — used under section headings. */
 .rule-fade {
   height: 1px;

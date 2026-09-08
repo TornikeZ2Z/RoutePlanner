@@ -237,8 +237,8 @@ export function SearchForm({
      the bar one row tall. CR-2026-0032 had just finished shrinking it.
   */
   const vehicleOptions = [
-    <option key="any" value="" className="text-ink-900">{t("search.vehAny")}</option>,
-    ...VEHICLE_CATEGORIES.map((c) => <option key={c.id} value={c.id} className="text-ink-900">{t(c.label)}</option>),
+    <option key="any" value="" className="select-option">{t("search.vehAny")}</option>,
+    ...VEHICLE_CATEGORIES.map((c) => <option key={c.id} value={c.id} className="select-option">{t(c.label)}</option>),
   ];
 
   if (compact) {

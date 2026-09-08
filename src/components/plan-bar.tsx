@@ -48,10 +48,11 @@ export function PlanBar({ locale }: { locale: string }) {
   const t = getTranslator(isLocale(locale) ? (locale as Locale) : "en");
 
   const control = `${CELL_BASE} ${TONE.glass.control} select-chevron-glass cursor-pointer`;
-  /* The control is white text on a photograph; the native option list is not,
-     and inherits it onto a white popup. The vehicle select on the transfer bar
-     carries the same class for the same reason. */
-  const option = "text-ink-900";
+  /* The control is white text on a photograph and the popup is not, so the
+     options set their own colour AND their own ground — see .select-option in
+     globals.css, which exists because setting only the colour fixed light mode
+     and broke dark mode into the same white-on-white it was preventing. */
+  const option = "select-option";
 
   return (
     <form action={`/${locale}/plan`} method="get" className="space-y-4">
