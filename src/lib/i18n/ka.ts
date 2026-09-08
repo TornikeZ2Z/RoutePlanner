@@ -591,7 +591,7 @@ export const ka: Partial<Dictionary> = {
   "home.tabRoundTrip": "წასვლა-წამოსვლა",
   "home.tabHourly": "საათობრივი",
   "home.tabTours": "ტურები",
-  "home.check1": "უფასო გაუქმება აყვანამდე 24სთ+ ადრე",
+  "home.check1": "უფასო გაუქმება, როცა შეგვატყობინებთ",
   "home.check2": "ფარული გადასახადების გარეშე",
   "home.check3": "ცოცხალი მხარდაჭერა ყოველდღე",
   "home.check4": "გადამოწმებული ადგილობრივი მძღოლები",

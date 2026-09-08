@@ -591,7 +591,7 @@ export const ru: Partial<Dictionary> = {
   "home.tabRoundTrip": "Туда и обратно",
   "home.tabHourly": "Почасовая",
   "home.tabTours": "Туры",
-  "home.check1": "Бесплатная отмена за 24ч+ до подачи",
+  "home.check1": "Бесплатная отмена, когда бы вы ни сообщили",
   "home.check2": "Без скрытых платежей",
   "home.check3": "Живая поддержка каждый день",
   "home.check4": "Проверенные местные водители",

@@ -67,19 +67,38 @@ export function HeroCarousel({ images }: { images: string[] }) {
   return (
     <>
       <div className="absolute inset-0" data-carousel="">
+        {/*
+          WebP first, the JPEG as the fallback the browser only fetches if it
+          cannot do WebP.
+
+          These are the heaviest thing on the site: eight 2400x1500 JPEGs at
+          3.2 MB total, and because every slide is in the viewport from the
+          start — merely transparent — `loading="lazy"` defers almost nothing.
+          A first visit on a Georgian phone paid for all of them. The same
+          pictures at 1800px wide in WebP are 1.36 MB, and the six the carousel
+          actually uses come to about 1.1 MB.
+
+          <picture> rather than next/image on purpose: the whole point of this
+          component is that it works before React does, and next/image needs
+          the runtime. The <img> keeps data-slide, so the inline script that
+          rotates the slides still selects exactly what it selected before, and
+          it stays the element that carries the opacity classes.
+        */}
         {images.map((src, i) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={src}
-            data-slide={i}
-            src={src}
-            alt=""
-            loading={i === 0 ? "eager" : "lazy"}
-            fetchPriority={i === 0 ? "high" : "auto"}
-            className={`absolute inset-0 size-full object-cover transition-opacity duration-1000 ${
-              i === 0 ? "opacity-100" : "opacity-0"
-            }`}
-          />
+          <picture key={src}>
+            <source srcSet={src.replace(/\.jpg$/, ".webp")} type="image/webp" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              data-slide={i}
+              src={src}
+              alt=""
+              loading={i === 0 ? "eager" : "lazy"}
+              fetchPriority={i === 0 ? "high" : "auto"}
+              className={`absolute inset-0 size-full object-cover transition-opacity duration-1000 ${
+                i === 0 ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          </picture>
         ))}
         {images.length > 1 && (
           <div className="absolute bottom-5 right-5 z-10 flex gap-2">

@@ -612,7 +612,7 @@ export const en = {
   "home.tabRoundTrip": "Round trip",
   "home.tabHourly": "Hourly",
   "home.tabTours": "Tours",
-  "home.check1": "Free cancellation 24h+ before pickup",
+  "home.check1": "Free cancellation, whenever you tell us",
   "home.check2": "No hidden fees",
   "home.check3": "Real support, every day",
   "home.check4": "Verified local drivers",
