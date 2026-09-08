@@ -112,9 +112,8 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
                         </button>
                       ))}
                     </div>
-                    {/* The hourly-hire link stood here — removed for
-                        CR-2026-0037. The /hourly page itself is still live;
-                        CR-2026-0011 item 23 decides its fate, not this. */}
+                    {/* The hourly-hire link stood here. Hourly is withdrawn
+                        outright — CR-2026-0011 item 23, fourth round. */}
                   </div>
                   {roundTrip
                     ? <SearchForm key="rt" locale={locale} locations={locations} tone="glass" roundTrip />

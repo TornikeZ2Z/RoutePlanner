@@ -2,28 +2,27 @@ import { getTranslator, type Locale } from "@/lib/i18n";
 import { Alert, Field, Input, Textarea } from "@/components/ui";
 
 /**
- * Shared inquiry form for the business, school and hourly pages.
+ * Shared inquiry form for the business and school pages.
  *
  * Server-rendered plain form POST: no JavaScript required, outcome comes back
  * as ?sent=1 / ?error=1. The invisible "website" field is a honeypot.
  */
 export function InquiryForm({
-  locale, kind, sent = false, error = false, withCompany = false, withHourly = false,
+  locale, kind, sent = false, error = false, withCompany = false,
   withVehicleTypes = false, withPackages = false,
 }: {
   locale: Locale;
-  kind: "business" | "school" | "hourly";
+  kind: "business" | "school";
   sent?: boolean;
   error?: boolean;
   withCompany?: boolean;
-  withHourly?: boolean;
   /** Business: which vehicle classes the company needs. */
   withVehicleTypes?: boolean;
   /** Schools: add-on service packages (chaperone, guide, …). */
   withPackages?: boolean;
 }) {
   const t = getTranslator(locale);
-  const paths = { business: "business", school: "schools", hourly: "hourly" } as const;
+  const paths = { business: "business", school: "schools" } as const;
 
   if (sent) {
     return (
@@ -61,19 +60,6 @@ export function InquiryForm({
         <Field label={t("inquiry.phone")} htmlFor="inq-phone" required>
           <Input id="inq-phone" name="phone" type="tel" required minLength={6} maxLength={40} autoComplete="tel" />
         </Field>
-        {withHourly && (
-          <>
-            <Field label={t("hourly.city")} htmlFor="inq-city" required>
-              <Input id="inq-city" name="city" required maxLength={120} />
-            </Field>
-            <Field label={t("hourly.start")} htmlFor="inq-start" required>
-              <Input id="inq-start" name="start" type="datetime-local" required />
-            </Field>
-            <Field label={t("hourly.hours")} htmlFor="inq-hours" required>
-              <Input id="inq-hours" name="hours" type="number" min={1} max={16} defaultValue={4} required />
-            </Field>
-          </>
-        )}
         <Field label={t("inquiry.passengers")} htmlFor="inq-pax">
           <Input id="inq-pax" name="passengers" type="number" min={1} max={60} />
         </Field>

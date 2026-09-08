@@ -151,7 +151,6 @@ export default async function LocaleLayout({
               <li><Link className="hover:text-white" href={`/${locale}/transfers`}>{t("footer.allRoutes")}</Link></li>
               <li><Link className="hover:text-white" href={`/${locale}/tours`}>{t("footer.dayTrips")}</Link></li>
               <li><Link className="hover:text-white" href={`/${locale}/plan`}>{t("nav.plan")}</Link></li>
-              <li><Link className="hover:text-white" href={`/${locale}/hourly`}>{t("nav.hourly")}</Link></li>
               <li><Link className="hover:text-white" href={`/${locale}/booking`}>{t("lookup.title")}</Link></li>
               <li><Link className="hover:text-white" href={`/${locale}/faq`}>{t("footer.faqLink")}</Link></li>
             </ul>
@@ -162,7 +161,6 @@ export default async function LocaleLayout({
             <ul className="mt-3 space-y-2 text-sm text-pine-200">
               <li><Link className="hover:text-white" href={`/${locale}/business`}>{t("footer.b2bTransport")}</Link></li>
               <li><Link className="hover:text-white" href={`/${locale}/schools`}>{t("nav.schools")}</Link></li>
-              <li><Link className="hover:text-white" href={`/${locale}/hourly`}>{t("nav.hourly")}</Link></li>
             </ul>
           </nav>
 

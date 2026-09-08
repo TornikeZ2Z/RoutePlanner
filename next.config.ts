@@ -40,6 +40,22 @@ const config: NextConfig = {
    */
   async redirects() {
     const rules = [
+      /*
+       * Hourly hire is withdrawn, so /hourly answers by sending people to what
+       * we do sell rather than 404ing at them.
+       *
+       * It was live long enough to be in the sitemap and the footer, and a
+       * visitor who followed a link for "a car by the hour" still wants a car.
+       * Permanent, because this is not "not yet, this week": CR-2026-0011 item
+       * 23 went round four times and came back the same way each time. If
+       * hourly returns with real prices it returns as a new page and this line
+       * comes out.
+       */
+      {
+        source: "/:locale(en|ka|ru)/hourly",
+        destination: "/:locale/transfers",
+        permanent: true,
+      },
       {
         source: "/:path*",
         has: [{ type: "host" as const, value: `www.${CANONICAL_HOST}` }],

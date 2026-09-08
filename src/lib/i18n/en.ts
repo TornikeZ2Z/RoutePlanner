@@ -238,6 +238,16 @@ export const en = {
   "faq.a8": "You can pay the driver in cash at the end of the trip, or by card online where card payment is available. All prices are set and charged in Georgian lari.",
   "faq.q9": "Are the drivers checked?",
   "faq.a9": "Every driver's identity, licence, vehicle registration and insurance is reviewed before their profile goes live, and each document must still be valid on your travel date or they cannot be offered to you.",
+  "faq.q10": "What is included in the price?",
+  "faq.a10": "The whole vehicle and its driver for the journey you booked, the fuel, every stop on the agreed route, any road tolls, and drinking water for each passenger. It does not include meals, hotels, entry tickets to museums or sites, cable cars, boats or other local activities, or any detour that was not agreed in advance.",
+  "faq.q11": "Are there hidden charges?",
+  "faq.a11": "No. The price you agree is the price for the trip as booked. It changes only if you change the trip — adding a stop or extending the route — and then you see the new price and accept it before it applies.",
+  "faq.q12": "What does a child seat cost?",
+  "faq.a12": "{price}, per seat. Ask for it when you book so the driver brings the right one for your child's age.",
+  "faq.q13": "Can I choose a particular driver?",
+  "faq.a13": "Yes. The search results show each available driver with their car, languages and rating, and you pick the one you want before paying.",
+  "faq.q14": "Can I change driver after booking?",
+  "faq.a14": "Tell support and we will move you to another available driver where we can. On a busy date or a remote route the choice may be limited, so tell us as early as you can.",
 
   // ---- contact -----------------------------------------------------------
   "contact.eyebrow": "Support",

@@ -4,6 +4,8 @@ import { isLocale, LOCALES, getTranslator, type Locale, type MessageKey } from "
 import { config } from "@/lib/config";
 import { getSettings } from "@/lib/settings";
 import { Card } from "@/components/ui";
+import { formatMoney } from "@/lib/money";
+import { CANONICAL } from "@/lib/currency";
 
 export const revalidate = 3600;
 
@@ -19,6 +21,11 @@ const QA: [MessageKey, MessageKey][] = [
   ["faq.q1", "faq.a1"], ["faq.q2", "faq.a2"], ["faq.q3", "faq.a3"],
   ["faq.q4", "faq.a4"], ["faq.q5", "faq.a5"], ["faq.q6", "faq.a6"],
   ["faq.q7", "faq.a7"], ["faq.q8", "faq.a8"], ["faq.q9", "faq.a9"],
+  /* Five added from CR-2026-0012 item 27, answered by the requestor: what the
+     price covers, whether anything is hidden, the child-seat charge, and
+     whether a traveller can pick or change their driver. */
+  ["faq.q10", "faq.a10"], ["faq.q11", "faq.a11"], ["faq.q12", "faq.a12"],
+  ["faq.q13", "faq.a13"], ["faq.q14", "faq.a14"],
 ];
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -48,8 +55,15 @@ export default async function FaqPage({ params }: Props) {
    * all — a promise to travellers that no driver had agreed to honour.
    */
   const { waiting_included_minutes: waitMinutes } = await getSettings();
+  /* Two answers quote a real number rather than a hard-coded one: the free
+     waiting allowance, and the child-seat fee the requestor confirmed as
+     +20 GEL. Both come from settings and config, so a change to either does
+     not leave the FAQ stating an old price. */
   const answer = (key: MessageKey) =>
-    key === "faq.a3" ? t(key, { minutes: waitMinutes }) : t(key);
+    key === "faq.a3" ? t(key, { minutes: waitMinutes })
+      : key === "faq.a12"
+        ? t(key, { price: formatMoney(BigInt(config.policy.childSeatFeeMinor), CANONICAL, locale) })
+        : t(key);
 
   const jsonLd = {
     "@context": "https://schema.org",

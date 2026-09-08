@@ -33,13 +33,15 @@ export async function generateMetadata({
    marked it in yellow to delete. It is the third time the same answer has
    come back: "a car with a driver for four, six, eight or ten hours" is a
    price list we do not have, and the requestor's answers on CR-2026-0011
-   item 23 twice said to take it down until we do. The /hourly enquiry page
-   is untouched — the two requestors still disagree about what should replace
-   the packages, and that question is open. */
+   item 23 twice said to take it down until we do. Hourly is now withdrawn
+   outright — page, menu and all — decided on the fourth round of asking.
+   "თანამშრომლების გადაყვანა" (business.p4t/p4b) went for CR-2026-0028's
+   second yellow mark, which took three rounds to place. The two requestors
+   still disagreed — one read it as employee transport, the other as teams and
+   events — and the one who drew the mark said employee transport. */
 const POINTS = [
   ["business.p1t", "business.p1b"],
   ["business.p2t", "business.p2b"],
-  ["business.p4t", "business.p4b"],
   ["business.p5t", "business.p5b"],
 ] as const;
 
