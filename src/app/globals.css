@@ -138,13 +138,20 @@ h1, h2, h3, h4, h5, nav, button, .font-display {
   font-family: var(--font-display);
 }
 
-/* Micro caps annotation above sections — steel, quiet. */
+/*
+ * Micro caps annotation above sections — steel, quiet.
+ *
+ * It was gold. CR-2026-0034's reference has exactly one accent and uses it
+ * only for things you press; a label that announces a section is not one of
+ * those, and gold on it read as decoration. ink-500 is the same muted grey the
+ * reference puts under its own headings.
+ */
 .eyebrow {
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--color-gold-600);
+  color: var(--color-ink-500);
 }
 
 /* A hairline that fades out — used under section headings. */

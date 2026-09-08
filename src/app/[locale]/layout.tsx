@@ -100,9 +100,15 @@ export default async function LocaleLayout({
                 {t("nav.signIn")}
               </Link>
             )}
+            {/*
+              The one button in the header, and it is the accent colour rather
+              than gold — CR-2026-0034's reference puts a blue pill exactly
+              here and uses its accent for nothing but actions. This is shared
+              chrome, so it changes on every page, not only the home page.
+            */}
             <Link
               href={`/${locale}#book`}
-              className="rounded-xl bg-gold-400 px-4 py-2.5 text-sm font-bold tracking-[-0.01em] text-pine-900 shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-gold-300"
+              className="rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-brand-700"
             >
               {t("nav.bookRide")}
             </Link>
