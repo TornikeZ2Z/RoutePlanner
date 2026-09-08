@@ -489,119 +489,31 @@ export default async function Home({
       </section>
 
       {/*
-        How it works — written, translated, and then never placed.
+        "ოთხი ნაბიჯი, ვაჭრობის გარეშე" stood here and is gone — CR-2026-0037.
 
-        STEP_KEYS has sat at the top of this file with nothing reading it, and
-        home.how1t through how4b have sat in all three dictionaries unused, so
-        the section CR-2026-0015 item 48 asks for in slot 7 was already paid for
-        and simply not on the page. Four steps: choose a route, choose a driver,
-        book, travel.
+        It had been on the page for about an hour. CR-2026-0015 item 48 lists
+        "როგორ მუშაობს?" as slot 7 of the home page, and the copy had been
+        written and translated into all three languages but never rendered, so
+        placing it closed that item. The next instruction removed it.
+
+        STEP_KEYS and home.how1t-how4b stay where they are, unused again.
       */}
-      <section>
-        <p className="eyebrow">{t("home.howEyebrow")}</p>
-        <h2 className="font-display mt-2 text-[1.9rem] leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.howTitle")}</h2>
-        <ol className="mt-8 grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-          {STEP_KEYS.map(([title, body], i) => (
-            <li key={title}>
-              <span
-                aria-hidden
-                className="grid size-9 place-items-center rounded-full border border-ink-300 text-sm font-semibold tabular-nums text-brand-600"
-              >
-                {i + 1}
-              </span>
-              <p className="mt-3 font-semibold text-ink-900">{t(title)}</p>
-              <p className="mt-1 text-sm leading-relaxed text-ink-500">{t(body)}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
 
-      {/* --------------------------------------------------- seasons ------ */}
       {/*
-        When you are coming decides more than what you like: the Svaneti
-        passes are shut half the year, rtveli is a fortnight, and Gudauri in
-        August is a building site.
+        The seasons section stood here and is gone — CR-2026-0038,
+        "საქართველო სეზონების მიხედვით, ეგ საერთოდ წავშალოთ".
 
-        The map this used to drive is gone — it was a second place to browse
-        the same twenty-odd destinations. Each season now opens where it
-        stands, and nothing is open on load, which is the point: a season
-        picked for you is a recommendation nobody asked for.
+        Worth recording that this reverses CR-2026-0010 item 13, which said in
+        as many words "სეზონები საერთოდ არ წავშალოთ" — do not delete seasons at
+        all — and gave a reason: seasonal content is good for SEO and for the
+        traveller. The later instruction governs, but the reason has not gone
+        away, and this section was the only place the site said when a place is
+        worth visiting.
 
-        <details> rather than React state, so it works before hydration and
-        the keyboard gets disclosure semantics without us writing any.
+        Nothing was destroyed: home.seasonsTitle, home.season1t-4b and the four
+        photographs in public/photos/seasons are all still there. Restoring it
+        is a revert of this commit.
       */}
-      <section>
-        <div>
-          <h2 className="font-display text-[1.9rem] leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.seasonsTitle")}</h2>
-          <p className="mt-2 text-ink-500">{t("home.seasonsSub")}</p>
-        </div>
-        <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {(["spring", "summer", "autumn", "winter"] as const).map((season, i) => {
-            /*
-             * Fewest seasons first surfaces the specialists — Gudauri for
-             * winter, the coast for summer, Kakheti for the harvest. Taking
-             * them in table order gave three of the four cards the same
-             * opening names, because the year-round places sort first.
-             */
-            const picks = DESTINATIONS.filter((d) => d.seasons.includes(season))
-              .slice()
-              .sort((a, b) => a.seasons.length - b.seasons.length)
-              .flatMap((d) => {
-                const name = locations.find((l) => l.slug === d.slug)?.name_en;
-                return name ? [{ ...d, name }] : [];
-              });
-            const photo = sitePhoto(`seasons/${season}.jpg`);
-            return (
-              <li key={season}>
-                <details className="group/season">
-                  <summary className="relative block h-56 cursor-pointer list-none overflow-hidden rounded-2xl shadow-[0_1px_3px_rgba(11,29,51,.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-soft)] lg:h-64 [&::-webkit-details-marker]:hidden">
-                    {photo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={photo} alt="" loading="lazy"
-                           className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover/season:scale-105" />
-                    ) : (
-                      <PlaceImage imageKey={null} alt="" seedText={`season-${season}`}
-                                  className="absolute inset-0 size-full transition-transform duration-500 group-hover/season:scale-105" />
-                    )}
-                    <span className="absolute inset-0 bg-gradient-to-t from-pine-900/90 via-pine-900/35 to-pine-900/10" />
-                    <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4 text-white">
-                      <span>
-                        <span className="font-display block text-xl">{t(`home.season${i + 1}t` as never)}</span>
-                        <span className="mt-1 block text-sm text-pine-100">
-                          {picks.length} {t("home.seasonPlaces")}
-                        </span>
-                      </span>
-                      <span aria-hidden className="shrink-0 rounded-full bg-white/15 p-1.5 backdrop-blur-sm transition-transform duration-300 group-open/season:rotate-180">
-                        <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor"
-                             strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M6 9l6 6 6-6" />
-                        </svg>
-                      </span>
-                    </span>
-                  </summary>
-
-                  <ul className="mt-2 space-y-1 rounded-2xl border border-ink-200 bg-white p-2 shadow-[0_1px_3px_rgba(11,29,51,.06)]">
-                    {picks.map((d) => (
-                      <li key={d.slug}>
-                        <Link
-                          href={`/${locale}/destinations/${d.slug}`}
-                          className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 hover:text-ink-900"
-                        >
-                          <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-brand-600" fill="none" stroke="currentColor"
-                               strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                            <path d={CATEGORY_ICONS[d.icon]} />
-                          </svg>
-                          <span className="min-w-0">{d.name}</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </details>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
 
       {/*
         The contact card, alone now.

@@ -112,10 +112,9 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
                         </button>
                       ))}
                     </div>
-                    <Link href={`/${locale}/hourly`}
-                          className="text-xs font-medium text-white/70 underline-offset-2 hover:text-white hover:underline">
-                      {t("home.tabHourly")} →
-                    </Link>
+                    {/* The hourly-hire link stood here — removed for
+                        CR-2026-0037. The /hourly page itself is still live;
+                        CR-2026-0011 item 23 decides its fate, not this. */}
                   </div>
                   {roundTrip
                     ? <SearchForm key="rt" locale={locale} locations={locations} tone="glass" roundTrip />
