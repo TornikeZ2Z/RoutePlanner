@@ -50,4 +50,21 @@ export const DESTINATIONS: Destination[] = [
   { slug: "abastumani",  categories: ["nature"],                        seasons: ["summer", "autumn"],                     descKey: "map.d.abastumani",  icon: "nature", labelPos: "bottom", dx: -4, dy: -14 },
   { slug: "kvareli",     categories: ["wine"],                          seasons: ["autumn", "spring", "summer"],           descKey: "map.d.kvareli",     icon: "wine", labelPos: "right" },
   { slug: "tsinandali",  categories: ["wine", "culture"],               seasons: ["autumn", "spring", "summer"],           descKey: "map.d.tsinandali",  icon: "wine", labelPos: "top", dy: -6 },
+
+  /*
+     CR-2026-0018 named nineteen destinations the site should cover. These four
+     were the ones it did not have at all.
+
+     Their location rows (migration 0021) are in_service_area = false, so they
+     have pages and appear on the destinations index, but do not offer
+     themselves in the booking fields. Three are 4x4-only mountain road, two of
+     those for about four months a year, and none has a route family to price
+     against. The seasons below say so honestly rather than optimistically:
+     Tusheti and Khevsureti are summer only because the passes are shut the rest
+     of the year.
+  */
+  { slug: "okatse",      categories: ["nature"],                        seasons: ["spring", "summer", "autumn"],           descKey: "map.d.okatse",      icon: "nature", labelPos: "top", dy: -6 },
+  { slug: "tusheti",     categories: ["mountains", "nature"],           seasons: ["summer"],                               descKey: "map.d.tusheti",     icon: "mountains", labelPos: "right" },
+  { slug: "khevsureti",  categories: ["mountains", "nature"],           seasons: ["summer"],                               descKey: "map.d.khevsureti",  icon: "mountains", labelPos: "top", dy: -8 },
+  { slug: "goderdzi",    categories: ["winter", "mountains"],           seasons: ["winter", "summer"],                     descKey: "map.d.goderdzi",    icon: "winter", labelPos: "bottom" },
 ];

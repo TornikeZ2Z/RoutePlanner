@@ -255,7 +255,7 @@ export const en = {
 
   // ---- cookie notice -----------------------------------------------------
   "cookie.body": "We use only the cookies the site needs to work, and to remember your language and currency.",
-  "cookie.link": "How we handle your data",
+  "cookie.link": "Privacy policy",
   "cookie.accept": "Got it",
 
   // ---- checkout ----------------------------------------------------------
@@ -881,6 +881,10 @@ export const en = {
   "map.d.abastumani": "A forest health resort under Georgia's national observatory and its dark skies.",
   "map.d.kvareli": "Wine tunnels in the rock and the Lopota lake valley — Kakheti at its greenest.",
   "map.d.tsinandali": "The Chavchavadze estate: a historic winery, gardens and Kakheti's noble past.",
+  "map.d.okatse": "A glass walkway pinned to the cliff above the Okatse gorge, an hour from Kutaisi.",
+  "map.d.tusheti": "Slate towers at Omalo, over the Abano pass — 4x4 only, and open roughly June to October.",
+  "map.d.khevsureti": "Shatili's fortress village on the Chechen border, reached by a single mountain road.",
+  "map.d.goderdzi": "Adjara's pass at 2,025 m — a young ski resort in winter, alpine meadow in summer.",
 
 
   // --- Navy & gold identity ------------------------------------------------

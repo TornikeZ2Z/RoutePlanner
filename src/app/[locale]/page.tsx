@@ -228,8 +228,27 @@ export default async function Home({
         on the page's own ground, where a hairline ring and the accent colour
         read properly instead of fighting a photograph.
       */}
-      <section className="left-1/2 -mt-20 w-screen -translate-x-1/2 border-b border-ink-200 bg-ink-50 sm:-mt-28">
-        <ul className="mx-auto grid max-w-[1400px] grid-cols-2 gap-x-8 gap-y-6 px-4 py-8 sm:px-6 sm:grid-cols-4 lg:px-10 2xl:max-w-[1680px]">
+      {/*
+        `relative` is load-bearing, not tidiness. CR-2026-0035 reported the four
+        promises half off the left of the screen with empty space to their
+        right, and this is why: left-1/2 does nothing on a statically positioned
+        element, but the -translate-x-1/2 that is supposed to cancel it still
+        applies, so the band sat half a viewport to the left. The hero above has
+        always carried `relative` with the same three classes; this one was
+        written without it.
+      */}
+      <section className="relative left-1/2 -mt-20 w-screen -translate-x-1/2 border-b border-ink-200 bg-ink-50 sm:-mt-28">
+        <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6 lg:px-10 2xl:max-w-[1680px]">
+          {/*
+            Titled, and third on the page — CR-2026-0015 item 48 puts "რატომ
+            RoutePlanner?" in slot 3 with exactly these four promises. It used
+            to be an untitled band here AND a titled section with a second,
+            differently-worded set of four further down, which is the repetition
+            CR-2026-0018 asks to cut. The lower one is gone; its earned numbers
+            moved here, where they sit under the claims they support.
+          */}
+          <h2 className="font-display text-[1.6rem] leading-[1.15] text-ink-900 sm:text-[2rem]">{t("home.whyRG")}</h2>
+        <ul className="mt-6 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
           {HERO_CHIPS.map(([key, icon], i) => (
             <li key={key} className="flex items-start gap-3">
               <span className="grid size-9 shrink-0 place-items-center rounded-full border border-ink-300 text-brand-600">
@@ -245,6 +264,23 @@ export default async function Home({
             </li>
           ))}
         </ul>
+
+          {/* Catalogue size proves nothing. Drivers and completed trips are
+              earned numbers, so they appear only once they exist. */}
+          {((stats[0]?.drivers ?? 0) > 0 || (stats[0]?.trips ?? 0) > 0) && (
+            <dl className="mt-8 grid grid-cols-2 gap-x-8 gap-y-6 border-t border-ink-200 pt-6 sm:max-w-md">
+              {([[stats[0]?.drivers ?? 0, t("home.statDrivers")],
+                 [stats[0]?.trips ?? 0, t("home.statTrips")]] as const)
+                .filter(([v]) => (v as number) > 0)
+                .map(([value, label]) => (
+                <div key={label as string}>
+                  <dt className="font-display text-3xl text-brand-600">{value as number}</dt>
+                  <dd className="mt-0.5 text-sm text-ink-500">{label as string}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
       </section>
 
       {/* ------------------------------------------------ categories ------ */}
@@ -452,6 +488,34 @@ export default async function Home({
         </div>
       </section>
 
+      {/*
+        How it works — written, translated, and then never placed.
+
+        STEP_KEYS has sat at the top of this file with nothing reading it, and
+        home.how1t through how4b have sat in all three dictionaries unused, so
+        the section CR-2026-0015 item 48 asks for in slot 7 was already paid for
+        and simply not on the page. Four steps: choose a route, choose a driver,
+        book, travel.
+      */}
+      <section>
+        <p className="eyebrow">{t("home.howEyebrow")}</p>
+        <h2 className="font-display mt-2 text-[1.9rem] leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.howTitle")}</h2>
+        <ol className="mt-8 grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+          {STEP_KEYS.map(([title, body], i) => (
+            <li key={title}>
+              <span
+                aria-hidden
+                className="grid size-9 place-items-center rounded-full border border-ink-300 text-sm font-semibold tabular-nums text-brand-600"
+              >
+                {i + 1}
+              </span>
+              <p className="mt-3 font-semibold text-ink-900">{t(title)}</p>
+              <p className="mt-1 text-sm leading-relaxed text-ink-500">{t(body)}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       {/* --------------------------------------------------- seasons ------ */}
       {/*
         When you are coming decides more than what you like: the Svaneti
@@ -539,42 +603,17 @@ export default async function Home({
         </ul>
       </section>
 
-      {/* -------------------------------------------- why + contact ------- */}
-      <section className={config.contact.phone ? "grid gap-4 lg:grid-cols-[1fr_20rem]" : "grid gap-4"}>
-        <div className="rounded-2xl bg-pine-50 p-6 sm:p-10">
-          <h2 className="font-display text-[1.6rem] leading-[1.15] text-ink-900 sm:text-[2rem]">{t("home.whyRG")}</h2>
-          <ul className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-            {([["home.why1t", "home.why1b"], ["home.why2t", "home.why2b"],
-               ["home.why3t", "home.why3b"], ["home.why4t", "home.why4b"]] as const).map(([tt, bb]) => (
-              <li key={tt} className="flex gap-3">
-                <svg viewBox="0 0 24 24" className="mt-0.5 size-5 shrink-0 text-brand-600" fill="none" stroke="currentColor"
-                     strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="m5 12 5 5L20 7" />
-                </svg>
-                <div>
-                  <p className="font-semibold text-ink-900">{t(tt)}</p>
-                  <p className="mt-0.5 text-sm leading-relaxed text-ink-500">{t(bb)}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-          {/* Destinations and tour counts are catalogue size, not proof of
-              anything — dropped. Drivers and completed trips are earned
-              numbers, shown only once they exist. */}
-          {((stats[0]?.drivers ?? 0) > 0 || (stats[0]?.trips ?? 0) > 0) && (
-            <dl className="mt-8 grid grid-cols-2 gap-x-8 gap-y-6 border-t border-ink-200 pt-6">
-              {([[stats[0]?.drivers ?? 0, t("home.statDrivers")],
-                 [stats[0]?.trips ?? 0, t("home.statTrips")]] as const)
-                .filter(([v]) => (v as number) > 0)
-                .map(([value, label]) => (
-                <div key={label as string}>
-                  <dt className="font-display text-3xl text-brand-600">{value as number}</dt>
-                  <dd className="mt-0.5 text-sm text-ink-500">{label as string}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
-        </div>
+      {/*
+        The contact card, alone now.
+
+        A "რატომ RoutePlanner?" panel stood beside it with four reasons and
+        the earned numbers. It said the same thing as the titled band in slot
+        3, in different words, on the same page — which is precisely what
+        CR-2026-0018 lists under "the same information repeated". The band
+        keeps the promises and has taken the numbers; home.why1t-why4b stay in
+        all three dictionaries.
+      */}
+      <section className={config.contact.phone ? "grid gap-4" : "hidden"}>
         {config.contact.phone && (
           <div className="rounded-2xl bg-pine-800 p-6 text-white">
             <h2 className="font-display text-xl">{t("home.helpTitle")}</h2>
