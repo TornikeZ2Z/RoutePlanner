@@ -293,7 +293,7 @@ export function SearchForm({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch">
         <div className="flex flex-1 flex-col rounded-2xl border border-ink-200 bg-white sm:flex-row sm:flex-wrap lg:flex-nowrap lg:divide-x lg:divide-ink-200 [&>*+*]:border-t [&>*+*]:border-ink-100 sm:[&>*+*]:border-t-0 lg:[&>*+*]:border-t-0">
           {!lockRoute && (
-            <Cell icon={ICONS.from} label={t("search.from")} htmlFor="from" className="sm:basis-1/2 lg:basis-auto">
+            <Cell icon={ICONS.from} label={t("search.from")} htmlFor="from" className="sm:basis-1/2 lg:min-w-[14.75rem] lg:basis-auto">
               <input id="from" name="from" value={from} list={LIST_ID} autoComplete="off"
                      onChange={(e) => setFrom(e.target.value)} className={CELL_INPUT} />
             </Cell>
