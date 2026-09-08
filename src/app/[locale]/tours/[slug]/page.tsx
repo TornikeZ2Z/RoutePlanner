@@ -162,6 +162,54 @@ export default async function TourPage({ params }: Props) {
             </div>
           </section>
 
+          {/*
+            What the price covers, from CR-2026-0011 item 18 and CR-2026-0018.
+
+            One list for every tour rather than per-tour fields, because both
+            requestors described the same thing: "we provide the car, so only
+            the route and its cost are included — we are not responsible for
+            food, hotels or guiding". The tours table has nowhere to store an
+            inclusions list, and inventing a column per tour to hold identical
+            text would be storage pretending to be editorial.
+
+            The day a tour genuinely differs — one that does include a boat, or
+            a ticket — that tour needs its own field, and this becomes the
+            default rather than the only answer.
+          */}
+          <section>
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div>
+                <h2 className="font-display text-2xl text-ink-900">{t("tours.inclTitle")}</h2>
+                <ul className="mt-4 space-y-2">
+                  {(["tours.incl1","tours.incl2","tours.incl3","tours.incl4","tours.incl5","tours.incl6"] as const).map((k) => (
+                    <li key={k} className="flex gap-2.5 text-sm leading-relaxed text-ink-700">
+                      <svg viewBox="0 0 24 24" className="mt-0.5 size-4 shrink-0 text-brand-600" fill="none"
+                           stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <path d="m5 12 5 5L20 7" />
+                      </svg>
+                      {t(k)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h2 className="font-display text-2xl text-ink-900">{t("tours.exclTitle")}</h2>
+                <ul className="mt-4 space-y-2">
+                  {(["tours.excl1","tours.excl2","tours.excl3","tours.excl4","tours.excl5","tours.excl6"] as const).map((k) => (
+                    <li key={k} className="flex gap-2.5 text-sm leading-relaxed text-ink-500">
+                      <svg viewBox="0 0 24 24" className="mt-0.5 size-4 shrink-0 text-ink-400" fill="none"
+                           stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+                        <path d="M6 6l12 12M18 6L6 18" />
+                      </svg>
+                      {t(k)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <p className="mt-5 text-sm leading-relaxed text-ink-500">{t("tours.inclNote")}</p>
+          </section>
+
           <section>
             <h2 className="font-display text-2xl text-ink-900">{t("tours.route")}</h2>
             <ol className="mt-4 space-y-0">
