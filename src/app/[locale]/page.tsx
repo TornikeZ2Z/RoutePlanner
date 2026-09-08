@@ -116,7 +116,7 @@ export default async function Home({
   const t = getTranslator(locale);
 
   const popular = await popularDestinations();
-  const [locations, tours, stats] = await Promise.all([
+  const [locations, tours, stats, reviews] = await Promise.all([
     sql<{ slug: string; name_en: string; type: string; lat: number; lon: number }[]>`
       SELECT slug,
              coalesce(CASE WHEN ${locale} = 'ka' THEN name_ka
@@ -127,6 +127,30 @@ export default async function Home({
     sql<{ drivers: number; trips: number }[]>`
       SELECT (SELECT count(*) FROM driver_profiles WHERE published)::int AS drivers,
              (SELECT count(*) FROM bookings WHERE status = 'COMPLETED')::int AS trips`,
+    /*
+     * Published reviews, newest first.
+     *
+     * CR-2026-0015 item 48 puts these in slot 8. There are none yet — no trip
+     * has been completed — so the section below renders nothing at all rather
+     * than an empty heading over white space. That was the choice: build it and
+     * let it appear by itself on the first real review, instead of leaving a
+     * second job for the day somebody finally travels.
+     *
+     * published_body is the moderated text where a moderator edited one, and
+     * body otherwise. Only PUBLISHED rows: SUBMITTED has not been read yet, and
+     * REJECTED and REDACTED were read and refused.
+     */
+    sql<{ rating: number; body: string; author: string | null; driver: string; handle: string }[]>`
+      SELECT r.rating_overall AS rating,
+             coalesce(r.published_body, r.body) AS body,
+             r.author_name AS author,
+             d.public_name AS driver,
+             d.handle
+      FROM reviews r
+      JOIN driver_profiles d ON d.id = r.driver_id AND d.published
+      WHERE r.status = 'PUBLISHED' AND coalesce(r.published_body, r.body) IS NOT NULL
+      ORDER BY r.created_at DESC
+      LIMIT 6`,
   ]);
 
   /*
@@ -556,6 +580,35 @@ export default async function Home({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={photo.src} alt={photo.caption} loading="lazy" className="aspect-square w-full rounded-t-lg object-cover" />
                 <p className="px-4 py-3 text-sm text-ink-500">{photo.caption}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/*
+        Slot 8. Absent entirely until there is something true to put in it —
+        see the query above. A testimonials block with nothing in it is worse
+        than no testimonials block, and one filled with invented praise is
+        worse than both.
+      */}
+      {reviews.length > 0 && (
+        <section>
+          <h2 className="font-display text-[1.9rem] leading-[1.15] text-ink-900 sm:text-[2.5rem]">{t("home.reviewsTitle")}</h2>
+          <p className="mt-2 text-ink-500">{t("home.reviewsSub")}</p>
+          <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {reviews.map((r, i) => (
+              <li key={i} className="rounded-2xl border border-ink-200 bg-white p-5">
+                <p className="text-sm tabular-nums text-brand-600" aria-label={`${r.rating} / 5`}>
+                  {"★".repeat(Math.round(r.rating))}
+                  <span className="text-ink-300">{"★".repeat(Math.max(0, 5 - Math.round(r.rating)))}</span>
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-ink-700">{r.body}</p>
+                <p className="mt-4 text-xs text-ink-500">
+                  {r.author ?? ""}
+                  {r.author ? " · " : ""}
+                  <Link href={`/${locale}/drivers/${r.handle}`} className="hover:text-ink-900">{r.driver}</Link>
+                </p>
               </li>
             ))}
           </ul>

@@ -780,6 +780,8 @@ export const ru: Partial<Dictionary> = {
   "home.travellersEyebrow": "Путешественники",
   "home.travellersTitle": "Настоящие поездки, настоящие люди",
   "home.travellersBody": "Фотографии, которыми поделились наши путешественники — с их согласия.",
+  "home.reviewsTitle": "Что говорят путешественники",
+  "home.reviewsSub": "Написано теми, кто завершил поездку, — уже после неё.",
   "home.closingTitle": "Спланируй своё путешествие по Грузии",
   "home.closingBody": "Выбери трансфер, готовый тур или собери собственный маршрут.",
   "home.closingCta": "Начать",

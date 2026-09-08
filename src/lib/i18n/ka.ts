@@ -780,6 +780,8 @@ export const ka: Partial<Dictionary> = {
   "home.travellersEyebrow": "მოგზაურები",
   "home.travellersTitle": "ნამდვილი მოგზაურობები, ნამდვილი ადამიანები",
   "home.travellersBody": "ფოტოები, რომლებიც ჩვენმა მოგზაურებმა თავად გაგვიზიარეს, მათი თანხმობით.",
+  "home.reviewsTitle": "რას ამბობენ მოგზაურები",
+  "home.reviewsSub": "დაწერილია მათ მიერ, ვინც მგზავრობა დაასრულა — მისი დასრულების შემდეგ.",
   "home.closingTitle": "დაგეგმე შენი მოგზაურობა საქართველოში",
   "home.closingBody": "აირჩიე ტრანსფერი, მზა ტური ან შექმენი საკუთარი მარშრუტი.",
   "home.closingCta": "დაწყება",

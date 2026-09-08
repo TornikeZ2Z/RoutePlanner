@@ -801,6 +801,8 @@ export const en = {
   "home.travellersEyebrow": "Travellers",
   "home.travellersTitle": "Real trips, real people",
   "home.travellersBody": "Photos shared by our travellers, with their permission.",
+  "home.reviewsTitle": "What travellers said",
+  "home.reviewsSub": "Written by people who finished the journey, after it ended.",
   "home.closingTitle": "Plan your journey across Georgia",
   "home.closingBody": "Pick a transfer, a ready-made tour, or build your own route.",
   "home.closingCta": "Start",
