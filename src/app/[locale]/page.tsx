@@ -484,8 +484,8 @@ export default async function Home({
         home.planStep1-3 render nowhere now. They stay in all three
         dictionaries, the way home.how1t-how4b did when CR-2026-0037 took the
         four steps out: a translated string costs nothing to keep and a day of
-        somebody's time to write again. home.day1t-day4t and plan.int*/pace*
-        are NOT orphaned — the bar and the wizard both use them.
+        somebody's time to write again. home.day1t-day4t and the plan.int and
+        plan.pace families are NOT orphaned — the bar and the wizard both use them.
       */}
 
       {/*
