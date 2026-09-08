@@ -134,6 +134,24 @@ export default async function TourPage({ params }: Props) {
           <div><dt className="text-ink-500">{t("tours.startsFrom")}</dt><dd className="font-medium text-ink-900">{tour.originName}</dd></div>
           <div><dt className="text-ink-500">{t("tours.distance")}</dt><dd className="font-medium text-ink-900">{t("tours.roundTrip", { km: formatDistance(tour.distanceKm, locale as Locale) })}</dd></div>
           <div><dt className="text-ink-500">{t("tours.drivingTime")}</dt><dd className="font-medium text-ink-900">{formatDuration(tour.driveMinutes, locale as Locale)}</dd></div>
+          {/*
+            Vehicle — the last item on CR-2026-0011 item 18's list, and the only
+            one this page did not answer.
+
+            It says what the marketplace actually enforces, which is NOT a class.
+            Both pricing paths filter on the vehicle's four_wheel_drive
+            capability (offers.ts, tourPriceFrom), never on class = SUV_4X4, and
+            inferVehicleClass calls an eight-seat 4x4 a MINIBUS — so that car is
+            eligible for Kazbegi while a card reading "SUV / 4x4" would have
+            told its driver otherwise. Naming a class here would invent a
+            restriction the system does not apply.
+          */}
+          <div>
+            <dt className="text-ink-500">{t("tours.vehicle")}</dt>
+            <dd className="font-medium text-ink-900">
+              {tour.requires4x4 ? t("tours.vehicle4x4") : t("tours.vehicleAny")}
+            </dd>
+          </div>
           {price && (
             <div>
               <dt className="text-ink-500">{t("tours.priceFrom")}</dt>

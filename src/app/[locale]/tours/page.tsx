@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { isLocale, LOCALES, getTranslator, type Locale } from "@/lib/i18n";
-import { listTours, tourPriceFrom } from "@/lib/tours";
+import { listTours, listTourStops, tourPriceFrom, groupByBand } from "@/lib/tours";
 import { formatMoney } from "@/lib/money";
 import { formatDuration, formatDistance } from "@/lib/format";
 import { getDisplayCurrency, getRate, convert, CANONICAL } from "@/lib/currency";
@@ -57,8 +57,9 @@ export default async function ToursIndex({ params, searchParams }: Props) {
   if (!isLocale(locale)) notFound();
 
   const t = getTranslator(locale as Locale);
-  const [tours, currency] = await Promise.all([
+  const [tours, stopsByTour, currency] = await Promise.all([
     listTours(locale as Locale),
+    listTourStops(locale as Locale),
     getDisplayCurrency(),
   ]);
   const rate = await getRate(currency);
@@ -67,7 +68,21 @@ export default async function ToursIndex({ params, searchParams }: Props) {
   const CATS = ["sea", "mountains", "winter", "culture", "wine"] as const;
   const activeCat = CATS.includes(rawCat as (typeof CATS)[number]) ? rawCat : undefined;
   const shown = activeCat ? tours.filter((x) => x.category === activeCat) : tours;
-  const prices = await Promise.all(shown.map((t) => tourPriceFrom(t.slug)));
+  /*
+     Keyed by slug, not positional.
+
+     This was `prices[index]` read against `shown.map((tour, index) => …)`, which
+     held only because the two arrays were the same list in the same order. The
+     page is partitioned into duration bands now, so the card's index is its
+     index WITHIN ITS BAND and no longer addresses this array at all — a bug
+     that type-checks, renders, and quietly prints the wrong price under the
+     wrong tour.
+  */
+  const priced = await Promise.all(
+    shown.map(async (x) => [x.slug, await tourPriceFrom(x.slug)] as const),
+  );
+  const prices = new Map(priced);
+  const bands = groupByBand(shown);
   const CAT_KEY: Record<string, string> = {
     sea: "tours.catSea", mountains: "tours.catMountains", winter: "tours.catWinter",
     culture: "tours.catCulture", wine: "tours.catWine",
@@ -101,12 +116,34 @@ export default async function ToursIndex({ params, searchParams }: Props) {
         ))}
       </nav>
 
-      {tours.length === 0 ? (
+      {/*
+        Split by how long the trip takes — CR-2026-0011 item 18, "the Tours page
+        should not be just a list of tours".
+
+        Duration is the heading and category stays the filter, because the
+        request says "let us split it" and then names an example route for each
+        band: all four have to be visible at once or the page is still a list
+        with one more chip row above it. Choosing a category re-splits that
+        category across the bands rather than escaping the grouping.
+
+        Empty bands are dropped. There is no tour longer than three days in the
+        catalogue today, and a heading reading "4-6 days" over nothing is the
+        page advertising something the marketplace cannot sell; when such a tour
+        is published its band appears on its own.
+      */}
+      {shown.length === 0 ? (
         <EmptyState title={t("tours.empty")} />
       ) : (
+        bands.map(({ band, tours: inBand }) => (
+        <section key={band.id} className="space-y-5">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-ink-200 pb-3">
+            <h2 className="font-display text-2xl text-ink-900">{t(band.label)}</h2>
+            <p className="text-sm text-ink-500">{t(band.example)}</p>
+          </div>
         <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {shown.map((tour, index) => {
-            const price = prices[index];
+          {inBand.map((tour) => {
+            const price = prices.get(tour.slug);
+            const route = collapse(stopsByTour[tour.slug] ?? []);
             return (
               <li key={tour.slug}>
                 <Link
@@ -132,7 +169,24 @@ export default async function ToursIndex({ params, searchParams }: Props) {
                   </div>
 
                   <div className="flex flex-1 flex-col p-5">
-                    <h2 className="font-display text-xl text-ink-900 group-hover:text-ink-900">{tour.title}</h2>
+                    <h3 className="font-display text-xl text-ink-900">{tour.title}</h3>
+                    {/*
+                      The route, which is the other half of item 18 and the one
+                      thing a card could never say before. It sits ABOVE the
+                      summary on purpose: the summary carries flex-1 and is the
+                      spring that pushes the price row to the bottom of every
+                      card, so anything placed after it competes for that space
+                      and the cards stop lining up.
+
+                      tour_stops already holds this and already includes the
+                      origin at both ends, so the chain reads Tbilisi → Borjomi
+                      → Vardzia → Tbilisi without anything being prepended.
+                    */}
+                    {route.length > 1 && (
+                      <p className="mt-1.5 text-xs leading-relaxed text-ink-500">
+                        {route.join(" → ")}
+                      </p>
+                    )}
                     <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-600">{tour.summary}</p>
 
                     <div className="mt-4 flex items-end justify-between border-t border-ink-100 pt-3">
@@ -162,7 +216,21 @@ export default async function ToursIndex({ params, searchParams }: Props) {
             );
           })}
         </ul>
+        </section>
+        ))
       )}
     </div>
   );
+}
+
+/**
+ * Consecutive repeats out of a stop chain.
+ *
+ * A three-day Svaneti tour records Mestia on day one and day two, so its stops
+ * read Kutaisi, Mestia, Mestia, Kutaisi — correct as an itinerary, and noise on
+ * one line. Only ADJACENT repeats go: a tour that returns to Tbilisi in the
+ * middle and again at the end is telling the truth about its shape both times.
+ */
+function collapse(names: string[]): string[] {
+  return names.filter((name, i) => name !== names[i - 1]);
 }

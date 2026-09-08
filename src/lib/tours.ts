@@ -3,7 +3,7 @@ import { sql } from "@db/client";
 import { computeQuote, ENGINE_VERSION } from "@/lib/pricing/engine";
 import { config } from "@/lib/config";
 import { getCommissionRateBps, getMinimumDayFareMinor } from "@/lib/settings";
-import type { Locale } from "@/lib/i18n";
+import type { Locale, MessageKey } from "@/lib/i18n";
 
 /**
  * Curated tours.
@@ -40,6 +40,59 @@ export interface Tour {
 }
 
 const NAME_COLUMN: Record<Locale, string> = { en: "name_en", ka: "name_ka", ru: "name_ru" };
+
+/**
+ * The duration bands the catalogue is shown in — CR-2026-0011 item 18.
+ *
+ *   "The Tours page should not be just a list of tours. Split it:
+ *    1 day / 2-3 days / 4-5 days / 7+ days"
+ *
+ * Written here rather than in the page because a set of values the page
+ * partitions on is exactly the kind of literal that gets copied: the five tour
+ * CATEGORIES are already written out three times in three files, and a second
+ * ad-hoc axis would have been the fourth.
+ *
+ * The bands cover 1 to 10, which is what the tour_duration_sane CHECK allows.
+ * Note the third one is 4-6, not the 4-5 the request names: the literal reading
+ * leaves six days in no band at all, and a tour that belongs to nothing simply
+ * would not appear on the page. One extra day in a label is the cheapest
+ * possible fix for that, and it is flagged on the ticket rather than done
+ * quietly.
+ *
+ * `example` is the founder's own illustration of each band, kept because it is
+ * what makes a heading a promise about the catalogue rather than a divider.
+ */
+export interface TourBand {
+  id: "day" | "short" | "week" | "grand";
+  label: MessageKey;
+  example: MessageKey;
+  covers: (days: number) => boolean;
+}
+
+export const TOUR_BANDS: TourBand[] = [
+  { id: "day",   label: "tours.band1", example: "tours.band1eg", covers: (d) => d === 1 },
+  { id: "short", label: "tours.band2", example: "tours.band2eg", covers: (d) => d >= 2 && d <= 3 },
+  { id: "week",  label: "tours.band3", example: "tours.band3eg", covers: (d) => d >= 4 && d <= 6 },
+  { id: "grand", label: "tours.band4", example: "tours.band4eg", covers: (d) => d >= 7 },
+];
+
+/**
+ * Split an already-ordered list of tours into its bands, dropping the empty ones.
+ *
+ * listTours orders by duration_days then distance_km, so this is a stable walk:
+ * within a band the shorter trip still comes first. Empty bands are dropped
+ * rather than shown with an invitation under them — the catalogue has no tour
+ * longer than three days today, and a heading that says "4-6 days" over nothing
+ * is the page promising a thing the marketplace cannot sell. When such a tour
+ * is published its band appears by itself.
+ */
+export function groupByBand<T extends { durationDays: number }>(
+  tours: T[],
+): { band: TourBand; tours: T[] }[] {
+  return TOUR_BANDS
+    .map((band) => ({ band, tours: tours.filter((t) => band.covers(t.durationDays)) }))
+    .filter((group) => group.tours.length > 0);
+}
 
 export async function listTours(locale: Locale = "en"): Promise<Tour[]> {
   const rows = await sql<TourRow[]>`
@@ -86,6 +139,39 @@ export async function getTour(slug: string, locale: Locale = "en"): Promise<Tour
       legKm: s.leg_km === null ? null : Number(s.leg_km), notes: s.notes,
     })),
   };
+}
+
+/**
+ * Every active tour's stops at once, keyed by tour slug and in road order.
+ *
+ * listTours deliberately returns stops: [] — six callers, and four of them
+ * (the sitemap, the homepage, the destination pages, the "other tours" strip)
+ * want title, duration and price only, so loading a join they never read would
+ * make every one of them pay for the tours index.
+ *
+ * So this is a sibling rather than a flag: one grouped query for the whole
+ * catalogue, folded in JS. CR-2026-0011 item 18 asks for the route on each card
+ * of that index, which is the first caller to need it.
+ *
+ * Names are resolved to the reader's language in SQL, the same way the tour's
+ * own title and origin are — and names, not slugs, is the whole difference from
+ * the near-identical query in the plan page. That one feeds a map and needs
+ * slugs to look coordinates up; this one is read by a human. Merging them would
+ * mean returning both and giving each caller half of something.
+ */
+export async function listTourStops(locale: Locale = "en"): Promise<Record<string, string[]>> {
+  const rows = await sql<{ tour: string; name: string }[]>`
+    SELECT t.slug AS tour,
+           coalesce(${sql.unsafe(`l.${NAME_COLUMN[locale]}`)}, l.name_en) AS name
+    FROM tour_stops s
+    JOIN tours t ON t.id = s.tour_id
+    JOIN locations l ON l.id = s.location_id
+    WHERE t.active
+    ORDER BY t.slug, s.day_index, s.position`;
+
+  const byTour: Record<string, string[]> = {};
+  for (const row of rows) (byTour[row.tour] ??= []).push(row.name);
+  return byTour;
 }
 
 /** Cheapest published price for a tour, for the "from" label. */
