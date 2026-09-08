@@ -9,7 +9,7 @@ import { formatMoney } from "@/lib/money";
 import { formatDuration, formatDistance } from "@/lib/format";
 import { getDisplayCurrency, getRate, convert, CANONICAL } from "@/lib/currency";
 import { config } from "@/lib/config";
-import { Alert, Badge, Card } from "@/components/ui";
+import { Badge, Card } from "@/components/ui";
 import { PlaceImage } from "@/components/place-image";
 import { sitePhoto } from "@/lib/site-photos";
 import { SearchForm } from "@/components/search-form";
@@ -268,10 +268,23 @@ export default async function TourPage({ params }: Props) {
             </ol>
           </section>
 
-          <Alert tone="info" title={t("tours.coversTitle")}>
-            {t("tours.coversBody", { place: tour.originName })}
-            {tour.durationDays > 1 && ` ${t("tours.coversOvernight")}`}
-          </Alert>
+          {/*
+            What stood here said "What the price covers" for the second time on
+            one page — tours.coversTitle is character-identical to
+            tours.inclTitle thirty-five lines above it, and coversBody restated
+            the eight inclusions and three exclusions in prose. CR-2026-0018
+            part 4 asks for exactly this to go: "ერთნაირი ინფორმაციის
+            გამეორება", the same information repeated. Repeating it on the SAME
+            page is the strongest case of it on the site.
+
+            One sentence survives, because it was the only thing here the lists
+            do not say: on a trip of more than a day, the driver's own bed and
+            meals are inside the quoted price rather than something the
+            traveller is billed for later.
+          */}
+          {tour.durationDays > 1 && (
+            <p className="text-sm leading-relaxed text-ink-500">{t("tours.coversOvernight")}</p>
+          )}
         </div>
 
         <aside className="lg:sticky lg:top-4 lg:self-start">
