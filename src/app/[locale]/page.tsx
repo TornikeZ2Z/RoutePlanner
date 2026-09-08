@@ -83,14 +83,22 @@ const HERO_CHIPS = [
   ["home.chip3", ICONS.shield], ["home.chip4", ICONS.support],
 ] as const;
 
-/** Service cards: photo drop-in name, illustration seed, destination. */
-const SERVICES = [
-  { t: "home.svc1t", b: "home.svc1b", photo: "airport.jpg", seed: "tbilisi-airport", href: "/transfers", icon: "M10.5 20l1-5.5L6 12l-2.5 1L3 11.5 6.8 9 6 3.5 7.5 3l3 5 5.6-2.4a1.6 1.6 0 0 1 1.3 2.9L12.5 11l1.5 5.5-1.5 1-2-5-3.5 2 .5 4-1.5 1.5Z" },
-  { t: "home.svc2t", b: "home.svc2b", photo: "cityroad.jpg", seed: "tbilisi-kutaisi", href: "/transfers", icon: "M12 3v2m0 4v2m0 4v2m0 4v0M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16" },
-  { t: "home.svc3t", b: "home.svc3b", photo: "tour.jpg", seed: "svaneti-tour", href: "/tours", icon: "M9 20l-5-2V5l5 2m0 13 6-2m-6 2V7m6 11 5 2V7l-5-2m0 13V5M9 7l6-2" },
-  { t: "home.svc4t", b: "home.svc4b", photo: "group.jpg", seed: "group-minibus", href: "/business", icon: "M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM2 20a6 6 0 0 1 12 0m1-6.5a5 5 0 0 1 7 4.6V20" },
-  { t: "home.svc5t", b: "home.svc5b", photo: "school.jpg", seed: "school-run", href: "/schools", icon: "M12 3 2 8l10 5 8-4v5m-14-2.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5" },
-] as const;
+/*
+   The five service cards stood here and are gone.
+
+   SERVICES.map was last rendered in 58d2786, two designs ago; every layout
+   since has answered "what do you sell" with the booking tabs and the theme
+   tiles instead, and nothing has referenced this array since. CR-2026-0018 part
+   4 asks for what does not earn its place to go, and a table of five icons,
+   five photo filenames and five hrefs that reaches no page is the clearest case
+   of it in this file.
+
+   Not the same call as STEP_KEYS below, which is also unrendered and stays:
+   that one carries a recorded decision from CR-2026-0037 saying so. This one
+   carries nothing. The home.svc1t-svc5b strings stay in all three dictionaries
+   on the usual grounds — a translation costs nothing to keep and a day to write
+   again.
+*/
 
 /** The six themes, in the order they read on the page. Labels are the tour
     categories' own, so a theme is called the same thing wherever it appears. */
