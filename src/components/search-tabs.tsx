@@ -43,7 +43,7 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
 
   return (
     <div>
-      <div role="tablist" aria-label={t("home.planTitle")} className="flex flex-wrap gap-1.5 border-b border-ink-100 pb-2.5 sm:gap-2 sm:pb-3">
+      <div role="tablist" aria-label={t("home.planTitle")} className="mx-auto flex w-fit flex-wrap justify-center gap-1 rounded-full border border-white/25 bg-white/10 p-1 backdrop-blur-md">
         {tabs.map(({ id, label, sub, icon }) => (
           <button
             key={id} role="tab" type="button"
@@ -51,7 +51,7 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
             title={sub}
             onClick={() => setTab(id)}
             className={`inline-flex items-center gap-2 rounded-full px-3.5 py-2 transition-colors sm:px-4 ${
-              tab === id ? "bg-brand-600 text-white" : "text-ink-500 hover:bg-ink-50 hover:text-ink-900"
+              tab === id ? "bg-white text-ink-900" : "text-white/75 hover:bg-white/10 hover:text-white"
             }`}
           >
             <svg viewBox="0 0 24 24" className="size-4 shrink-0" fill="none" stroke="currentColor"
@@ -81,7 +81,7 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
         Presence is therefore no longer the same as being open: data-active
         says which one is, for anything that needs to ask.
       */}
-      <div className="grid pt-4">
+      <div className="grid pt-5">
         {PANELS.map((id) => {
           const open = tab === id;
           return (
@@ -99,13 +99,13 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
                 <div className="space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div role="radiogroup" aria-label={t("home.tabTransfer")}
-                         className="inline-flex rounded-full border border-ink-200 p-0.5 text-xs font-semibold">
+                         className="inline-flex rounded-full border border-white/25 bg-white/10 p-0.5 text-xs font-semibold backdrop-blur-md">
                       {([false, true] as const).map((rt) => (
                         <button
                           key={String(rt)} type="button" role="radio" aria-checked={roundTrip === rt}
                           onClick={() => setRoundTrip(rt)}
                           className={`rounded-full px-3.5 py-1.5 transition-colors ${
-                            roundTrip === rt ? "bg-brand-600 text-white" : "text-ink-500 hover:text-ink-900"
+                            roundTrip === rt ? "bg-white text-ink-900" : "text-white/70 hover:text-white"
                           }`}
                         >
                           {rt ? t("home.tabRoundTrip") : t("home.tabOneWay")}
@@ -113,13 +113,13 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
                       ))}
                     </div>
                     <Link href={`/${locale}/hourly`}
-                          className="text-xs font-medium text-ink-500 underline-offset-2 hover:text-ink-900 hover:underline">
+                          className="text-xs font-medium text-white/70 underline-offset-2 hover:text-white hover:underline">
                       {t("home.tabHourly")} →
                     </Link>
                   </div>
                   {roundTrip
-                    ? <SearchForm key="rt" locale={locale} locations={locations} roundTrip />
-                    : <SearchForm key="ow" locale={locale} locations={locations} />}
+                    ? <SearchForm key="rt" locale={locale} locations={locations} tone="glass" roundTrip />
+                    : <SearchForm key="ow" locale={locale} locations={locations} tone="glass" />}
                 </div>
               )}
               {id === "tours" && (
@@ -139,10 +139,10 @@ export function SearchTabs({ locale, locations }: { locale: string; locations: L
 function TeaserPanel({ body, cta, href }: { body: string; cta: string; href: string }) {
   return (
     <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="max-w-xl text-sm leading-relaxed text-ink-600">{body}</p>
+      <p className="max-w-xl text-sm leading-relaxed text-white/80">{body}</p>
       <Link
         href={href}
-        className="inline-flex min-h-11 shrink-0 items-center rounded-lg bg-brand-600 px-5 py-2.5 text-sm text-white shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-brand-700"
+        className="inline-flex min-h-11 shrink-0 items-center rounded-full bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_0_2px_0_rgba(0,0,0,.16)] transition-colors hover:bg-brand-700"
       >
         {cta}
       </Link>

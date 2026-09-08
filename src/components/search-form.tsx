@@ -28,15 +28,45 @@ const ICONS = {
   car: "M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11m-14 0h14m-14 0a2 2 0 0 0-2 2v4h2m14-6a2 2 0 0 1 2 2v4h-2m-12 0v2m10-2v2m-9-5h.01M17 13h.01",
 } as const;
 
-const CELL_CONTROL =
-  "w-full border-0 bg-transparent p-0 text-sm font-semibold text-ink-900 " +
-  "focus:outline-none focus:ring-0";
+/**
+ * Two tones for the same bar.
+ *
+ * "light" is the original: a white segmented bar, used inside the Card on the
+ * transfer route pages. "glass" is CR-2026-0034 — the reference site floats a
+ * translucent bar directly on the photograph rather than standing a white card
+ * on top of it, so the picture reads through the controls.
+ *
+ * It is a tone rather than a rewrite because the two live in different places:
+ * the transfer pages have no photograph behind the bar, and on white the glass
+ * treatment is invisible.
+ */
+export type SearchTone = "light" | "glass";
 
-const CELL_INPUT = CELL_CONTROL + " truncate placeholder:font-normal placeholder:text-ink-400";
+const TONE = {
+  light: {
+    shell: "border-ink-200 bg-white lg:divide-ink-200 [&>*+*]:border-ink-100",
+    label: "text-ink-400",
+    icon: "text-gold-600",
+    control: "text-ink-900 placeholder:text-ink-400",
+    hint: "text-ink-500",
+    addStop: "text-gold-600 hover:text-gold-700",
+  },
+  glass: {
+    shell: "border-white/25 bg-white/10 backdrop-blur-md lg:divide-white/20 [&>*+*]:border-white/15",
+    label: "text-white/60",
+    icon: "text-white/70",
+    control: "text-white placeholder:text-white/50",
+    hint: "text-white/70",
+    addStop: "text-white/80 hover:text-white",
+  },
+} as const;
+
+const CELL_BASE = "w-full border-0 bg-transparent p-0 text-sm font-semibold focus:outline-none focus:ring-0";
 
 function Cell({
-  icon, label, htmlFor, children, className = "",
-}: { icon: string; label: string; htmlFor: string; children: React.ReactNode; className?: string }) {
+  icon, label, htmlFor, children, className = "", tone = "light",
+}: { icon: string; label: string; htmlFor: string; children: React.ReactNode; className?: string; tone?: SearchTone }) {
+  const c = TONE[tone];
   return (
     /*
       Tight gutters, because the bar now carries six fields and a button.
@@ -48,12 +78,12 @@ function Cell({
       come down a step rather than any field being dropped.
     */
     <label htmlFor={htmlFor} className={`flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 px-3 py-2.5 ${className}`}>
-      <svg viewBox="0 0 24 24" className="size-4.5 shrink-0 text-gold-600" fill="none" stroke="currentColor"
+      <svg viewBox="0 0 24 24" className={`size-4.5 shrink-0 ${c.icon}`} fill="none" stroke="currentColor"
            strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d={icon} />
       </svg>
       <span className="min-w-0 flex-1">
-        <span className="block truncate whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-400">{label}</span>
+        <span className={`block truncate whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.08em] ${c.label}`}>{label}</span>
         {children}
       </span>
     </label>
@@ -61,17 +91,23 @@ function Cell({
 }
 
 export function SearchForm({
-  locale, locations, initial, layout = "wide", tourSlug, lockRoute = false, roundTrip = false,
+  locale, locations, initial, layout = "wide", tone = "light", tourSlug,
+  lockRoute = false, roundTrip = false,
 }: {
   locale: string;
   locations: LocationOption[];
   initial?: { from?: string; to?: string };
   layout?: "wide" | "compact";
+  /** "glass" floats the bar on a photograph; see TONE above. Wide layout only. */
+  tone?: SearchTone;
   tourSlug?: string;
   lockRoute?: boolean;
   roundTrip?: boolean;
 }) {
   const compact = layout === "compact";
+  const tint = TONE[tone];
+  const CELL_CONTROL = `${CELL_BASE} ${tint.control}`;
+  const CELL_INPUT = `${CELL_CONTROL} truncate placeholder:font-normal`;
   const t = getTranslator(isLocale(locale) ? (locale as Locale) : "en");
   const router = useRouter();
   const has = (slug: string) => locations.some((l) => l.slug === slug);
@@ -184,8 +220,8 @@ export function SearchForm({
      the bar one row tall. CR-2026-0032 had just finished shrinking it.
   */
   const vehicleOptions = [
-    <option key="any" value="">{t("search.vehAny")}</option>,
-    ...VEHICLE_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{t(c.label)}</option>),
+    <option key="any" value="" className="text-ink-900">{t("search.vehAny")}</option>,
+    ...VEHICLE_CATEGORIES.map((c) => <option key={c.id} value={c.id} className="text-ink-900">{t(c.label)}</option>),
   ];
 
   if (compact) {
@@ -281,7 +317,7 @@ export function SearchForm({
             type="button"
             onClick={() => setStops([...stops, ""])}
             disabled={stops.length >= 6}
-            className="text-sm font-semibold text-gold-600 hover:text-gold-700 disabled:opacity-40"
+            className={`text-sm font-semibold disabled:opacity-40 ${tint.addStop}`}
           >
             {t("search.addStop")}
           </button>
@@ -291,7 +327,7 @@ export function SearchForm({
       {stopsEditor}
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch">
-        <div className="flex flex-1 flex-col rounded-2xl border border-ink-200 bg-white sm:flex-row sm:flex-wrap lg:flex-nowrap lg:divide-x lg:divide-ink-200 [&>*+*]:border-t [&>*+*]:border-ink-100 sm:[&>*+*]:border-t-0 lg:[&>*+*]:border-t-0">
+        <div className={`flex flex-1 flex-col rounded-full border sm:flex-row sm:flex-wrap lg:flex-nowrap lg:divide-x [&>*+*]:border-t sm:[&>*+*]:border-t-0 lg:[&>*+*]:border-t-0 ${tint.shell}`}>
           {!lockRoute && (
             <Cell icon={ICONS.from} label={t("search.from")} htmlFor="from" className="sm:basis-1/2 lg:min-w-[14.75rem] lg:basis-auto">
               <input id="from" name="from" value={from} list={LIST_ID} autoComplete="off"
@@ -332,14 +368,14 @@ export function SearchForm({
 
         <button
           type="submit"
-          className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-brand-600 px-6 text-base font-bold tracking-[-0.01em] text-white shadow-[var(--shadow-soft)] transition-colors hover:bg-brand-700"
+          className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-brand-600 px-7 text-base font-semibold tracking-[-0.01em] text-white shadow-[var(--shadow-soft)] transition-colors hover:bg-brand-700"
         >
           {t("search.submit")}
           <span aria-hidden>→</span>
         </button>
       </div>
 
-      {roundTrip && <p className="text-xs text-ink-500">{t("search.roundTripNote")}</p>}
+      {roundTrip && <p className={`text-xs ${tint.hint}`}>{t("search.roundTripNote")}</p>}
       {error && <p className="text-sm text-[--color-danger]" role="alert">{error}</p>}
     </form>
   );

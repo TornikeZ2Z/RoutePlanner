@@ -165,107 +165,86 @@ export default async function Home({
             <PlaceImage imageKey={null} alt="" seedText="stepantsminda-gergeti" className="size-full" />
           )}
           {/*
-            Two scrims instead of one, for CR-2026-0033 — "ახლა ძააან მუქია".
+            The scrim is bottom-weighted now, for CR-2026-0034.
 
-            The horizontal one used to carry the whole job at 95 / 60 / 15, so
-            every part of every photograph paid for the readability of text that
-            only sits in the top-left. It is now 85 / 45 / 5, and a second scrim
-            fades from 55% down to nothing by mid-height, putting the darkness
-            where the headline actually is. Net effect: the photo is markedly
-            lighter across the bottom half and the right — around and below the
-            booking card, which is what a visitor looks at — while the text sits
-            on MORE cover than before, not less.
+            The reference site (blacklane.com) puts no scrim on its hero at all:
+            the photograph is the hero, the headline sits low over a dark part of
+            it, and the booking bar floats translucent at the bottom. We cannot
+            copy that literally — theirs is one art-directed image, ours is six
+            that rotate every six seconds, one of which is a bridge in flat
+            daylight — so the darkness moved rather than left. The top two
+            thirds of the picture are now almost clear, and the weight is at the
+            bottom where the headline and the bar actually are.
 
-            Measured over the six slides, worst 8×8 patch behind the headline:
-
-                              white      gold
-              before          4.41       2.55
-              after           5.17       2.99
-
-            The gold second line is the binding constraint and it was already
-            failing: 2.55:1 is under the 3:1 that WCAG asks even of large text,
-            on today's live site. It cannot be fixed by darkening alone — gold
-            is a mid-tone, so past a point more scrim costs the white text more
-            than it gains the gold. 2.99 clears the bar with nothing spare, which
-            is why the accent moved up a step to gold-300 and why the headline's
-            width is capped: let it run further right and it walks off the scrim
-            onto bare daylight photograph.
+            Measured worst 8×8 patch behind the headline across the six slides,
+            white text: 5.17 before this change, and the floor is 3:1 for text
+            this size. The gold second line is gone from the hero — the
+            reference has no gold anywhere — which removes the constraint that
+            was capping how light this could go at all.
           */}
-          <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-pine-900/85 via-pine-900/45 to-pine-900/5" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-1/2 bg-gradient-to-b from-pine-900/55 to-transparent" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-32 bg-gradient-to-t from-pine-900/70 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-pine-900/92 via-pine-900/45 to-pine-900/10" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-2/3 bg-gradient-to-t from-pine-900/85 to-transparent" />
         </div>
 
-        <div className="relative z-[2] mx-auto max-w-[1400px] 2xl:max-w-[1680px] px-4 pb-8 pt-8 sm:px-6 sm:pb-10 sm:pt-14 lg:px-10">
+        {/*
+          Content sits at the BOTTOM of the hero, not the top.
+
+          min-h is what makes the picture a picture rather than a strip behind
+          some controls: it gives the photograph room above the text, which is
+          the whole shape of the reference. It is sized against the viewport and
+          capped, so a tall monitor does not turn the hero into a full screen of
+          sky, and CR-2026-0032 — "it should all be on one page, you should not
+          have to scroll" — still holds: the cap is what guarantees the bar
+          lands inside the first screen.
+        */}
+        <div className="relative z-[2] mx-auto flex min-h-[min(78svh,640px)] max-w-[1400px] flex-col justify-end px-4 pb-8 pt-16 sm:px-6 sm:pb-10 lg:px-10 2xl:max-w-[1680px]">
           {/*
-            The headline is sized for a sentence, not a slogan.
-
-            It ran at text-7xl when it read "Let's go." — two words, five
-            characters. The same size under a full Georgian sentence wrapped to
-            five lines and swallowed the hero (CR-2026-0016). It came down a
-            step when the booking card moved in beside it (CR-2026-0030), and a
-            step again for CR-2026-0032, which asked for the slogan smaller and
-            the whole thing on one screen.
-
-            The width is doing as much work as the size: max-w-4xl is what keeps
-            the Georgian to two lines. Narrow it and the type size stops
-            mattering, because a third line costs more than a point of scale.
-
-            Below this it is not worth going. The headline is the one thing on
-            the page that says what the company sells; shrink it further and the
-            hero fits a laptop by having nothing to say.
+            Centred, light, and one sentence — the reference's headings are all
+            weight 400 at 64px and up, sentence case, ending in a full stop.
+            Ours is a two-part sentence in Georgian, so it keeps its line break
+            but loses the gold on the second half and the bold weight on both.
           */}
-          <h1 className="font-display max-w-4xl text-[1.5rem] leading-[1.12] sm:text-[1.9rem] lg:text-[2.15rem]">
-            {t("home.heroTitle")}
-            <span className="block text-gold-300">{t("home.heroTitle2")}</span>
+          <h1 className="font-display mx-auto max-w-4xl text-center text-[1.7rem] font-normal leading-[1.15] sm:text-[2.4rem] lg:text-[3rem]">
+            {t("home.heroTitle")}{" "}
+            <span className="text-white/80">{t("home.heroTitle2")}</span>
           </h1>
-          <p className="mt-2.5 max-w-3xl text-sm leading-relaxed text-pine-100 sm:text-base">
+          <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-white/70 sm:text-base">
             {t("home.heroSubtitle")}
           </p>
 
-          {/*
-            The booking bar sits ON the hero, not under it.
-
-            It used to be the next block down, pulled up by a negative margin so
-            it overlapped the hero's lower edge. On a laptop that left the date
-            field at the bottom of the screen and the rest of the form below the
-            fold: the first thing a visitor saw was a photograph and a slogan,
-            not the thing they came to do. CR-2026-0030 asked for the fields
-            "where the slides are", and CR-2026-0015 item 48 asked the same
-            question of both requestors — one answered "on the image, title
-            above it", the other filed the ticket. The hero's padding is now
-            sized for the headline alone, so the card starts about a third of
-            the way down whatever screen it opens on.
-          */}
-          <div id="book" className="mt-5 scroll-mt-24">
-            <Card className="p-3.5 shadow-[var(--shadow-float)] sm:p-5">
-              <SearchTabs locale={locale} locations={locations} />
-            </Card>
+          <div id="book" className="mt-7 scroll-mt-24">
+            <SearchTabs locale={locale} locations={locations} />
           </div>
-
-          {/*
-            The four promises, as one row under the card instead of a block of
-            tiles beside the headline. Same four keys. The checklist that used
-            to sit inside the card said the same four things in different
-            words; dropping the duplicate is part of what let the card move up.
-          */}
-          <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
-            {HERO_CHIPS.map(([key, icon], i) => (
-              <li key={key} className="flex items-start gap-2.5">
-                <span className="grid size-8 shrink-0 place-items-center rounded-full border border-gold-300/80 text-gold-300">
-                  <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor"
-                       strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d={icon} />
-                  </svg>
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[13px] font-bold leading-tight tracking-[-0.01em]">{t(key)}</span>
-                  <span className="mt-0.5 block text-[11px] leading-snug text-pine-200">{t(`home.chip${i + 1}s` as never)}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
         </div>
+      </section>
+
+      {/*
+        The four promises, below the photograph rather than on it.
+
+        They were in the hero from CR-2026-0030 onwards. The reference site
+        carries nothing but a headline and a booking bar over its picture, and
+        the promises are the one thing here that reads as decoration when it is
+        competing with a photograph. Same four keys, same words — a quiet band
+        on the page's own ground, where the gold ring finally has enough
+        contrast to be worth drawing.
+      */}
+      <section className="left-1/2 -mt-20 w-screen -translate-x-1/2 border-b border-ink-200 bg-ink-50 sm:-mt-28">
+        <ul className="mx-auto grid max-w-[1400px] grid-cols-2 gap-x-8 gap-y-6 px-4 py-8 sm:px-6 sm:grid-cols-4 lg:px-10 2xl:max-w-[1680px]">
+          {HERO_CHIPS.map(([key, icon], i) => (
+            <li key={key} className="flex items-start gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full border border-ink-300 text-brand-600">
+                <svg viewBox="0 0 24 24" className="size-4.5" fill="none" stroke="currentColor"
+                     strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d={icon} />
+                </svg>
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold leading-tight text-ink-900">{t(key)}</span>
+                <span className="mt-1 block text-xs leading-snug text-ink-500">{t(`home.chip${i + 1}s` as never)}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* ------------------------------------------------ categories ------ */}
