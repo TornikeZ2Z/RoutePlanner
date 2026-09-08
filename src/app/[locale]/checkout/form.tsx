@@ -4,9 +4,12 @@ import { useState } from "react";
 import { Alert, Card, Field, Input, Textarea } from "@/components/ui";
 import { SubmitButton } from "@/components/form-state";
 import { getTranslator, type Locale } from "@/lib/i18n";
+import { formatMoney } from "@/lib/money";
+import { CANONICAL } from "@/lib/currency-constants";
 
 export function CheckoutForm({
   quoteId, locale, defaults, cashAvailable, isAirport, error, childSeatFeeLabel,
+  grossMinor, childSeatFeeMinor,
 }: {
   quoteId: string;
   locale: Locale;
@@ -15,9 +18,18 @@ export function CheckoutForm({
   isAirport: boolean;
   error?: string;
   childSeatFeeLabel: string;
+  /** The quote, in tetri. What the traveller was shown before this page. */
+  grossMinor: string;
+  /** Per seat, in tetri. config.policy.childSeatFeeMinor. */
+  childSeatFeeMinor: number;
 }) {
   const [payment, setPayment] = useState<"CASH" | "CARD">(cashAvailable ? "CASH" : "CARD");
   const [submitting, setSubmitting] = useState(false);
+  const [childSeats, setChildSeats] = useState(0);
+  /* Formatted here rather than passed in: a function cannot cross the
+     server/client boundary, and formatMoney is a pure module with no
+     server-only import. */
+  const money = (minor: bigint) => formatMoney(minor, CANONICAL, locale);
 
   /**
    * Explicit submission. React 19 intercepts client-component form posts and
@@ -68,7 +80,8 @@ export function CheckoutForm({
             <Input id="luggage" name="luggage" type="number" min={0} max={30} defaultValue={defaults.luggage} />
           </Field>
           <Field label={t("checkout.childSeats")} htmlFor="childSeats" hint={`${t("checkout.childSeatsHint")} ${t("checkout.childSeatFee", { amount: childSeatFeeLabel })}`}>
-            <Input id="childSeats" name="childSeats" type="number" min={0} max={6} defaultValue={0} />
+            <Input id="childSeats" name="childSeats" type="number" min={0} max={6} value={childSeats}
+                   onChange={(e) => setChildSeats(Math.max(0, Math.min(6, Number(e.target.value) || 0)))} />
           </Field>
           <div className="flex items-end">
             <label className="flex items-center gap-2 pb-2 text-sm text-ink-700">
@@ -161,6 +174,44 @@ export function CheckoutForm({
       </Card>
 
       {error && <Alert tone="danger" title={t("checkout.errorT")}>{error}</Alert>}
+
+      {/*
+        What the traveller is actually about to pay, beside the button that
+        commits them to it.
+
+        CR-2026-0014 item 39 asks that "no hidden fees" be true rather than
+        merely claimed, and it named this exact shape: the trip, the child
+        seats, the total. It was not true here. The sidebar's "Total" is the
+        QUOTE, and booking.ts adds childSeats x 20 GEL to it afterwards — up to
+        120 GEL that appeared nowhere before the traveller committed. The unit
+        price was on the field's hint, which tells you the rate and never the
+        bill.
+
+        The server still computes the real figure; this only stops the page
+        showing a number it knows is about to change.
+      */}
+      <div className="rounded-2xl border border-ink-200 bg-white p-5">
+        <dl className="space-y-1.5 text-sm">
+          <div className="flex justify-between gap-4">
+            <dt className="text-ink-500">{t("checkout.tripPrice")}</dt>
+            <dd className="text-ink-900">{money(BigInt(grossMinor))}</dd>
+          </div>
+          {childSeats > 0 && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-ink-500">{t("checkout.childSeatLine", { n: childSeats })}</dt>
+              <dd className="text-ink-900">
+                {money(BigInt(childSeats) * BigInt(childSeatFeeMinor))}
+              </dd>
+            </div>
+          )}
+          <div className="flex items-baseline justify-between gap-4 border-t border-ink-100 pt-2">
+            <dt className="font-medium text-ink-900">{t("checkout.payNow")}</dt>
+            <dd className="font-display text-2xl text-ink-900">
+              {money(BigInt(grossMinor) + BigInt(childSeats) * BigInt(childSeatFeeMinor))}
+            </dd>
+          </div>
+        </dl>
+      </div>
 
       <SubmitButton>
         {payment === "CARD" ? t("checkout.submitCard") : t("checkout.submitCash")}

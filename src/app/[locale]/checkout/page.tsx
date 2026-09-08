@@ -96,6 +96,8 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
             isAirport={points.some((p) => p.includes("airport"))}
             error={error}
             childSeatFeeLabel={formatMoney(BigInt(config.policy.childSeatFeeMinor), CANONICAL, locale)}
+            grossMinor={String(gross)}
+            childSeatFeeMinor={config.policy.childSeatFeeMinor}
           />
         </div>
       </div>
@@ -133,7 +135,11 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
 
           <div className="mt-4 border-t border-ink-100 pt-3">
             <div className="flex items-baseline justify-between">
-              <span className="font-medium text-ink-900">{t("checkout.total")}</span>
+              {/* The quote, not the bill. Child seats are added in the form,
+                  beside the button that commits to them — see the comment
+                  there. Calling this "Total" while booking.ts was about to add
+                  up to 120 GEL to it is what CR-2026-0014 item 39 objects to. */}
+              <span className="font-medium text-ink-900">{t("checkout.tripPrice")}</span>
               <span className="font-display text-2xl text-ink-900">
                 {formatMoney(gross, CANONICAL, locale)}
               </span>
