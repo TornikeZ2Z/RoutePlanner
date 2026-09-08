@@ -38,8 +38,17 @@ function Cell({
   icon, label, htmlFor, children, className = "",
 }: { icon: string; label: string; htmlFor: string; children: React.ReactNode; className?: string }) {
   return (
-    <label htmlFor={htmlFor} className={`flex min-w-0 flex-1 cursor-pointer items-center gap-3 px-4 py-2.5 ${className}`}>
-      <svg viewBox="0 0 24 24" className="size-5 shrink-0 text-gold-600" fill="none" stroke="currentColor"
+    /*
+      Tight gutters, because the bar now carries six fields and a button.
+
+      The vehicle select came back for CR-2026-0033 and pushed "from" past its
+      own width — თბილისის აეროპორტი needs 183px and had 153 — while the date
+      cell lost enough room to clip the "PM" off its own value. Every pixel
+      spent on padding here is spent six times, so the gutter and the icon each
+      come down a step rather than any field being dropped.
+    */
+    <label htmlFor={htmlFor} className={`flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 px-3 py-2.5 ${className}`}>
+      <svg viewBox="0 0 24 24" className="size-4.5 shrink-0 text-gold-600" fill="none" stroke="currentColor"
            strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d={icon} />
       </svg>
@@ -295,7 +304,7 @@ export function SearchForm({
                      onChange={(e) => setTo(e.target.value)} className={CELL_INPUT} />
             </Cell>
           )}
-          <Cell icon={ICONS.date} label={t("search.date")} htmlFor="when" className="sm:basis-1/2 lg:basis-auto">
+          <Cell icon={ICONS.date} label={t("search.date")} htmlFor="when" className="sm:basis-1/2 lg:min-w-[12.5rem] lg:basis-auto">
             <input id="when" name="when" type="datetime-local" min={earliest} value={when}
                    onChange={(e) => setWhen(e.target.value)} className={CELL_CONTROL} />
           </Cell>
@@ -305,15 +314,15 @@ export function SearchForm({
                      onChange={(e) => setReturnWhen(e.target.value)} className={CELL_CONTROL} />
             </Cell>
           )}
-          <Cell icon={ICONS.pax} label={t("search.passengers")} htmlFor="pax" className="sm:basis-1/4 lg:max-w-36 lg:basis-auto">
+          <Cell icon={ICONS.pax} label={t("search.passengers")} htmlFor="pax" className="sm:basis-1/4 lg:max-w-28 lg:basis-auto">
             <input id="pax" name="passengers" type="number" min={1} max={20} value={passengers}
                    onChange={(e) => setPassengers(Number(e.target.value))} className={CELL_CONTROL} />
           </Cell>
-          <Cell icon={ICONS.bag} label={t("search.luggage")} htmlFor="bags" className="sm:basis-1/4 lg:max-w-32 lg:basis-auto">
+          <Cell icon={ICONS.bag} label={t("search.luggage")} htmlFor="bags" className="sm:basis-1/4 lg:max-w-28 lg:basis-auto">
             <input id="bags" name="luggage" type="number" min={0} max={20} value={luggage}
                    onChange={(e) => setLuggage(Number(e.target.value))} className={CELL_CONTROL} />
           </Cell>
-          <Cell icon={ICONS.car} label={t("search.vehicle")} htmlFor="vehicle" className="sm:basis-1/2 lg:max-w-48 lg:basis-auto">
+          <Cell icon={ICONS.car} label={t("search.vehicle")} htmlFor="vehicle" className="sm:basis-1/2 lg:max-w-44 lg:basis-auto">
             <select id="vehicle" name="vehicle" value={vehicle}
                     onChange={(e) => setVehicle(e.target.value)} className={CELL_CONTROL + " cursor-pointer"}>
               {vehicleOptions}
@@ -323,7 +332,7 @@ export function SearchForm({
 
         <button
           type="submit"
-          className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-brand-600 px-8 text-base font-bold tracking-[-0.01em] text-white shadow-[var(--shadow-soft)] transition-colors hover:bg-brand-700"
+          className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-brand-600 px-6 text-base font-bold tracking-[-0.01em] text-white shadow-[var(--shadow-soft)] transition-colors hover:bg-brand-700"
         >
           {t("search.submit")}
           <span aria-hidden>→</span>
