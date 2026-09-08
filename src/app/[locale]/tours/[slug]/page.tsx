@@ -36,7 +36,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       canonical: url,
       languages: Object.fromEntries(LOCALES.map((l) => [l, `${config.appUrl}/${l}/tours/${slug}`])),
     },
-    openGraph: { title: tour.title, description: tour.summary, url, type: "article" },
+    /*
+       images is restated, not inherited. A page's openGraph REPLACES the root
+       layout's rather than merging, so setting title and description here
+       dropped the site image: every tour shared to WhatsApp or Facebook
+       appeared as a bare grey link with no picture.
+    */
+    openGraph: {
+      title: tour.title, description: tour.summary, url, type: "article",
+      images: [{ url: "/og.jpg", width: 1200, height: 630, alt: tour.title }],
+    },
   };
 }
 

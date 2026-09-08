@@ -31,12 +31,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await getRoute(route, locale);
   if (!data) return { title: "Route not found" };
 
+  /*
+     Both of these were English on every locale.
+
+     A Georgian visitor's search result and shared link read "ბათუმის
+     აეროპორტი to ბათუმი transfer — private driver" — Georgian place names
+     inside an English sentence — across every route page on the site. The
+     translated keys existed; the metadata simply never used them.
+
+     Distance carries the number and lets each language supply its own unit.
+     formatDuration is deliberately not used here: it returns "3 h 20 min" in
+     every locale, and an English unit inside a Georgian sentence is the thing
+     this is fixing. The driving time is on the page itself, where it belongs.
+  */
+  const t = getTranslator(locale);
   const url = `${config.appUrl}/${locale}/transfers/${route}`;
-  const title = `${data.originName} to ${data.destinationName} transfer — private driver`;
-  const description =
-    `Book a private driver from ${data.originName} to ${data.destinationName}. ` +
-    `About ${Math.round(data.distanceKm)} km, ${formatDuration(data.driveMinutes)} driving. ` +
-    `Fixed price for the whole vehicle, agreed before you travel.`;
+  const title = t("transfers.routeTitle", { from: data.originName, to: data.destinationName });
+  const description = t("transfers.metaDesc", {
+    from: data.originName,
+    to: data.destinationName,
+    km: String(Math.round(data.distanceKm)),
+  });
 
   return {
     title,
@@ -47,7 +62,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         LOCALES.map((l) => [l, `${config.appUrl}/${l}/transfers/${route}`]),
       ),
     },
-    openGraph: { title, description, url, type: "website" },
+    /*
+       images is restated, not inherited. A page's openGraph REPLACES the one
+       in the root layout rather than merging into it, so declaring title and
+       description here silently dropped the site image: every route page
+       shared to WhatsApp, Telegram or Facebook appeared as a bare grey link.
+    */
+    openGraph: {
+      title, description, url, type: "website",
+      images: [{ url: "/og.jpg", width: 1200, height: 630, alt: title }],
+    },
   };
 }
 

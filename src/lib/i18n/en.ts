@@ -192,6 +192,7 @@ export const en = {
   "transfers.title": "Private transfers across Georgia",
   "transfers.intro": "Every corridor we price directly. Distances and driving times are reviewed by our operations team rather than taken from a live estimate, so the quote you see is the quote your driver has agreed to.",
   "transfers.routeTitle": "{from} to {to} by private driver",
+  "transfers.metaDesc": "Book a private driver from {from} to {to}, about {km} km. A fixed price for the whole vehicle, agreed before you travel.",
   "transfers.routeIntro": "A fixed price for the whole vehicle, with a named driver and car confirmed before you travel. The driving time below excludes stops, traffic and weather — add your own stops below and the price updates with them.",
   "transfers.seasonal": "Seasonal conditions",
   "transfers.checkTitle": "Check availability and price",
