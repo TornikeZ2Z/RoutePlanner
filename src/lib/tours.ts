@@ -67,31 +67,47 @@ export interface TourBand {
   label: MessageKey;
   example: MessageKey;
   covers: (days: number) => boolean;
+  /**
+   * The planner bucket this band hands over to when no tour is published in it.
+   *
+   * These are the values @/lib/plan's DAYS accepts, so the link lands on a real
+   * built itinerary with a price rather than an empty questionnaire.
+   */
+  planDays: "1" | "3" | "5" | "7";
 }
 
 export const TOUR_BANDS: TourBand[] = [
-  { id: "day",   label: "tours.band1", example: "tours.band1eg", covers: (d) => d === 1 },
-  { id: "short", label: "tours.band2", example: "tours.band2eg", covers: (d) => d >= 2 && d <= 3 },
-  { id: "week",  label: "tours.band3", example: "tours.band3eg", covers: (d) => d >= 4 && d <= 6 },
-  { id: "grand", label: "tours.band4", example: "tours.band4eg", covers: (d) => d >= 7 },
+  { id: "day",   label: "tours.band1", example: "tours.band1eg", covers: (d) => d === 1,            planDays: "1" },
+  { id: "short", label: "tours.band2", example: "tours.band2eg", covers: (d) => d >= 2 && d <= 3,   planDays: "3" },
+  { id: "week",  label: "tours.band3", example: "tours.band3eg", covers: (d) => d >= 4 && d <= 6,   planDays: "5" },
+  { id: "grand", label: "tours.band4", example: "tours.band4eg", covers: (d) => d >= 7,             planDays: "7" },
 ];
 
 /**
- * Split an already-ordered list of tours into its bands, dropping the empty ones.
+ * Split an already-ordered list of tours into its bands, keeping the empty ones.
  *
  * listTours orders by duration_days then distance_km, so this is a stable walk:
- * within a band the shorter trip still comes first. Empty bands are dropped
- * rather than shown with an invitation under them — the catalogue has no tour
- * longer than three days today, and a heading that says "4-6 days" over nothing
- * is the page promising a thing the marketplace cannot sell. When such a tour
- * is published its band appears by itself.
+ * within a band the shorter trip still comes first.
+ *
+ * Empty bands are RETURNED, which reverses the first answer given here. That
+ * answer was "a heading reading 4-6 days over nothing advertises what the
+ * marketplace cannot sell", and it was wrong on the facts: /plan?d=7 builds a
+ * real seven-day itinerary out of the tours and destinations we do serve, with
+ * a price, and it was checked before this was changed. So the band is not empty
+ * in the sense that matters — the catalogue has no PACKAGED trip that long, and
+ * the planner makes one. Hiding the band would have hidden the expensive end of
+ * what the company offers, which is the opposite of what item 18 asked for.
+ *
+ * The page decides what to draw under an empty one; this only refuses to
+ * pretend it is not there.
  */
 export function groupByBand<T extends { durationDays: number }>(
   tours: T[],
 ): { band: TourBand; tours: T[] }[] {
-  return TOUR_BANDS
-    .map((band) => ({ band, tours: tours.filter((t) => band.covers(t.durationDays)) }))
-    .filter((group) => group.tours.length > 0);
+  return TOUR_BANDS.map((band) => ({
+    band,
+    tours: tours.filter((t) => band.covers(t.durationDays)),
+  }));
 }
 
 export async function listTours(locale: Locale = "en"): Promise<Tour[]> {

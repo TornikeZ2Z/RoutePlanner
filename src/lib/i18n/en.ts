@@ -175,6 +175,8 @@ export const en = {
   "tours.band3eg": "Georgia’s main directions",
   "tours.band4": "7+ days",
   "tours.band4eg": "The grand tour of Georgia",
+  "tours.bandEmpty": "No packaged trip this long yet — the planner builds one from the same drivers and routes, priced the same way.",
+  "tours.bandEmptyCta": "Build a {days}-day route",
   "tours.vehicle": "Vehicle",
   "tours.vehicleAny": "Any car on the list — you pick the driver and the car when you book.",
   "tours.vehicle4x4": "A four-wheel drive, whatever its size. The road decides this one, not the class.",

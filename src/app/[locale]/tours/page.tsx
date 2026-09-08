@@ -126,10 +126,14 @@ export default async function ToursIndex({ params, searchParams }: Props) {
         with one more chip row above it. Choosing a category re-splits that
         category across the bands rather than escaping the grouping.
 
-        Empty bands are dropped. There is no tour longer than three days in the
-        catalogue today, and a heading reading "4-6 days" over nothing is the
-        page advertising something the marketplace cannot sell; when such a tour
-        is published its band appears on its own.
+        All four bands are drawn, including the two with no tours in them. The
+        first version of this dropped the empty ones, reasoning that a heading
+        over nothing advertises what we cannot sell — which turned out to be
+        false: /plan?d=7 builds a real seven-day itinerary from the same drivers
+        and routes, with a price, and that was checked before this changed. So
+        an empty band hands over to the planner instead of disappearing. Hiding
+        them would have hidden the expensive end of the catalogue, which is the
+        opposite of what a request to show four bands was asking for.
       */}
       {shown.length === 0 ? (
         <EmptyState title={t("tours.empty")} />
@@ -140,6 +144,17 @@ export default async function ToursIndex({ params, searchParams }: Props) {
             <h2 className="font-display text-2xl text-ink-900">{t(band.label)}</h2>
             <p className="text-sm text-ink-500">{t(band.example)}</p>
           </div>
+        {inBand.length === 0 ? (
+          <div className="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-ink-300 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="max-w-2xl text-sm leading-relaxed text-ink-600">{t("tours.bandEmpty")}</p>
+            <Link
+              href={`/${locale}/plan?d=${band.planDays}`}
+              className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-ink-900 px-5 text-sm font-semibold text-ink-900 transition-colors hover:bg-ink-900 hover:text-white dark:hover:text-pine-900"
+            >
+              {t("tours.bandEmptyCta", { days: band.planDays })}
+            </Link>
+          </div>
+        ) : (
         <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {inBand.map((tour) => {
             const price = prices.get(tour.slug);
@@ -216,6 +231,7 @@ export default async function ToursIndex({ params, searchParams }: Props) {
             );
           })}
         </ul>
+        )}
         </section>
         ))
       )}
